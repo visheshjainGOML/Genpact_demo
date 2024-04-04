@@ -114,7 +114,7 @@ async def get_slots(agent_id: int, date: str, conn: psycopg2.extensions.connecti
 
 def run_server():
  
-    uvicorn.run("calendarScript:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("calendarScript:app", host="0.0.0.0", port=80, reload=True)
  
  
 if __name__ == "__main__":
