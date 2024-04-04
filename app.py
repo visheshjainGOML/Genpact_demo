@@ -56,7 +56,7 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
         calendar = {}
         if result:
             calendar = result['calendar']
-      
+
         slot_key = f"{booking_request.start}"
 
         # If slot already booked, we raise an exception
@@ -67,8 +67,7 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
         calendar[slot_key] = {
             'flagBooked': True,
             'customer': booking_request.customer.dict(),
-            # Assuming an 'end' value is necessary, adjust as needed
-            'end': "end_time_here"
+            'end': "end_time_here"  # Placeholder, adjust as necessary
         }
 
         if result:
@@ -79,11 +78,17 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
                 WHERE agent_id = %s AND date = %s
                 """, (json.dumps(calendar), booking_request.agent_id, booking_request.date))
         else:
-            # Insert new record
+            # Insert new record with default agent_name and product_type derived from customer
             cur.execute("""
-                INSERT INTO booking_system.agent_booking (agent_id, date, calendar)
-                VALUES (%s, %s, %s)
-                """, (booking_request.agent_id, booking_request.date, json.dumps({slot_key: calendar[slot_key]})))
+                INSERT INTO booking_system.agent_booking (agent_id, agent_name, product_type, date, calendar)
+                VALUES (%s, %s, %s, %s, %s)
+                """, (
+                    booking_request.agent_id,
+                    "Default Agent Name",  # Default or derived value
+                    booking_request.customer.product_type,  # Assuming this matches your needs
+                    booking_request.date,
+                    json.dumps({slot_key: calendar[slot_key]})
+                ))
 
         conn.commit()
         return {"message": "Booking confirmed."}
@@ -92,7 +97,29 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close()
+@app.get("/slots/{agent_id}/{date}/", response_model=List[TimeSlot])
+async def get_slots(agent_id: int, date: str, conn: psycopg2.extensions.connection = Depends(db_connection)):
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT calendar FROM booking_system.agent_booking
+            WHERE agent_id = %s AND date = %s
+            """, (agent_id, date))
+        result = cur.fetchone()
+        if not result:
+            raise HTTPException(status_code=404, detail="Booking information not found.")
 
+
+        calendar = result['calendar']
+        slots = []
+        for start_time, details in calendar.items():
+            slots.append(TimeSlot(start=start_time, end=details['end'], flagBooked=details['flagBooked'], customer=details.get('customer')))
+
+        return slots
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close()
 def run_server():
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
  
