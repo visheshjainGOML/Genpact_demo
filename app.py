@@ -93,6 +93,12 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
         
         if not slot_found:
             raise HTTPException(status_code=404, detail="Slot does not exist.")
+        # Before updating or inserting the calendar into the database, serialize it:
+        calendar_json_string = json.dumps(calendar)
+
+        # Then, use the serialized string in your SQL command
+
+
         
         # Update or insert the booking
         if result:
@@ -100,7 +106,7 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
                 UPDATE booking_system.agent_booking
                 SET calendar = %s
                 WHERE agent_id = %s AND date = %s
-                """, (json.dumps(calendar), booking_request.agent_id, booking_request.date))
+                """, (calendar_json_string, booking_request.agent_id, booking_request.date))
         else:
             cur.execute("""
                 INSERT INTO booking_system.agent_booking (agent_id, agent_name, product_type, date, calendar)
@@ -110,9 +116,10 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
                     "Default Agent Name",  # Placeholder, adjust as needed
                     booking_request.customer.product_type,
                     booking_request.date,
-                    json.dumps(calendar)
+                    calendar_json_string
                 ))
-        
+
+
         conn.commit()
         return {"message": "Booking confirmed."}
     except Exception as e:
