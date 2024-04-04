@@ -33,11 +33,11 @@ class BookingRequest(BaseModel):
     start: str  
     customer: Customer
 
-    @validator('start')
-    def validate_time_format(cls, value):
-        if not value: raise ValueError("Start time is required")
+    # @validator('start')
+    # def validate_time_format(cls, value):
+    #     if not value: raise ValueError("Start time is required")
      
-        return value
+    #     return value
 
 class TimeSlot(BaseModel):
     start: str
