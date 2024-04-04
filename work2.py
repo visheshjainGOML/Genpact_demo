@@ -5,7 +5,6 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import json
 import uvicorn
-from datetime import datetime, timedelta
 
 app = FastAPI()
 
@@ -44,26 +43,6 @@ def db_connection():
     finally:
         conn.close()
 
-
-
-
-def generate_default_calendar():
-    start_time = datetime.strptime("09:00", "%H:%M")
-    default_calendar = {}
-    for _ in range(48):  # Creating 48 time slots, each 30 minutes long
-        end_time = start_time + timedelta(minutes=30)
-        slot_key = f"{start_time.strftime('%H:%M')}"
-        default_calendar[slot_key] = {
-            "start": start_time.strftime("%H:%M"),
-            "end": end_time.strftime("%H:%M"),
-            "flagBooked": False,
-            "customer": None
-        }
-        start_time = end_time
-    return default_calendar
-
-
-
 @app.put("/book-slot/")
 async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.connection = Depends(db_connection)):
     cur = conn.cursor()
@@ -99,26 +78,16 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
                 WHERE agent_id = %s AND date = %s
                 """, (json.dumps(calendar), booking_request.agent_id, booking_request.date))
         else:
-            # Generate a calendar with default time slots
-            default_calendar = generate_default_calendar()
-
-            # Update the relevant slot with the current booking request
-            default_calendar[slot_key] = {
-                'flagBooked': True,
-                'customer': booking_request.customer.dict(),
-                'end': default_calendar[slot_key]['end']  # Use the end time from the default calendar
-            }
-
-            # Insert new record with default agent_name, product_type, and the updated calendar
+            # Insert new record with default agent_name and product_type derived from customer
             cur.execute("""
                 INSERT INTO booking_system.agent_booking (agent_id, agent_name, product_type, date, calendar)
                 VALUES (%s, %s, %s, %s, %s)
                 """, (
                     booking_request.agent_id,
-                    "Default Agent Name",  # Or a more appropriately derived value
-                    booking_request.customer.product_type,
+                    "Default Agent Name",  # Default or derived value
+                    booking_request.customer.product_type,  # Assuming this matches your needs
                     booking_request.date,
-                    json.dumps(default_calendar)
+                    json.dumps({slot_key: calendar[slot_key]})
                 ))
 
         conn.commit()
