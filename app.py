@@ -99,7 +99,11 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
 
         # Identify if the requested slot is already in the calendar and booked
         slot_found = False
+        print(f"Requested slot: {booking_request.start} to {booking_request.end}")
         for slot in calendar:
+            print(f"Available slot: {slot['start']} to {slot['end']}")
+
+       
             if slot['start'] == booking_request.start and slot['end'] == booking_request.end:
                 if slot['flagBooked']:
                     # The slot was found, and it is already booked
