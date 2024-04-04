@@ -111,3 +111,5 @@ async def get_slots(agent_id: int, date: str, conn: psycopg2.extensions.connecti
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close()
+if __name__ == "__main__":
+    app.run( port=8000, debug=True)
