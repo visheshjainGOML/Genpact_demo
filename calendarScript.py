@@ -5,7 +5,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import json
 import os
-
+import uvicorn
 app = FastAPI()
 
 
@@ -111,5 +111,11 @@ async def get_slots(agent_id: int, date: str, conn: psycopg2.extensions.connecti
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close()
+
+def run_server():
+ 
+    uvicorn.run("calendarScript:app", host="0.0.0.0", port=8000, reload=True)
+ 
+ 
 if __name__ == "__main__":
-    app.run( port=8000, debug=True)
+    run_server()
