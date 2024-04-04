@@ -74,8 +74,9 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
             """, (booking_request.agent_id, booking_request.date))
         result = cur.fetchone()
 
+        # Convert calendar from JSON string to Python dictionary
         if result:
-            calendar = result['calendar']
+            calendar = json.loads(result['calendar'])  # Ensure conversion here
         else:
             calendar = generate_default_calendar()
         
