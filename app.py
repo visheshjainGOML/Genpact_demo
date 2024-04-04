@@ -28,8 +28,10 @@ class Customer(BaseModel):
 class BookingRequest(BaseModel):
     agent_id: int
     date: str
-    start: str  
+    start: str
+    end: str  # New field for the end time
     customer: Customer
+
 
 class TimeSlot(BaseModel):
     start: str
@@ -74,13 +76,12 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
             """, (booking_request.agent_id, booking_request.date))
         result = cur.fetchone()
 
-        calendar = {}
-        if result:
-            calendar = result['calendar']
+        # Check if a calendar exists for the agent on the given date, if not, generate a default calendar
+        calendar = generate_default_calendar() if not result else result['calendar']
 
-        slot_key = f"{booking_request.start}"
+        slot_key = f"{booking_request.start}-{booking_request.end}"
 
-        # If slot already booked, we raise an exception
+        # If slot already booked or overlaps, raise an exception
         if slot_key in calendar and calendar[slot_key]['flagBooked']:
             raise HTTPException(status_code=400, detail="Slot already booked.")
 
@@ -88,37 +89,27 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
         calendar[slot_key] = {
             'flagBooked': True,
             'customer': booking_request.customer.dict(),
-            'end': "end_time_here"  # Placeholder, adjust as necessary
+            'start': booking_request.start,  # Use the start time from the request
+            'end': booking_request.end  # Use the end time from the request
         }
 
+        # If result exists, update; otherwise, insert a new row
         if result:
-            # Update existing record
             cur.execute("""
                 UPDATE booking_system.agent_booking
                 SET calendar = %s
                 WHERE agent_id = %s AND date = %s
                 """, (json.dumps(calendar), booking_request.agent_id, booking_request.date))
         else:
-            # Generate a calendar with default time slots
-            default_calendar = generate_default_calendar()
-
-            # Update the relevant slot with the current booking request
-            default_calendar[slot_key] = {
-                'flagBooked': True,
-                'customer': booking_request.customer.dict(),
-                'end': default_calendar[slot_key]['end']  # Use the end time from the default calendar
-            }
-
-            # Insert new record with default agent_name, product_type, and the updated calendar
             cur.execute("""
                 INSERT INTO booking_system.agent_booking (agent_id, agent_name, product_type, date, calendar)
                 VALUES (%s, %s, %s, %s, %s)
                 """, (
                     booking_request.agent_id,
-                    "Default Agent Name",  # Or a more appropriately derived value
+                    "Default Agent Name",  # This should be dynamically determined or adjusted
                     booking_request.customer.product_type,
                     booking_request.date,
-                    json.dumps(default_calendar)
+                    json.dumps(calendar)
                 ))
 
         conn.commit()
@@ -128,6 +119,7 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close()
+
 @app.get("/slots/{agent_id}/{date}/", response_model=List[TimeSlot])
 async def get_slots(agent_id: int, date: str, conn: psycopg2.extensions.connection = Depends(db_connection)):
     cur = conn.cursor()
