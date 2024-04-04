@@ -50,67 +50,68 @@ def db_connection():
 
 
 def generate_default_calendar():
+    calendar = []
     start_time = datetime.strptime("09:00", "%H:%M")
-    default_calendar = {}
-    for _ in range(48):  # Creating 48 time slots, each 30 minutes long
+    for _ in range(48):  # for 24 hours, assuming 30-minute slots
         end_time = start_time + timedelta(minutes=30)
-        slot_key = f"{start_time.strftime('%H:%M')}"
-        default_calendar[slot_key] = {
+        calendar.append({
             "start": start_time.strftime("%H:%M"),
             "end": end_time.strftime("%H:%M"),
             "flagBooked": False,
             "customer": None
-        }
+        })
         start_time = end_time
-    return default_calendar
-
+    return calendar
 
 
 @app.put("/book-slot/")
 async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.connection = Depends(db_connection)):
     cur = conn.cursor()
     try:
-        # Attempt to fetch the existing booking for the given agent_id and date
         cur.execute("""
             SELECT calendar FROM booking_system.agent_booking
             WHERE agent_id = %s AND date = %s
             """, (booking_request.agent_id, booking_request.date))
         result = cur.fetchone()
 
-        calendar = generate_default_calendar() if not result else result['calendar']
-
-        slot_key = f"{booking_request.start}-{booking_request.end}"
-
-        if slot_key in calendar and calendar[slot_key]['flagBooked']:
-            raise HTTPException(status_code=400, detail="Slot already booked.")
-
-        calendar[slot_key] = {
-            'flagBooked': True,
-            'start': booking_request.start,
-            'end': booking_request.end,
-            'customer': booking_request.customer.dict()
-        }
-
         if result:
-            # Update the existing calendar entry
+            calendar = result['calendar']
+        else:
+            calendar = generate_default_calendar()
+        
+        # Find the slot to book or update
+        slot_found = False
+        for slot in calendar:
+            if slot['start'] == booking_request.start and slot['end'] == booking_request.end:
+                if slot['flagBooked']:
+                    raise HTTPException(status_code=400, detail="Slot already booked.")
+                slot['flagBooked'] = True
+                slot['customer'] = booking_request.customer.dict()  # Assuming customer data fits here directly
+                slot_found = True
+                break
+        
+        if not slot_found:
+            raise HTTPException(status_code=404, detail="Slot does not exist.")
+        
+        # Update or insert the booking
+        if result:
             cur.execute("""
                 UPDATE booking_system.agent_booking
                 SET calendar = %s
                 WHERE agent_id = %s AND date = %s
                 """, (json.dumps(calendar), booking_request.agent_id, booking_request.date))
         else:
-            # Insert a new calendar entry if it does not exist
             cur.execute("""
                 INSERT INTO booking_system.agent_booking (agent_id, agent_name, product_type, date, calendar)
                 VALUES (%s, %s, %s, %s, %s)
                 """, (
                     booking_request.agent_id,
-                    'Default Agent Name',  # Consider dynamically assigning this based on `agent_id`
+                    "Default Agent Name",  # Placeholder, adjust as needed
                     booking_request.customer.product_type,
                     booking_request.date,
                     json.dumps(calendar)
                 ))
-
+        
         conn.commit()
         return {"message": "Booking confirmed."}
     except Exception as e:
@@ -141,6 +142,8 @@ async def get_slots(agent_id: int, date: str, conn: psycopg2.extensions.connecti
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close()
+
+
 
 def run_server():
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
