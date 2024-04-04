@@ -137,22 +137,29 @@ async def get_slots(agent_id: int, date: str, conn: psycopg2.extensions.connecti
             WHERE agent_id = %s AND date = %s
             """, (agent_id, date))
         result = cur.fetchone()
-        if not result:
+        if not result or not result['calendar']:
             raise HTTPException(status_code=404, detail="Booking information not found.")
 
-        # Since the calendar is stored as a JSON string, ensure it is loaded into a Python object
-        calendar = json.loads(result['calendar']) if result['calendar'] else []
+        # Directly use the calendar if it's already a Python object (list)
+        # No need to use json.loads() if psycopg2 with RealDictCursor already decodes it
+        calendar = result['calendar']
 
         slots = []
         for slot in calendar:
-            # No need to use .items() as we're iterating over a list of dictionaries
-            slots.append(TimeSlot(start=slot['start'], end=slot['end'], flagBooked=slot['flagBooked'], customer=slot.get('customer')))
+            slot_data = TimeSlot(
+                start=slot['start'], 
+                end=slot['end'], 
+                flagBooked=slot['flagBooked'],
+                customer=slot.get('customer')
+            )
+            slots.append(slot_data)
 
         return slots
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close()
+
 
 
 
