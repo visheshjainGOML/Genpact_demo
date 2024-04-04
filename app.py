@@ -78,61 +78,64 @@ def generate_default_calendar():
         })
         start_time = end_time
     return calendar
-
 @app.put("/book-slot/")
 async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.connection = Depends(db_connection)):
     cur = conn.cursor()
     try:
+        # Try to fetch any existing calendar for the given agent and date
         cur.execute("""
             SELECT calendar FROM booking_system.agent_booking
             WHERE agent_id = %s AND date = %s
             """, (booking_request.agent_id, booking_request.date))
         result = cur.fetchone()
 
-        # Use directly if psycopg2 and RealDictCursor handle decoding
-        calendar = result['calendar'] if result and 'calendar' in result else generate_default_calendar()
+        # If there's no existing booking for this agent and date, use a default, empty calendar
+        if not result:
+            calendar = generate_default_calendar()
+        else:
+            # If there is an existing record, use the calendar from the database
+            # Assuming psycopg2's RealDictCursor or similar is used, no need for json.loads()
+            calendar = result['calendar']
 
+        # Identify if the requested slot is already in the calendar and booked
         slot_found = False
         for slot in calendar:
-            # Check for an exact match on start and end times
             if slot['start'] == booking_request.start and slot['end'] == booking_request.end:
-                # Check if the slot is already booked
                 if slot['flagBooked']:
+                    # The slot was found, and it is already booked
                     raise HTTPException(status_code=400, detail="Slot already booked.")
-                else:
-                    # Mark the slot as booked and assign the customer
-                    slot['flagBooked'] = True
-                    slot['customer'] = booking_request.customer.dict()
-                    slot_found = True
-                    break
+                slot['flagBooked'] = True
+                slot['customer'] = booking_request.customer.dict()
+                slot_found = True
+                break
 
         if not slot_found:
-            # If no exact slot match was found, consider how you want to handle this case.
-            # For now, we're treating it as an error condition.
-            raise HTTPException(status_code=404, detail="Slot does not exist.")
+            # This condition should not typically happen if your calendar generation covers all slots
+            # This means the requested slot isn't valid (doesn't exist in your generated calendar)
+            raise HTTPException(status_code=404, detail="Requested slot is invalid or does not exist.")
 
-        # Serialize the updated calendar to a JSON string
+        # Prepare the calendar for database insertion/update
         calendar_json_string = json.dumps(calendar)
 
-        if result:
-            # Update the booking if the calendar already existed
-            cur.execute("""
-                UPDATE booking_system.agent_booking
-                SET calendar = %s
-                WHERE agent_id = %s AND date = %s
-                """, (calendar_json_string, booking_request.agent_id, booking_request.date))
-        else:
-            # Insert a new booking if no existing calendar was found
+        if not result:
+            # If no existing booking, insert a new one
             cur.execute("""
                 INSERT INTO booking_system.agent_booking (agent_id, agent_name, product_type, date, calendar)
                 VALUES (%s, %s, %s, %s, %s)
                 """, (
                     booking_request.agent_id,
-                    "Default Agent Name",  # Adjust as needed
+                    'Default Agent Name',  # Placeholder, adjust as necessary
                     booking_request.customer.product_type,
                     booking_request.date,
                     calendar_json_string
                 ))
+        else:
+            # Update the existing booking
+            cur.execute("""
+                UPDATE booking_system.agent_booking
+                SET calendar = %s
+                WHERE agent_id = %s AND date = %s
+                """, (calendar_json_string, booking_request.agent_id, booking_request.date))
 
         conn.commit()
         return {"message": "Booking confirmed."}
