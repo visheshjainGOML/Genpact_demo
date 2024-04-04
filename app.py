@@ -70,43 +70,42 @@ def generate_default_calendar():
 async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.connection = Depends(db_connection)):
     cur = conn.cursor()
     try:
+        # Attempt to fetch the existing booking for the given agent_id and date
         cur.execute("""
             SELECT calendar FROM booking_system.agent_booking
             WHERE agent_id = %s AND date = %s
             """, (booking_request.agent_id, booking_request.date))
         result = cur.fetchone()
 
-        # Check if a calendar exists for the agent on the given date, if not, generate a default calendar
         calendar = generate_default_calendar() if not result else result['calendar']
 
         slot_key = f"{booking_request.start}-{booking_request.end}"
 
-        # If slot already booked or overlaps, raise an exception
         if slot_key in calendar and calendar[slot_key]['flagBooked']:
             raise HTTPException(status_code=400, detail="Slot already booked.")
 
-        # Update or create the calendar entry
         calendar[slot_key] = {
             'flagBooked': True,
-            'customer': booking_request.customer.dict(),
-            'start': booking_request.start,  # Use the start time from the request
-            'end': booking_request.end  # Use the end time from the request
+            'start': booking_request.start,
+            'end': booking_request.end,
+            'customer': booking_request.customer.dict()
         }
 
-        # If result exists, update; otherwise, insert a new row
         if result:
+            # Update the existing calendar entry
             cur.execute("""
                 UPDATE booking_system.agent_booking
                 SET calendar = %s
                 WHERE agent_id = %s AND date = %s
                 """, (json.dumps(calendar), booking_request.agent_id, booking_request.date))
         else:
+            # Insert a new calendar entry if it does not exist
             cur.execute("""
                 INSERT INTO booking_system.agent_booking (agent_id, agent_name, product_type, date, calendar)
                 VALUES (%s, %s, %s, %s, %s)
                 """, (
                     booking_request.agent_id,
-                    "Default Agent Name",  # This should be dynamically determined or adjusted
+                    'Default Agent Name',  # Consider dynamically assigning this based on `agent_id`
                     booking_request.customer.product_type,
                     booking_request.date,
                     json.dumps(calendar)
