@@ -74,9 +74,9 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
             """, (booking_request.agent_id, booking_request.date))
         result = cur.fetchone()
 
-        # Convert calendar from JSON string to Python dictionary
-        if result:
-            calendar = json.loads(result['calendar'])  # Ensure conversion here
+        # Directly use the calendar if it's already a Python list; no need for json.loads()
+        if result and result['calendar']:
+            calendar = result['calendar']
         else:
             calendar = generate_default_calendar()
         
@@ -87,7 +87,7 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
                 if slot['flagBooked']:
                     raise HTTPException(status_code=400, detail="Slot already booked.")
                 slot['flagBooked'] = True
-                slot['customer'] = booking_request.customer.dict()  # Assuming customer data fits here directly
+                slot['customer'] = booking_request.customer.dict()  # Convert customer info directly
                 slot_found = True
                 break
         
