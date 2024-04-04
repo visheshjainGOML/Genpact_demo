@@ -89,39 +89,46 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
             """, (booking_request.agent_id, booking_request.date))
         result = cur.fetchone()
 
-        if result and result['calendar']:
-            calendar = result['calendar']  # Use directly if psycopg2 and RealDictCursor handle decoding
-        else:
-            calendar = generate_default_calendar()
+        # Use directly if psycopg2 and RealDictCursor handle decoding
+        calendar = result['calendar'] if result and 'calendar' in result else generate_default_calendar()
 
         slot_found = False
         for slot in calendar:
+            # Check for an exact match on start and end times
             if slot['start'] == booking_request.start and slot['end'] == booking_request.end:
+                # Check if the slot is already booked
                 if slot['flagBooked']:
                     raise HTTPException(status_code=400, detail="Slot already booked.")
-                slot['flagBooked'] = True
-                slot['customer'] = booking_request.customer.dict()  # Convert customer info directly
-                slot_found = True
-                break
+                else:
+                    # Mark the slot as booked and assign the customer
+                    slot['flagBooked'] = True
+                    slot['customer'] = booking_request.customer.dict()
+                    slot_found = True
+                    break
 
         if not slot_found:
+            # If no exact slot match was found, consider how you want to handle this case.
+            # For now, we're treating it as an error condition.
             raise HTTPException(status_code=404, detail="Slot does not exist.")
 
-        calendar_json_string = json.dumps(calendar)  # Serialize updated calendar to JSON string
+        # Serialize the updated calendar to a JSON string
+        calendar_json_string = json.dumps(calendar)
 
         if result:
+            # Update the booking if the calendar already existed
             cur.execute("""
                 UPDATE booking_system.agent_booking
                 SET calendar = %s
                 WHERE agent_id = %s AND date = %s
                 """, (calendar_json_string, booking_request.agent_id, booking_request.date))
         else:
+            # Insert a new booking if no existing calendar was found
             cur.execute("""
                 INSERT INTO booking_system.agent_booking (agent_id, agent_name, product_type, date, calendar)
                 VALUES (%s, %s, %s, %s, %s)
                 """, (
                     booking_request.agent_id,
-                    "Default Agent Name",
+                    "Default Agent Name",  # Adjust as needed
                     booking_request.customer.product_type,
                     booking_request.date,
                     calendar_json_string
@@ -134,6 +141,7 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close()
+
 
 
 @app.get("/slots/{agent_id}/{date}/", response_model=List[TimeSlot])
