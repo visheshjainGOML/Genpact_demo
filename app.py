@@ -163,16 +163,19 @@ async def get_slots(agent_id: int, date: str, conn: psycopg2.extensions.connecti
             """, (agent_id, date))
         result = cur.fetchone()
 
-        # If no booking information is found, use the default calendar
+        # If no booking information is found for the agent and date, return the default calendar
         if not result or not result['calendar']:
             calendar = generate_default_calendar()
         else:
-            # If booking information is found, use the calendar from the database
+            # If booking information is found, check if calendar needs parsing
             calendar = result['calendar']
+            if isinstance(calendar, str):
+                # Parse the string to a Python object if necessary
+                calendar = json.loads(calendar)
 
         slots = []
         for slot in calendar:
-            # Use the existing slot information if available, otherwise use the default slot data
+            # Directly use slot data to populate TimeSlot models
             slots.append(TimeSlot(
                 start=slot['start'], 
                 end=slot['end'], 
@@ -185,6 +188,7 @@ async def get_slots(agent_id: int, date: str, conn: psycopg2.extensions.connecti
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close()
+
 
 
 
