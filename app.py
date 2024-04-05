@@ -17,6 +17,9 @@ def get_db_connection():
         password="postgres123",
         cursor_factory=RealDictCursor
     )
+class AgentDetail(BaseModel):
+    agent_id: int
+    agent_name: str
 
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
@@ -150,7 +153,6 @@ async def book_slot(booking_request: BookingRequest, conn: psycopg2.extensions.c
         cur.close()
 
 
-
 @app.get("/slots/{agent_id}/{date}/", response_model=List[TimeSlot])
 async def get_slots(agent_id: int, date: str, conn: psycopg2.extensions.connection = Depends(db_connection)):
     cur = conn.cursor()
@@ -160,22 +162,23 @@ async def get_slots(agent_id: int, date: str, conn: psycopg2.extensions.connecti
             WHERE agent_id = %s AND date = %s
             """, (agent_id, date))
         result = cur.fetchone()
-        if not result or not result['calendar']:
-            raise HTTPException(status_code=404, detail="Booking information not found.")
 
-        # Directly use the calendar if it's already a Python object (list)
-        # No need to use json.loads() if psycopg2 with RealDictCursor already decodes it
-        calendar = result['calendar']
+        # If no booking information is found, use the default calendar
+        if not result or not result['calendar']:
+            calendar = generate_default_calendar()
+        else:
+            # If booking information is found, use the calendar from the database
+            calendar = result['calendar']
 
         slots = []
         for slot in calendar:
-            slot_data = TimeSlot(
+            # Use the existing slot information if available, otherwise use the default slot data
+            slots.append(TimeSlot(
                 start=slot['start'], 
                 end=slot['end'], 
-                flagBooked=slot['flagBooked'],
+                flagBooked=slot.get('flagBooked', False),
                 customer=slot.get('customer')
-            )
-            slots.append(slot_data)
+            ))
 
         return slots
     except Exception as e:
@@ -184,6 +187,26 @@ async def get_slots(agent_id: int, date: str, conn: psycopg2.extensions.connecti
         cur.close()
 
 
+
+@app.get("/agents/", response_model=List[AgentDetail])
+async def get_agents(conn: psycopg2.extensions.connection = Depends(db_connection)):
+    cur = conn.cursor()
+    try:
+        # Assuming your table name is 'agent_booking' and it contains 'agent_id' and 'agent_name'
+        cur.execute("SELECT DISTINCT agent_id, agent_name FROM booking_system.agent_booking")
+        agents = cur.fetchall()
+        
+        # If no agents found, you might want to return an empty list or handle differently
+        if not agents:
+            return []
+
+        # Transform the query results into a list of AgentDetail models
+        agent_details = [AgentDetail(agent_id=agent['agent_id'], agent_name=agent['agent_name']) for agent in agents]
+        return agent_details
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close()
 
 
 def run_server():
