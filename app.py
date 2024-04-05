@@ -32,16 +32,7 @@ class AgentDetail(BaseModel):
     agent_id: int
     agent_name: str
 
-from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
-from typing import List, Optional
-import psycopg2
-from psycopg2.extras import RealDictCursor
-import json
-import uvicorn
-from datetime import datetime, timedelta
 
-app = FastAPI()
 
 class Customer(BaseModel):
     customer_id: int
