@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import psycopg2
@@ -8,6 +9,13 @@ import uvicorn
 from datetime import datetime, timedelta
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "OPTIONS", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+)
 
 def get_db_connection():
     return psycopg2.connect(
@@ -217,4 +225,5 @@ def run_server():
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
  
 if __name__ == "__main__":
+    
     run_server()
