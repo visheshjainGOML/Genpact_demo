@@ -355,4 +355,4 @@ async def trigger_call(appointment_id: int, db: Session = Depends(get_db)):
 #---------- Run the server -------------
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8002)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
