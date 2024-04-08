@@ -3,6 +3,7 @@ from sqlalchemy import Table, create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.orm import declarative_base
 from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import  Literal, Optional
 from datetime import datetime, timedelta
@@ -134,6 +135,13 @@ class ResponseModel(BaseModel):
 
 #---------- API endpoints -------------
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Replace with specific allowed origins
+    allow_methods=["*"],  # Replace with specific HTTP methods
+    allow_headers=["*"],  # Replace with specific headers
+)
+
 
 ### ------------- Customer Endpoints -----------
 # Get Agents List for a selected product
