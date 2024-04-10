@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import  Literal, Optional
 from datetime import datetime, timedelta
+from sqlalchemy import create_engine, text
 import boto3
 
 #--------- Constants -------------
@@ -364,6 +365,30 @@ async def get_all_customers(db: Session = Depends(get_db)):
 
     return ResponseModel(message=success_message, payload={"customers":[row2dict(product) for product in db.query(Customer).all()]})
 
+@app.post("/cancel_appointment/",tags=['appointment'])
+async def cancel_appointment_route(customer_id: int):
+    # Create session
+    db = SessionLocal()
+    
+    try:
+        # Execute SQL query to delete appointment
+        query = text("DELETE FROM genpact.appointment WHERE customer_id = :customer_id")
+        db.execute(query, {"customer_id": customer_id})
+        
+        # Commit transaction
+        db.commit()
+        
+        # Return success message
+        return {"message": "Appointment canceled successfully."}
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
+        
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=500, detail=f"Error canceling appointment: {str(e)}")
+    finally:
+        # Close session
+        db.close()
 #---------- Run the server -------------
 if __name__ == "__main__":
     import uvicorn
