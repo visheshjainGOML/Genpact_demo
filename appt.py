@@ -389,6 +389,74 @@ async def cancel_appointment_route(customer_id: int):
     finally:
         # Close session
         db.close()
+@app.get("/userDetail/{customer_id}")
+async def get_user_detail(customer_id: int):
+    # Create session
+    db: Session = SessionLocal()
+    
+    try:
+        # Execute SQL query to fetch customer details
+        query = text("SELECT * FROM genpact.customer WHERE id = :customer_id")
+        result = db.execute(query, {"customer_id": customer_id})
+        
+        # Fetch the row
+        user_detail = result.fetchone()
+        
+        if user_detail is None:
+            # If no user found with the provided ID, raise HTTPException
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get column names
+        columns = result.keys()
+        
+        # Create dictionary from row
+        user_detail_dict = {col: value for col, value in zip(columns, user_detail)}
+        
+        return user_detail_dict
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
+        
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=500, detail=f"Error retrieving user detail: {str(e)}")
+    finally:
+        # Close session
+        db.close()
+
+@app.get("/appointments/{customer_id}")
+def get_appointments(customer_id: int):
+    # Create session
+    db: Session = SessionLocal()
+    
+    try:
+        # Execute SQL query to fetch customer details
+        query = text("SELECT * FROM genpact.appointment WHERE customer_id = :customer_id")
+        result = db.execute(query, {"customer_id": customer_id})
+        
+        # Fetch the row
+        user_detail = result.fetchone()
+        
+        if user_detail is None:
+            # If no user found with the provided ID, raise HTTPException
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get column names
+        columns = result.keys()
+        
+        # Create dictionary from row
+        user_detail_dict = {col: value for col, value in zip(columns, user_detail)}
+        
+        return user_detail_dict
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
+        
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=500, detail=f"Error retrieving user detail: {str(e)}")
+    finally:
+        # Close session
+        db.close()
+
 #---------- Run the server -------------
 if __name__ == "__main__":
     import uvicorn
