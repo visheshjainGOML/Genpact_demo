@@ -352,7 +352,19 @@ async def trigger_call(appointment_id: int, db: Session = Depends(get_db)):
     # Implement the logic to trigger the call to the end-user    
     return {"message": "Call triggered successfully"}
 
+#------------test db ------------------#
+@app.get("/tables/", response_model=ResponseModel)
+async def get_tables(db: Session = Depends(get_db)):
+    tables = Base.metadata.tables.keys()
+    return ResponseModel(message="List of tables", payload={"tables": list(tables)})
+
+# API to get data from a specific table
+@app.get("/customer/", response_model=ResponseModel, tags=["customer"])
+async def get_all_customers(db: Session = Depends(get_db)):
+
+    return ResponseModel(message=success_message, payload={"customers":[row2dict(product) for product in db.query(Customer).all()]})
+
 #---------- Run the server -------------
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("appt:app", host="0.0.0.0", port=8000, reload=True)
