@@ -311,58 +311,77 @@ async def get_agents(db: Session = Depends(get_db)):
 #     db.refresh(schedule)
 #     return ResponseModel(message=success_message, payload={"schedule_id":schedule.id})
 
-
-@app.get(path="/slots/{product_id}/{date}",  response_model=ResponseModel, tags=["customer","agent"])
+def format_db_response(result):
+    result_dict = []
+    for item in result:
+        item_dict = item.__dict__
+        # Remove the attribute holding the reference to the database session
+        item_dict.pop('_sa_instance_state', None)
+        result_dict.append(item_dict)
+    return result_dict
+import random
+@app.get(path="/slots/{product_id}/{date}",  tags=["customer","agent"])
 async def get_agent_schedules(product_id: int, date: str, type:Literal["customer","agent"]=Header(), agent_id:int = Query(default=None), db: Session = Depends(get_db)):
-
-    if not db.query(Product).filter(Product.id == product_id).first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
     
-    if type=="agent" :
-        if not agent_id :
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Agent id not provided")
-        elif not db.query(Agent).filter(Agent.id == agent_id).first():
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Agent not found")
+    Agents = db.query(Agent).filter(Agent.product_id == product_id).all()
+    if not Agents:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    print(Agents)
+    # agent_ids = db.query(Agent.id).filter(Agent.product_id == product_id).all()
+    Agents = format_db_response(Agents)
+    agents=[]
+    for i in Agents:
+        agents.append(i["id"])
+    avail_id  = random.choice(agents)
+    return avail_id
+    # if not db.query(Product).filter(Product.id == product_id).first():
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    
+    # if type=="agent" :
+    #     if not agent_id :
+    #         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Agent id not provided")
+    #     elif not db.query(Agent).filter(Agent.id == agent_id).first():
+    #         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Agent not found")
 
-    if not agent_id:
-        schedules = db.query(AgentSchedule).filter(AgentSchedule.alloted_product_id == product_id, AgentSchedule.date == date).all()
-    else:
-        schedules = db.query(AgentSchedule).filter(AgentSchedule.alloted_product_id == product_id,  AgentSchedule.date == date, AgentSchedule.agent_id == agent_id).all()
+    # if not agent_id:
+    #     schedules = db.query(AgentSchedule).filter(AgentSchedule.alloted_product_id == product_id, AgentSchedule.date == date).all()
+    # else:
+    #     schedules = db.query(AgentSchedule).filter(AgentSchedule.alloted_product_id == product_id,  AgentSchedule.date == date, AgentSchedule.agent_id == agent_id).all()
 
-    response = []
-    for schedule in schedules:        
-        time_slots = generate_time_slots(schedule.shift_from, schedule.shift_to, schedule.slot_duration_mins)        
+    # response = []
+    # for schedule in schedules:        
+    #     time_slots = generate_time_slots(schedule.shift_from, schedule.shift_to, schedule.slot_duration_mins)        
        
-        for start_time,end_time in time_slots:
-            record = {}
-            record["id"] = schedule.id
-            record["agent_name"] = schedule.call_name
-            record["date"] = schedule.date
-            record["start"] = start_time
-            record["end"] = end_time
+    #     for start_time,end_time in time_slots:
+    #         record = {}
+    #         record["id"] = schedule.id
+    #         record["agent_name"] = schedule.call_name
+    #         record["date"] = schedule.date
+    #         record["start"] = start_time
+    #         record["end"] = end_time
 
-            # Get Booked slots from Appointment DB     
-            appointment   =  db.query(Appointment).filter(Appointment.schedule_id == schedule.id, Appointment.from_time == start_time).first()
-            if appointment:
-                record ['is_booked'] = True
-                if type == "agent":
-                    customer = db.query(Customer).filter(Customer.id == appointment.customer_id).first()
-                    if  customer:
-                        record["customer_name"]  = customer.username                
-                        record["details"] = appointment.apt_details
-                        record["call_status"] = appointment.call_status
-                        if appointment.call_status == "pending" and make_contact_visible(schedule.date, appointment.from_time) : 
-                            record["contact"] = customer.mobile_no
-                        if appointment.call_status == "completed":
-                            record["call_rating"] = appointment.call_rating                            
-                        record["agent_comments"] = appointment.agent_comments
-            else:
-                record['is_booked'] = False
+    #         # Get Booked slots from Appointment DB     
+    #         appointment   =  db.query(Appointment).filter(Appointment.schedule_id == schedule.id, Appointment.from_time == start_time).first()
+    #         if appointment:
+    #             record ['is_booked'] = True
+    #             if type == "agent":
+    #                 customer = db.query(Customer).filter(Customer.id == appointment.customer_id).first()
+    #                 if  customer:
+    #                     record["customer_name"]  = customer.username                
+    #                     record["details"] = appointment.apt_details
+    #                     record["call_status"] = appointment.call_status
+    #                     if appointment.call_status == "pending" and make_contact_visible(schedule.date, appointment.from_time) : 
+    #                         record["contact"] = customer.mobile_no
+    #                     if appointment.call_status == "completed":
+    #                         record["call_rating"] = appointment.call_rating                            
+    #                     record["agent_comments"] = appointment.agent_comments
+    #         else:
+    #             record['is_booked'] = False
 
-            if type != "agent" or (type=="agent" and  record['is_booked']):
-                response.append(record)       
+    #         if type != "agent" or (type=="agent" and  record['is_booked']):
+    #             response.append(record)       
                 
-    return ResponseModel(message=success_message, payload={"slots":response})
+    # return ResponseModel(message=success_message, payload={"slots":response})
 
 
 
