@@ -519,37 +519,36 @@ async def get_user_detail(customer_id: int,db: Session = Depends(get_db)):
 @app.get("/appointments/{customer_id}",tags=['appointment'])
 def get_appointments(customer_id: int,db: Session = Depends(get_db)):
     # Create session
-    db: Session = SessionLocal()
-    
     try:
+        appointments = db.query(Appointment).filter(Appointment.customer_id == customer_id).all()
+        # schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
+        if not appointments:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        print(appointments)
+        # agent_ids = db.query(Agent.id).filter(Agent.product_id == product_id).all()
+        appointments = format_db_response(appointments)
 
-        query = text("""
-        SELECT 
-            a.*, 
-            s.end_time,
-            s.date
-        FROM 
-            genpact.appointment a
-        JOIN 
-            genpact.agent_schedule s 
-        ON 
-            a.agent_id = s.agent_id 
-            AND a.customer_id = s.customer_id 
-            AND a.appointment_at = s.start_time 
-        WHERE 
-            a.customer_id = :customer_id
-    """)
+        new_data=[]
+        print(appointments,"\n\n")
+        for i in appointments:
+            data = i 
+            agent_id = i['agent_id']
+            start_time = i["scheduled_at"]
+            print(start_time,agent_id)
+            schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
+            query = text("select * from genpact.agent_schedule where agent_id= :agent_id ")
+            if not schedules:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+            item_dict = schedules.__dict__
+            # Remove the attribute holding the reference to the database session
+            item_dict.pop('_sa_instance_state', None)
+            
+            print(item_dict)
+            result =  data|item_dict
+            new_data.append(result)
 
-        result = db.execute(query, {"customer_id": customer_id})
-        
-        # Fetch all the rows
-        appointments_with_schedule = result.fetchall()
-        
-        # Close the connection
-        db.close()
-        
-        return appointments_with_schedule
-
+        return new_data
+    
     except Exception as e:
         # Rollback transaction in case of error
         db.rollback()
@@ -570,7 +569,7 @@ def get_booked_agent_schedule(agent_id:int,db: Session = Depends(get_db)):
         WHERE agent_id = :agent_id 
         AND status = 'booked'
     """)
-    
+
     # Execute the query
     result = db.execute(query, {"agent_id": agent_id})
     
