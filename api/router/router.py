@@ -546,20 +546,23 @@ def get_appointments(customer_id: int,db: Session = Depends(get_db)):
         new_data=[]
         print(appointments,"\n\n")
         for i in appointments:
+            print(i)
             data = i 
             agent_id = i['agent_id']
             start_time = i["scheduled_at"]
             print(start_time,agent_id)
-            schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == agent_id).first()
+            schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == agent_id and AgentSchedule.start_time==start_time).first()
             if not schedules:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+            # Convert the object to a dictionary
             item_dict = schedules.__dict__
             # Remove the attribute holding the reference to the database session
-            item_dict.pop('_sa_instance_state', None)
+            # item_dict.pop('_sa_instance_state', None)
 
             print(item_dict)
             result = data|item_dict
             new_data.append(result)
+        
         return new_data
     
     except Exception as e:
