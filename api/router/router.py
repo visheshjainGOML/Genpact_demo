@@ -122,7 +122,6 @@ class CustomerSchema(BaseModel):
 
 class ProductSchema(BaseModel):
     name: str
-    agent_id: int
     created_at : Optional[datetime] = str(datetime.now()) # type: ignore
     category : str
 
@@ -523,24 +522,7 @@ def get_appointments(customer_id: int,db: Session = Depends(get_db)):
     db: Session = SessionLocal()
     
     try:
-        # # Execute SQL query to fetch customer details
-        # query = text("SELECT * FROM genpact.appointment WHERE customer_id = :customer_id")
-        # result = db.execute(query, {"customer_id": customer_id})
-        
-        # # Fetch the row
-        # user_detail = result.fetchone()
-        
-        # if user_detail is None:
-        #     # If no user found with the provided ID, raise HTTPException
-        #     raise HTTPException(status_code=404, detail="User not found")
-        
-        # # Get column names
-        # columns = result.keys()
-        
-        # # Create dictionary from row
-        # user_detail_dict = {col: value for col, value in zip(columns, user_detail)}
-        
-        # return user_detail_dict
+
         query = text("""
         SELECT 
             a.*, 
