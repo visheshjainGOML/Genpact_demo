@@ -132,8 +132,8 @@ class AppointmentSchema(BaseModel):
     agent_id:int
     created_at: Optional[datetime]  = None
     is_booked: bool =None
-    appointment_desc: str
-    appointment_at: Optional[datetime]
+    appointment_description: str
+    schedule_at: Optional[datetime]
 
 
 class TriggerCallSchema(BaseModel):
@@ -535,7 +535,7 @@ def get_appointments(customer_id: int,db: Session = Depends(get_db)):
             agent_id = i['agent_id']
             start_time = i["scheduled_at"]
             print(start_time,agent_id)
-            schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
+            schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == agent_id).first()
             query = text("select * from genpact.agent_schedule where agent_id= :agent_id ")
             if not schedules:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
@@ -544,6 +544,22 @@ def get_appointments(customer_id: int,db: Session = Depends(get_db)):
             item_dict.pop('_sa_instance_state', None)
             
             print(item_dict)
+            result =  data|item_dict
+            product_id = db.query(Agent).filter(AgentSchedule.agent_id == agent_id).first()
+            query = text("select * from genpact.agent_schedule where agent_id= :agent_id ")
+            if not schedules:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+            product_id = schedules.__dict__
+            # Remove the attribute holding the reference to the database session
+            product_id.pop('_sa_instance_state', None)
+            print("product_id",product_id['product_id'])
+            product_id = db.query(Agent).filter(AgentSchedule.agent_id == agent_id).first()
+            query = text("select * from genpact.agent_schedule where agent_id= :agent_id ")
+            if not schedules:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+            product_id = schedules.__dict__
+            # Remove the attribute holding the reference to the database session
+            product_id.pop('_sa_instance_state', None)
             result =  data|item_dict
             new_data.append(result)
 
@@ -559,24 +575,44 @@ def get_appointments(customer_id: int,db: Session = Depends(get_db)):
         # Close session
         db.close()
 
-@app.get("/appointments/{agent_id}",tags=['appointment'])
-def get_booked_agent_schedule(agent_id:int,db: Session = Depends(get_db)):
-    # Define database connection URL
-    
-    # Build the SQL query to select agent schedules for the given agent ID with status "booked"
-    query = text("""
-        SELECT * FROM genpact.agent_schedule 
-        WHERE agent_id = :agent_id 
-        AND status = 'booked'
-    """)
+# @app.get("/appointments/{agent_id}",tags=['appointment'])
+# def get_booked_agent_schedule(agent_id:int,db: Session = Depends(get_db)):
+#    try:
+#         appointments = db.query(Appointment).filter(Appointment.agent_id == agent_id).all()
+#         # schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
+#         if not appointments:
+#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+#         print(appointments)
+#         # agent_ids = db.query(Agent.id).filter(Agent.product_id == product_id).all()
+#         appointments = format_db_response(appointments)
 
-    # Execute the query
-    result = db.execute(query, {"agent_id": agent_id})
+#         new_data=[]
+#         print(appointments,"\n\n")
+#         for i in appointments:
+#             data = i 
+#             agent_id = i['agent_id']
+#             start_time = i["scheduled_at"]
+#             print(start_time,agent_id)
+#             schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
+#             query = text("select * from genpact.agent_schedule where agent_id= :agent_id ")
+#             if not schedules:
+#                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+#             item_dict = schedules.__dict__
+#             # Remove the attribute holding the reference to the database session
+#             item_dict.pop('_sa_instance_state', None)
+            
+#             print(item_dict)
+#             result =  data|item_dict
+#             new_data.append(result)
+
+#         return new_data
     
-    # Fetch all the rows
-    booked_schedules = result.fetchall()
-    
-    # Close the connection
-    db.close()
-    
-    return booked_schedules
+#     except Exception as e:
+#         # Rollback transaction in case of error
+#         db.rollback()
+        
+#         # Raise HTTPException with error message
+#         raise HTTPException(status_code=200, detail=f"No record found - {e}")
+#     finally:
+#         # Close session
+#         db.close()
