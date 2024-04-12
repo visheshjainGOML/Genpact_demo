@@ -282,8 +282,8 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         db.refresh(new_appointment)
         # Update agent_schedule status to "booked" for the corresponding appointment
         query = text("""
-           INSERT INTO genpact.agent_schedule (status, customer_id, agent_id, start_time,end_time,date)
-VALUES ('booked', :customer_id, :agent_id, :start_time,:end_time,:date);
+           INSERT INTO genpact.agent_schedule (status, customer_id, agent_id, start_time,end_time,date,appointment_id)
+VALUES ('booked', :customer_id, :agent_id, :start_time,:end_time,:date,:appointment_id);
 
         """)
         db.execute(
@@ -293,7 +293,8 @@ VALUES ('booked', :customer_id, :agent_id, :start_time,:end_time,:date);
                 "agent_id": appointment.agent_id,
                 "start_time": start_time_obj,
                 "end_time": end_time_obj,
-                "date": date_obj
+                "date": date_obj,
+                "appointment_id":new_appointment.id
             }
         )
         db.commit()
@@ -579,10 +580,8 @@ def get_appointments(customer_id: int,db: Session = Depends(get_db)):
         for i in appointments:
             print(i)
             data = i 
-            agent_id = i['agent_id']
-            start_time = i["scheduled_at"]
-            print(start_time,agent_id)
-            schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == agent_id and AgentSchedule.start_time==start_time).first()
+            appointment_id = i['id']
+            schedules = db.query(AgentSchedule).filter(AgentSchedule.appointment_id == appointment_id ).first()
             if not schedules:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
             # Convert the object to a dictionary
