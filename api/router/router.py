@@ -259,10 +259,23 @@ async def create_agent(agent: AgentSchema, db: Session = Depends(get_db)):
 from datetime import datetime, time  
 
 import pytz
-@app.post(path="/appointment/create")#, response_model=ResponseModel, tags=["appointment"])
+@app.post(path="/appointment/create", response_model=ResponseModel, tags=["appointment"])
 async def create_appointment(appointment: AppointmentSchema, db: Session = Depends(get_db)):
     try:
         existing_appointment=appointment.dict()
+        query = text("""
+    SELECT COUNT(*) AS num_columns 
+    FROM genpact.agent_schedule 
+    WHERE status = 'booked' AND customer_id = :customer_id
+""")
+        data = db.execute(query,{"customer_id":existing_appointment['customer_id']})
+        result = data.fetchone()  # Fetch the first row of the result
+       # Access the value of 'num_columns' from the result
+        print("Number",result)
+        db.commit()
+        if result[0]>0:
+            return ResponseModel(message="You already have an exsiting appointment you cannot book one more until that is closed")
+        
         new_appointment = OriginalAppointmentSchema(
         customer_id=(existing_appointment['customer_id']),
         agent_id=existing_appointment['agent_id'],
@@ -282,10 +295,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         db.refresh(new_appointment)
         # Update agent_schedule status to "booked" for the corresponding appointment
         query = text("""
-           INSERT INTO genpact.agent_schedule (status, customer_id, agent_id, start_time,end_time,date,appointment_id)
-VALUES ('booked', :customer_id, :agent_id, :start_time,:end_time,:date,:appointment_id);
-
-        """)
+           INSERT INTO genpact.agent_schedule (status, customer_id, agent_id, start_time,end_time,date,appointment_id) VALUES ('booked', :customer_id, :agent_id, :start_time,:end_time,:date,:appointment_id);""")
         db.execute(
             query,
             {
