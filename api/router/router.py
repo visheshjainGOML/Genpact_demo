@@ -534,7 +534,45 @@ async def cancel_appointment_route(appointment_id: int,db: Session = Depends(get
         # Close session
         db.close()
 
+class UpdateAppointment(BaseModel):
+    date : str
+    start_time : str
+    end_time : str
 
+@app.post("/update_appointment/{appointment_id}",tags=['appointment'])
+async def cancel_appointment_route(appointment_id: int,data: UpdateAppointment, db: Session = Depends(get_db)):
+    # Create session
+    try:
+        # Execute SQL query to delete appointment
+        data=data.dict()
+        query = text("""UPDATE genpact.agent_schedule SET start_time = :start_time, end_time =:end_time, date = :date WHERE agent_schedule.appointment_id = :appointment_id """)
+        start_time_obj = time.fromisoformat(data['start_time'])
+        end_time_obj = time.fromisoformat(data['end_time'])
+        date_obj = datetime.strptime(data['date'], '%d-%m-%y').date()
+
+
+        db.execute(query, {"date": date_obj,"start_time":start_time_obj,"end_time":end_time_obj,"appointment_id":appointment_id})
+        
+        # Commit transaction
+        db.commit()
+        query = text("""UPDATE genpact.appointment SET scheduled_at = :scheduled_at WHERE appointment.id = :appointment_id """)
+
+        scheduled_at=datetime.strptime(data['date'] + ' ' + data['start_time'], '%d-%m-%y %H:%M')
+        db.execute(query, {"appointment_id":appointment_id,"scheduled_at":scheduled_at})
+        
+        # Commit transaction
+        db.commit()
+        # Return success message
+        return {"message": "Appointment updated successfully."}
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
+        
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=500, detail=f"Error canceling appointment: {str(e)}")
+    finally:
+        # Close session
+        db.close()
 @app.get("/userDetail/{customer_id}",tags=['customer'])
 async def get_user_detail(customer_id: int,db: Session = Depends(get_db)):
     # Create session
