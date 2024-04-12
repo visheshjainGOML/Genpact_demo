@@ -282,8 +282,8 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         db.refresh(new_appointment)
         # Update agent_schedule status to "booked" for the corresponding appointment
         query = text("""
-           INSERT INTO genpact.agent_schedule (status, customer_id, agent_id, start_time)
-VALUES ('booked', :customer_id, :agent_id, :start_time);
+           INSERT INTO genpact.agent_schedule (status, customer_id, agent_id, start_time,end_time,date)
+VALUES ('booked', :customer_id, :agent_id, :start_time,:end_time,:date);
 
         """)
         db.execute(
