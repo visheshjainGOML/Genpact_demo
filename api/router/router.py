@@ -108,7 +108,6 @@ class AgentSchema(BaseModel):
     leave_to: Optional[datetime] = None
     slot_time: int
     buffer_time: int
-
 class FeedbackSchema(BaseModel):
     appointment_id: int
     rating: int
@@ -119,6 +118,7 @@ class CustomerSchema(BaseModel):
     email_id: str
     mobile_no: str
     product_id : int
+    pre_screening: dict=None
 
 class ProductSchema(BaseModel):
     name: str
@@ -503,15 +503,21 @@ async def get_agent_schedules(product_id: int, date: str, type:Literal["customer
 #     return ResponseModel(message="List of tables", payload={"tables": list(tables)})
 
 
-@app.post("/cancel_appointment/",tags=['appointment'])
-async def cancel_appointment_route(customer_id: int,db: Session = Depends(get_db)):
+@app.post("/cancel_appointment/{appointment_id}",tags=['appointment'])
+async def cancel_appointment_route(appointment_id: int,db: Session = Depends(get_db)):
     # Create session
-
-    
     try:
         # Execute SQL query to delete appointment
-        query = text("DELETE FROM genpact.appointment WHERE customer_id = :customer_id")
-        db.execute(query, {"customer_id": customer_id})
+        query = text("""
+    UPDATE 
+        genpact.agent_schedule
+    SET 
+        status = 'cancelled'
+    WHERE 
+        agent_schedule.appointment_id = :appointment_id
+""")
+
+        db.execute(query, {"appointment_id": appointment_id})
         
         # Commit transaction
         db.commit()
@@ -639,5 +645,42 @@ WHERE
     print(appointments_with_schedule,type(appointments_with_schedule))
     # Close the connection
     db.close()
-    
+    # result = filter_json_by_time(appointments_with_schedule)
+    # return result
     return appointments_with_schedule
+
+@app.post("/agent/add-comments/{appointment_id}", response_model=ResponseModel, tags=["agent"])
+async def add_comments(appointment_id: int, comments: str, db: Session = Depends(get_db)):
+    try:
+        # Check if appointment exists
+        appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+        if not appointment:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+        
+        # Update the agent_comments field
+        appointment.agent_comments = comments
+        db.commit()
+        
+        return ResponseModel(message="Comments added successfully")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+ 
+
+def filter_json_by_time(json_data):
+    # Get current time
+    current_time = datetime.now()
+    
+    # Calculate filter end time (current time + 30 minutes)
+    filter_end_time = current_time + timedelta(minutes=30)
+    
+    # Extract only the time part of filter end time
+    filter_end_time = filter_end_time.time()
+    print(filter_end_time)
+    # Filter records based on start time
+    filtered_records = []
+    for record in json_data:
+        start_time = datetime.strptime(record['start_time'], '%H:%M:%S').time()
+        if current_time.time() <= start_time <= filter_end_time:
+            filtered_records.append(record)
+    
+    return filtered_records
