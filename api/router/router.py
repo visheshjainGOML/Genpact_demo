@@ -611,17 +611,22 @@ def get_agent_appointments(agent_id:int, db:Session = Depends(get_db)):
     
     # Execute raw SQL query
     query = text("""
-        SELECT 
-            appointments.*, 
-            customer.username, 
-            customer.email_id, 
-            customer.mobile_no 
-        FROM 
-            genpact.appointment AS appointments
-        JOIN 
-            genpact.customer ON appointments.customer_id = customer.id
-        WHERE 
-            appointments.agent_id = :agent_id
+        SELECT
+    appointments.*,
+    customer.username,
+    customer.email_id,
+    customer.mobile_no,
+    schedule.start_time,
+    schedule.end_time,
+    schedule.date
+FROM
+    genpact.appointment AS appointments
+JOIN
+    genpact.customer ON appointments.customer_id = customer.id
+JOIN
+    genpact.agent_schedule AS schedule ON appointments.id = schedule.appointment_id
+WHERE
+    appointments.agent_id = :agent_id
     """)
     
     # Execute the query
