@@ -607,115 +607,33 @@ def get_appointments(customer_id: int,db: Session = Depends(get_db)):
         db.close()
 
 @app.get("/appointments/list/{agent_id}",tags=['appointment'])
-def get_booked_agent_schedule(agent_id: int, db: Session = Depends(get_db)):
-    try:
-        appointments = db.query(Appointment).filter(Appointment.agent_id == agent_id).all()
-        if not appointments:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No appointments found for this agent")
-
-        new_data = []
-
-        for appointment in appointments:
-            # Fetch appointment details
-            appointment_data = format_db_response(appointment)
-
-            # Fetch agent schedule
-            agent_schedule = db.query(AgentSchedule).filter(AgentSchedule.agent_id == agent_id).first()
-            if not agent_schedule:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent schedule not found")
-
-            agent_schedule_data = agent_schedule.__dict__
-            agent_schedule_data.pop('_sa_instance_state', None)
-
-            # Fetch product details
-            product = db.query(Product).filter(Product.id == appointment.agent.product_id).first()
-            if not product:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-
-            product_data = product.__dict__
-            product_data.pop('_sa_instance_state', None)
-
-            # Fetch customer details using customer_id from appointments
-            customer_id = appointment.customer_id
-            customer = db.query(Customer).filter(Customer.id == customer_id).first()
-            if not customer:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
-
-            customer_data = {
-                'username': customer.username,
-                'mobile_number': customer.mobile_number,
-                'email': customer.email
-            }
-
-            # Combine all data
-            appointment_data.update(agent_schedule_data)
-            appointment_data.update(product_data)
-            appointment_data.update(customer_data)
-
-            new_data.append(appointment_data)
-
-        return new_data    
-    except Exception as e:
-        # Rollback transaction in case of error
-        db.rollback()
-        
-        # Raise HTTPException with error message
-        raise HTTPException(status_code=200, detail=f"No record found - {e}")
-    finally:
-        # Close session
-        db.close()
-
-# def get_booked_agent_schedule(agent_id:int,db: Session = Depends(get_db)):
-#     try:
-#         appointments = db.query(Appointment).filter(Appointment.agent_id == agent_id).all()
-#         # schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
-#         if not appointments:
-#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-#         print(appointments)
-#         # agent_ids = db.query(Agent.id).filter(Agent.product_id == product_id).all()
-#         appointments = format_db_response(appointments)
-
-#         new_data=[]
-#         print(appointments,"\n\n")
-#         for i in appointments:
-#             data = i 
-#             agent_id = i['agent_id']
-#             start_time = i["scheduled_at"]
-#             print(start_time,agent_id)
-#             schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
-#             if not schedules:
-#                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-#             item_dict = schedules.__dict__
-#             # Remove the attribute holding the reference to the database session            
-#             print(item_dict)
-
-#             result =  data|item_dict
+def get_agent_appointments(agent_id:int, db:Session = Depends(get_db)):
+    # Connect to the PostgreSQL database
     
-#             product_id = db.query(Agent).filter(Agent.id == agent_id).first()
-#             if not schedules:
-#                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-#             product_id = product_id.__dict__
-#             # Remove the attribute holding the reference
-#             product_id = product_id['product_id']
-#             print("product_id",product_id)
-#             product = db.query(Product).filter(Product.id == product_id).first()
-#             if not schedules:
-#                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-#             product = product.__dict__
-#             # Remove the attribute holding the reference to the database session
+    # Execute raw SQL query
+    query = text("""
+        SELECT 
+            appointments.*, 
+            customer.username, 
+            customer.email_id, 
+            customer.mobile_no 
+        FROM 
+            genpact.appointment AS appointments
+        JOIN 
+            genpact.customer ON appointments.customer_id = customer.id
+        WHERE 
+            appointments.agent_id = :agent_id
+    """)
+    
+    # Execute the query
+    result = db.execute(query, {"agent_id": agent_id})
+    columns = result.keys()
 
-#             result =  result|product
+    # Convert each row into a dictionary with column names as keys
+    appointments_with_schedule = [{col: val for col, val in zip(columns, row)} for row in result.fetchall()]
 
-#             new_data.append(result)
-            
-
-#         return new_data
-#     except Exception as e:
-#         # Rollback transaction in case of error
-#         db.rollback()
-        
-#         # Raise HTTPException with error message
-#         raise HTTPException(status_code=200, detail=f"No record found - {e}")
-#     finally:
-#         # Close session
-#         db.close()
+    print(appointments_with_schedule,type(appointments_with_schedule))
+    # Close the connection
+    db.close()
+    
+    return appointments_with_schedule
