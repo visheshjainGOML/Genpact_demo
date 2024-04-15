@@ -108,6 +108,7 @@ class AgentSchema(BaseModel):
     leave_to: Optional[datetime] = None
     slot_time: int
     buffer_time: int
+    agent_email: int
 class FeedbackSchema(BaseModel):
     appointment_id: int
     rating: int
@@ -259,6 +260,7 @@ async def create_agent(agent: AgentSchema, db: Session = Depends(get_db)):
 from datetime import datetime, time  
 
 import pytz
+
 @app.post(path="/appointment/create", response_model=ResponseModel, tags=["appointment"])
 async def create_appointment(appointment: AppointmentSchema, db: Session = Depends(get_db)):
     try:
@@ -518,16 +520,20 @@ async def cancel_appointment_route(appointment_id: int,db: Session = Depends(get
     # Create session
     try:
         # Execute SQL query to delete appointment
-        query = text("""
+        query1 = text("""
     UPDATE 
         genpact.agent_schedule
     SET 
-        status = 'cancelled'
+        status = 'cancelled',
+        appointment_id = NULL
     WHERE 
         agent_schedule.appointment_id = :appointment_id
 """)
+        query2 = text("""DELETE FROM genpact.appointment
+WHERE genpact.appointment.id = :appointment_id;""")
 
-        db.execute(query, {"appointment_id": appointment_id})
+        db.execute(query1, {"appointment_id": appointment_id})
+        db.execute(query2, {"appointment_id": appointment_id})
         
         # Commit transaction
         db.commit()
@@ -543,7 +549,6 @@ async def cancel_appointment_route(appointment_id: int,db: Session = Depends(get
     finally:
         # Close session
         db.close()
-
 class UpdateAppointment(BaseModel):
     date : str
     start_time : str
@@ -635,16 +640,19 @@ def get_appointments(customer_id: int,db: Session = Depends(get_db)):
             print(i)
             data = i 
             appointment_id = i['id']
+            agent_id = i['agent_id']
+            agent_info = db.query(Agent).filter(Agent.id == agent_id).first()
             schedules = db.query(AgentSchedule).filter(AgentSchedule.appointment_id == appointment_id ).first()
             if not schedules:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
             # Convert the object to a dictionary
             item_dict = schedules.__dict__
+            agent_info_dict = agent_info.__dict__
             # Remove the attribute holding the reference to the database session
             # item_dict.pop('_sa_instance_state', None)
 
             print(item_dict)
-            result = data|item_dict
+            result = data|item_dict|agent_info_dict
             new_data.append(result)
         
         return new_data
@@ -706,12 +714,56 @@ async def add_comments(appointment_id: int, comments: str, db: Session = Depends
             raise HTTPException(status_code=404, detail="Appointment not found")
         
         # Update the agent_comments field
-        appointment.agent_comments = comments
+        appointment.call_rating = comments
         db.commit()
         
         return ResponseModel(message="Comments added successfully")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+ 
+@app.post("/customer/call/{appointment_id}/{rating}", response_model=ResponseModel, tags=["customer"])
+async def add_comments(appointment_id: int, rating: int, db: Session = Depends(get_db)):
+    try:
+        # Check if appointment exists
+        appointment = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+        if not appointment:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+        
+        # Update the agent_comments field
+        appointment.call_rating = rating
+        db.commit()
+        
+        return ResponseModel(message="Rating added successfully")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.put("/customer/update/{id}",tags=["customer"])
+def update_customer(id: int, customer_data: CustomerSchema, db: Session = Depends(get_db)):
+    try:
+        query = text("""
+            UPDATE genpact.customer
+            SET username = :username, email_id = :email_id, mobile_no = :mobile_no, product_id = :product_id
+            WHERE id = :id;
+        """)
+ 
+        db.execute(
+            query,
+            {
+                "id": id,
+                "username": customer_data.username,
+                "email_id": customer_data.email_id,
+                "mobile_no": customer_data.mobile_no,
+                "product_id": customer_data.product_id,
+            }
+        )
+        db.commit()
+        return {"message": "Customer details updated successfully"}
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=500, detail=f"Failed to update customer: {str(e)}")
+   
  
 
 def filter_json_by_time(json_data):
@@ -732,3 +784,26 @@ def filter_json_by_time(json_data):
             filtered_records.append(record)
     
     return filtered_records
+
+@app.get("/appointments/description/{appointment_id}",tags=['appointment'])
+def get_appointments(appointment_id: int,db: Session = Depends(get_db)):
+    # Create session
+    try:
+        appointments = db.query(Appointment).filter(Appointment.id == appointment_id).all()
+        # schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
+        if not appointments:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+        print(appointments)
+        # agent_ids = db.query(Agent.id).filter(Agent.product_id == product_id).all()
+        appointments = format_db_response(appointments)
+
+        return {"appointment_details":appointments}
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
+        
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=200, detail=f"No record found - {e}")
+    finally:
+        # Close session
+        db.close()
