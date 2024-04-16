@@ -233,7 +233,7 @@ class UpdateAppointment(BaseModel):
     date: str
     start_time: str
     end_time: str
-
+    reason:str
 # ---------- API endpoints -------------
 app = APIRouter()
 
@@ -353,19 +353,33 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
 
 
 @app.get(path="/slots/{product_id}/{date}", response_model=ResponseModel, tags=["customer", "agent"])
-async def get_agent_schedules(product_id: int, date: str,db: Session = Depends(get_db)): # type: Literal["customer", "agent"] = Header(), agent_id: int = Query(default=None), db: Session = Depends(get_db)):
+async def get_agent_schedules(product_id: int, date: str, reschedule_time:str, db: Session = Depends(get_db)): # type: Literal["customer", "agent"] = Header(), agent_id: int = Query(default=None), db: Session = Depends(get_db)):
     try:
         Agents = db.query(Agent).filter(Agent.product_id == product_id).all()
         if not Agents:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
         print(Agents)
+        date_obj = datetime.strptime(date, '%d-%m-%y').date()
+        time_obj = time.fromisoformat(reschedule_time)
+
         # agent_ids = db.query(Agent.id).filter(Agent.product_id == product_id).all()
         Agents = format_db_response(Agents)
-        agents = []
+        print(Agents,"Agents")
+        available_agents = []
         for i in Agents:
-            agents.append(i["id"])
-        avail_id = random.choice(agents)
+            try:
+                data = db.query(AgentSchedule).filter(AgentSchedule.start_time == time_obj,AgentSchedule.date == date_obj,AgentSchedule.agent_id==i["id"]).all()
+                # data = format_db_response(Agents)
+                print(data,"data")
+            except Exception as e:
+                print(e)
+            if data==[]:
+                available_agents.append(i["id"])
+        print(available_agents,"available_agents")
+        if len(available_agents)==0:
+            return ResponseModel(message="No available agent found on the particular time")
+        avail_id = random.choice(available_agents)
         return ResponseModel(message="Available agent on the particular time",payload={"agent_id":avail_id})
     except Exception as e:
         # raise e
@@ -455,9 +469,10 @@ async def cancel_appointment_route(appointment_id: int,reason:str, db: Session =
         genpact.agent_schedule
     SET 
         status = 'cancelled',
-        appointment_id = NULL
+        appointment_id = NULL,
+        reason =:reason
     WHERE 
-        agent_schedule.appointment_id = :appointment_id,agent_schedule.reason=:reason;
+        agent_schedule.appointment_id = :appointment_id;
 """)
         query2 = text("""DELETE FROM genpact.appointment
 WHERE genpact.appointment.id = :appointment_id;""")
@@ -487,13 +502,13 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
     try:
         # Execute SQL query to delete appointment
         data = data.dict()
-        query = text("""UPDATE genpact.agent_schedule SET start_time = :start_time, end_time =:end_time, date = :date WHERE agent_schedule.appointment_id = :appointment_id """)
+        query = text("""UPDATE genpact.agent_schedule SET start_time = :start_time, end_time =:end_time, date = :date, reason=:reason WHERE agent_schedule.appointment_id = :appointment_id""")
         start_time_obj = time.fromisoformat(data['start_time'])
         end_time_obj = time.fromisoformat(data['end_time'])
         date_obj = datetime.strptime(data['date'], '%d-%m-%y').date()
 
         db.execute(query, {"date": date_obj, "start_time": start_time_obj,
-                   "end_time": end_time_obj, "appointment_id": appointment_id})
+                   "end_time": end_time_obj, "appointment_id": appointment_id,"reason":data['reason']})
 
         # Commit transaction
         db.commit()
@@ -820,8 +835,8 @@ async def update_all_agent_detials(updated_agent_details:dict,db: Session = Depe
 
 from sqlalchemy import text
 from sqlalchemy.orm import joinedload
-@app.post("/list/cancelled_appointments", tags=['appointment'])
-def get_cancelled_appointments(db: Session = Depends(get_db)):
+@app.post("/list/cancelled_appointments/{agent_id}", tags=['appointment'])
+def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
     try:
         query = db.query(AgentSchedule, Customer).\
     join(Customer, AgentSchedule.customer_id == Customer.id).\
@@ -838,9 +853,11 @@ def get_cancelled_appointments(db: Session = Depends(get_db)):
                 "status": agent_schedule.status,
                 "username": customer.username,
                 "mobile_no": customer.mobile_no,
-                "email_id": customer.email_id
+                "email_id": customer.email_id,
+                "agent_id":agent_schedule.agent_id,
             }
-            result.append(entry)
+            if agent_id==agent_schedule.agent_id:
+                result.append(entry)
         return result
        
 
