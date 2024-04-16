@@ -838,14 +838,14 @@ from sqlalchemy.orm import joinedload
 @app.post("/list/cancelled_appointments/{agent_id}", tags=['appointment'])
 def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
     try:
-        query = db.query(AgentSchedule, Customer).\
+        query = db.query(AgentSchedule, Customer,Appointment).\
     join(Customer, AgentSchedule.customer_id == Customer.id).\
     filter(AgentSchedule.status == "cancelled") # Optional: to load Customer objects along with AgentSchedule objects
 
         results = query.all()
         print(results)
         result = []
-        for agent_schedule, customer in results:
+        for agent_schedule, customer,appointment in results:
             entry = {
                 "id": agent_schedule.id,
                 "start_time": agent_schedule.start_time,
@@ -856,7 +856,9 @@ def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
                 "email_id": customer.email_id,
                 "agent_id":agent_schedule.agent_id,
                 "status": agent_schedule.status,
-                "reason":agent_schedule.reason
+                "date": agent_schedule.date,
+                "reason":agent_schedule.reason,
+                "appointment_description":appointment.appointment_description
             }
             if agent_id==agent_schedule.agent_id:
                 result.append(entry)
