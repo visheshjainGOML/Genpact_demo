@@ -797,8 +797,12 @@ async def update_all_agent_detials(updated_agent_details:dict,db: Session = Depe
         data = updated_agent_details["agents_details"]
         for value in data:
             id = value["id"]
+            print(value)
             try:
-                update_query = db.query(Agent).filter(Agent.id == id).update(value)
+                db.query(Agent).filter(Agent.id == id).update(value)
+                data=db.query(Agent).filter(Agent.id == id).all()
+                print(format_db_response(data),"\n\n")
+                db.commit()
             except Exception as e:
                 return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
         return ResponseModel(message="All the row updated successfully")
