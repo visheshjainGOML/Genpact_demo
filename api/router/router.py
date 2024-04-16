@@ -8,11 +8,12 @@ from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Literal, Optional
+from sqlalchemy import text
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine, text
 import boto3
 from dotenv import load_dotenv
-import os
+import os   
 from datetime import datetime, time
 import pytz
 
@@ -445,7 +446,7 @@ async def get_agent_schedules(product_id: int, date: str,db: Session = Depends(g
 
 
 @app.post("/cancel_appointment/{appointment_id}", response_model=ResponseModel,tags=['appointment'])
-async def cancel_appointment_route(appointment_id: int, db: Session = Depends(get_db)):
+async def cancel_appointment_route(appointment_id: int,reason:str, db: Session = Depends(get_db)):
     # Create session
     try:
         # Execute SQL query to delete appointment
@@ -456,12 +457,12 @@ async def cancel_appointment_route(appointment_id: int, db: Session = Depends(ge
         status = 'cancelled',
         appointment_id = NULL
     WHERE 
-        agent_schedule.appointment_id = :appointment_id
+        agent_schedule.appointment_id = :appointment_id,agent_schedule.reason=:reason;
 """)
         query2 = text("""DELETE FROM genpact.appointment
 WHERE genpact.appointment.id = :appointment_id;""")
 
-        db.execute(query1, {"appointment_id": appointment_id})
+        db.execute(query1, {"appointment_id": appointment_id,"reason":reason})
         db.execute(query2, {"appointment_id": appointment_id})
 
         # Commit transaction
@@ -796,23 +797,59 @@ async def update_all_agent_detials(updated_agent_details:dict,db: Session = Depe
         # Close session
         db.close()
 
+# @app.post("/list/cancelled_appointments", tags=['appointment'])
+# def get_cancelled_appointments(db: Session = Depends(get_db)):
+#     try:
+#         query = db.query(AgentSchedule).filter(
+#             AgentSchedule.status == "cancelled").all()
+#         # schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
+#         if not query:
+#             raise HTTPException(
+#                 status_code=status.HTTP_404_NOT_FOUND, detail="query not found")
+#         print(query)
+#         # agent_ids = db.query(Agent.id).filter(Agent.product_id == product_id).all()
+#         cancelled_appointment_data = format_db_response(query)
+
+#         return cancelled_appointment_data
+
+#     except Exception as e:
+#         db.rollback()
+#         raise HTTPException(status_code=500, detail=f"Error fetching cancelled appointments: {str(e)}")
+#     finally:
+#         db.close()  
+
+from sqlalchemy import text
+from sqlalchemy.orm import joinedload
 @app.post("/list/cancelled_appointments", tags=['appointment'])
 def get_cancelled_appointments(db: Session = Depends(get_db)):
     try:
-        query = db.query(AgentSchedule).filter(
-            AgentSchedule.status == "cancelled").all()
-        # schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
-        if not query:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="query not found")
-        print(query)
-        # agent_ids = db.query(Agent.id).filter(Agent.product_id == product_id).all()
-        cancelled_appointment_data = format_db_response(query)
+        query = db.query(AgentSchedule, Customer).\
+    join(Customer, AgentSchedule.customer_id == Customer.id).\
+    filter(AgentSchedule.status == "cancelled") # Optional: to load Customer objects along with AgentSchedule objects
 
-        return cancelled_appointment_data
+        results = query.all()
+        print(results)
+        result = []
+        for agent_schedule, customer in results:
+            entry = {
+                "id": agent_schedule.id,
+                "start_time": agent_schedule.start_time,
+                "end_time": agent_schedule.end_time,
+                "status": agent_schedule.status,
+                "username": customer.username,
+                "mobile_no": customer.mobile_no,
+                "email_id": customer.email_id
+            }
+            result.append(entry)
+        return result
+       
 
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Error fetching cancelled appointments: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error fetching cancelled appointments: {str(e)}"
+        )
     finally:
+        # Close the database connection
         db.close()
