@@ -446,7 +446,7 @@ Best Regards,
 Genpact Team
 """)
         db.commit()
-        return ResponseModel(message=success_message)#, payload={"appointment_id": new_appointment.id})
+        return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id})
     except Exception as e:
         # raise e
         raise HTTPException(
