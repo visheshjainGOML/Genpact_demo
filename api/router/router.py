@@ -171,7 +171,7 @@ class AgentSchema(BaseModel):
     product_id: int
     agent_email: int
     shift_from: time
-    shit_to: time
+    shift_to: time
     weekly_off: list[str]
 
 
@@ -878,3 +878,4 @@ def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
     finally:
         # Close the database connection
         db.close()
+
