@@ -158,7 +158,7 @@ async def make_contact_visible(date, start_time):
         return False
     
 
-
+#
 async def send_email(email, user_id, product_id):
     try:
     # Initialize AWS SES client
