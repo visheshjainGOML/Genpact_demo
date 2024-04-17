@@ -318,12 +318,16 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         db.add(new_customer)
         db.commit()
         db.refresh(new_customer)
-        send_email("Someshwar.Garud@genpact.com", new_customer.email_id, "Schedule Your Appointment with Us", f""" Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
+        send_email("Someshwar.Garud@genpact.com", new_customer.email_id, "Schedule Your Appointment with Us", f""" 
+Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
+                   
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-http://localhost:3000/customer/bookedAppointment?customer_id={new_customer.id}product_id={new_customer.product_id}
+https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={new_customer.id}product_id={new_customer.product_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
-Warm regards,""")
+Warm regards,
+
+Genpact Team """)
 
         # await send_email(email, user_id, product_id)
         return ResponseModel(message=success_message, payload={"customer_id": new_customer.id})
@@ -410,12 +414,41 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         query = db.query(Agent).filter(Agent.id ==appointment.agent_id )
         agent_email = query.first()
         agent_email = agent_email.agent_email
-        query = db.query(Customer).filter(Customer.id ==existing_appointment['customer_id'] )
-        Customer_email = query.first()
-        Customer_email= Customer_email.email_id
         
-        send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment confirmation", "Set ready to speak to our agent to find answers for all your questions")
-        send_email("Someshwar.Garud@genpact.com", agent_email, "appointment confirmation", "You have an upcoming meeting scheduled")
+        query = db.query(Customer).filter(Customer.id ==existing_appointment['customer_id'] )
+        Customer_data = query.first()
+        Customer_email= Customer_data.email_id
+        product_id = Customer_data.product_id
+        
+        send_email("Someshwar.Garud@genpact.com", Customer_email, "Confirmation of Your Scheduled Appointment",f"""
+We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
+To view the details of your appointment, please click the following link: https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
+
+Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
+Reschedule Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
+Cancel Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
+
+If you have any specific requests or questions prior to our meeting, do not hesitate to contact us directly through this email.
+We look forward to our conversation and are here to assist you with any questions you may have prior to our meeting.
+
+Warm regards,
+
+Genpact Team 
+""")
+        send_email("Someshwar.Garud@genpact.com", agent_email, "New Appointment Booked", f""" 
+We are pleased to inform you that a new appointment has been booked. Please log in to your agent portal to view the details and prepare for the upcoming meeting.
+
+Quick Reminder:
+Check the Appointment Date and Time: Ensure your schedule is updated.
+                   
+Review Customer Details: Familiarize yourself with the customer's requirements and previous interactions to provide a tailored experience.
+Access your portal here: https://main.d2el3bzkhp7t3w.amplifyapp.com/  
+Thank you for your dedication and hard work. Let's continue providing exceptional service to our clients!
+
+Best Regards,
+                   
+Genpact Team
+""")
         db.commit()
         return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id})
     except Exception as e:
