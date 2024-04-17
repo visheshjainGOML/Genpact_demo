@@ -323,7 +323,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={new_customer.id}product_id={new_customer.product_id}
+https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={new_customer.id}&product_id={new_customer.product_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
