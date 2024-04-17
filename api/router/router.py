@@ -318,7 +318,12 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         db.add(new_customer)
         db.commit()
         db.refresh(new_customer)
-        send_email("sriya.b@goml.io", new_customer.email_id, "appointment confirmation", f"you can book appointment by clicking this http://localhost:3000/customer/bookedAppointment?customer_id={new_customer.id}product_id={new_customer.product_id}")
+        send_email("Someshwar.Garud@genpact.com", new_customer.email_id, "Schedule Your Appointment with Us", f""" Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
+To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
+http://localhost:3000/customer/bookedAppointment?customer_id={new_customer.id}product_id={new_customer.product_id}
+ 
+We look forward to meeting you and are here to assist you every step of the way.
+Warm regards,""")
 
         # await send_email(email, user_id, product_id)
         return ResponseModel(message=success_message, payload={"customer_id": new_customer.id})
@@ -409,8 +414,8 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         Customer_email = query.first()
         Customer_email= Customer_email.email_id
         
-        send_email("sriya.b@goml.io", Customer_email, "appointment confirmation", "Set ready to speak to our agent to find answers for all your questions")
-        send_email("sriya.b@goml.io", agent_email, "appointment confirmation", "You have an upcoming meeting scheduled")
+        send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment confirmation", "Set ready to speak to our agent to find answers for all your questions")
+        send_email("Someshwar.Garud@genpact.com", agent_email, "appointment confirmation", "You have an upcoming meeting scheduled")
         db.commit()
         return ResponseModel(message=success_message)#, payload={"appointment_id": new_appointment.id})
     except Exception as e:
@@ -550,17 +555,17 @@ WHERE genpact.appointment.id = :appointment_id;""")
         db.execute(query1, {"appointment_id": appointment_id,"reason":reason})
         db.execute(query2, {"appointment_id": appointment_id})
         query = db.query(Appointment).filter(Appointment.id == appointment_id)
-        cust_id = query.first()
-        cust_id= cust_id.customer_id
-        agent_id= cust_id.agent_id
+        data = query.first()
+        cust_id= data.customer_id
+        agent_id= data.agent_id
         query = db.query(Customer).filter(Customer.id == cust_id)
         Customer_email = query.first()
         Customer_email= Customer_email.email_id
         query = db.query(Agent).filter(Agent.id == agent_id)
         agent_email = query.first()
         agent_email = agent_email.agent_email
-        send_email("sriya.b@goml.io", Customer_email, "appointment cancelled successfully", "We will catch up soon with your desired data, Get back us soon !!")
-        send_email("sriya.b@goml.io", agent_email, "appointment Cancelled", "The booked meeting has been Cancelled")
+        send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment cancelled successfully", "We will catch up soon with your desired data, Get back us soon !!")
+        send_email("Someshwar.Garud@genpact.com", agent_email, "appointment Cancelled", "The booked meeting has been Cancelled")
 
         # Commit transaction
         db.commit()
@@ -604,16 +609,16 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         
         query = db.query(Appointment).filter(Appointment.id == appointment_id)
         cust_id = query.first()
-        cust_id= cust_id.customer_id
-        agent_id= cust_id.agent_id
+        cust_id= data.customer_id
+        agent_id= data.agent_id
         query = db.query(Customer).filter(Customer.id == cust_id)
         Customer_email = query.first()
         Customer_email= Customer_email.email_id
         query = db.query(Agent).filter(Agent.id == agent_id)
         agent_email = query.first()
         agent_email = agent_email.agent_email
-        send_email("sriya.b@goml.io", Customer_email, "appointment update", "Set ready to speak to our agent to find answers for all your questions")
-        send_email("sriya.b@goml.io", agent_email, "appointment rescheduled", "The booked meeting has be rescheduled")
+        send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment update", "Set ready to speak to our agent to find answers for all your questions")
+        send_email("Someshwar.Garud@genpact.com", agent_email, "appointment rescheduled", "The booked meeting has be rescheduled")
 
         # Commit transaction
         db.commit()
