@@ -12,6 +12,7 @@ from sqlalchemy import text
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine, text
 import boto3
+from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 import os   
 from datetime import datetime, time
@@ -27,6 +28,47 @@ success_message = "Request processed successfully "
 # ----------- DB schema & connection -------------
 # SQLAlchemy setup
 
+AWS_ACCESS_KEY=os.getenv('AWS_ACCESS_KEY')
+AWS_SECRET_KEY=os.getenv('AWS_SECRET_KEY')
+AWS_REGION=os.getenv('AWS_REGION')
+
+client = boto3.client(
+    'ses',
+    region_name=AWS_REGION,
+    aws_access_key_id=AWS_ACCESS_KEY,
+    aws_secret_access_key=AWS_SECRET_KEY
+)
+
+def send_email(sender, recipient, subject, body):
+    # Create an SES client
+    # Try to send the email
+    try:
+        # Provide the contents of the email
+        response = client.send_email(
+            Destination={
+                'ToAddresses': [
+                    recipient,
+                ],
+            },
+            Message={
+                'Body': {
+                    'Text': {
+                        'Charset': 'UTF-8',
+                        'Data': body,
+                    },
+                },
+                'Subject': {
+                    'Charset': 'UTF-8',
+                    'Data': subject,
+                },
+            },
+            Source=sender,
+        )
+    except ClientError as e:
+        # Print error if something goes wrong
+        print("Error sending email: ", e.response['Error']['Message'])
+    else:
+        print("Email sent! Message ID:", response['MessageId'])
 
 def setup_db():
     engine = create_engine(SQLALCHEMY_DATABASE_URL,
@@ -159,36 +201,6 @@ async def make_contact_visible(date, start_time):
     
 
 #
-async def send_email(email, user_id, product_id):
-    try:
-    # Initialize AWS SES client
-        ses_client = boto3.client('ses', region_name='your_aws_region')
-
-        # Generate appointment link
-        appointment_link = book_appointment(user_id, product_id)["localhost_link"]
-
-        # Define email parameters
-        sender_email = 'your_sender_email@example.com'
-        subject = 'Welcome to Our Service'
-        body_text = f'Thank you for signing up! Click the link below to book your appointment:\n\n{appointment_link}'
-        body_html = f'<html><body><h1>Thank you for signing up!</h1><p>Click the link below to book your appointment:</p><p><a href="{appointment_link}">Book Appointment</a></p></body></html>'
-
-        # Send email
-        response = ses_client.send_email(
-            Destination={'ToAddresses': [email]},
-            Message={
-                'Body': {
-                    'Html': {'Charset': 'UTF-8', 'Data': body_html},
-                    'Text': {'Charset': 'UTF-8', 'Data': body_text}
-                },
-                'Subject': {'Charset': 'UTF-8', 'Data': subject}
-            },
-            Source=sender_email
-        )
-
-        print("Email sent to:", email)
-    except Exception as e:
-        return HTTPException(status_code=500,details=f"Error sending email {e}")
 
 def format_db_response(result):
     try:
@@ -306,6 +318,8 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         db.add(new_customer)
         db.commit()
         db.refresh(new_customer)
+        send_email("sriya.b@goml.io", new_customer.email_id, "appointment confirmation", f"you can book appointment by clicking this http://localhost:3000/customer/bookedAppointment?customer_id={new_customer.id}product_id={new_customer.product_id}")
+
         # await send_email(email, user_id, product_id)
         return ResponseModel(message=success_message, payload={"customer_id": new_customer.id})
     except Exception as e:
@@ -388,8 +402,17 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
                 "customer_timezone":existing_appointment['customer_timezone']
             }
         )
+        query = db.query(Agent).filter(Agent.id == existing_appointment['customer_id'])
+        agent_email = query.first()
+        agent_email = agent_email.agent_email
+        query = db.query(Customer).filter(Customer.id == appointment.agent_id)
+        Customer_email = query.first()
+        Customer_email= Customer_email.email_id
+        
+        send_email("sriya.b@goml.io", Customer_email, "appointment confirmation", "Set ready to speak to our agent to find answers for all your questions")
+        send_email("sriya.b@goml.io", agent_email, "appointment confirmation", "You have an upcoming meeting scheduled")
         db.commit()
-        return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id})
+        return ResponseModel(message=success_message)#, payload={"appointment_id": new_appointment.id})
     except Exception as e:
         # raise e
         raise HTTPException(
@@ -566,6 +589,19 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
             data['date'] + ' ' + data['start_time'], '%d-%m-%y %H:%M')
         db.execute(query, {"appointment_id": appointment_id,
                    "scheduled_at": scheduled_at})
+        
+        query = db.query(Appointment).filter(Appointment.id == appointment_id)
+        cust_id = query.first()
+        cust_id= cust_id.customer_id
+        agent_id= cust_id.agent_id
+        query = db.query(Customer).filter(Customer.id == cust_id)
+        Customer_email = query.first()
+        Customer_email= Customer_email.email_id
+        query = db.query(Agent).filter(Agent.id == agent_id)
+        agent_email = query.first()
+        agent_email = agent_email.agent_email
+        send_email("sriya.b@goml.io", Customer_email, "appointment update", "Set ready to speak to our agent to find answers for all your questions")
+        send_email("sriya.b@goml.io", agent_email, "appointment rescheduled", "The booked meeting has be rescheduled")
 
         # Commit transaction
         db.commit()
@@ -658,8 +694,8 @@ def get_appointments(customer_id: int, db: Session = Depends(get_db)):
             # item_dict.pop('_sa_instance_state', None)
             result = value | agent_info_dict
             new_data.append(result)
-
-        return new_data
+        new_data_sorted = sorted(new_data, key=lambda x: x['date'], reverse=True)
+        return new_data_sorted
 
     except Exception as e:
         # Rollback transaction in case of error
@@ -693,7 +729,9 @@ JOIN
 JOIN
     genpact.agent_schedule AS schedule ON appointments.id = schedule.appointment_id
 WHERE
-    appointments.agent_id = :agent_id
+    appointments.agent_id = :agent_id 
+ORDER BY
+    schedule.date DESC;
     """)
 
     # Execute the query
@@ -709,6 +747,7 @@ WHERE
     db.close()
     # result = filter_json_by_time(appointments_with_schedule)
     # return result
+    
     return appointments_with_schedule
 
 
@@ -916,7 +955,8 @@ def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
             }
             if agent_id==agent_schedule.agent_id:
                 result.append(entry)
-        return result
+        result_sorted = sorted(result, key=lambda x: x['date'], reverse=True)
+        return result_sorted
        
 
     except Exception as e:
@@ -928,4 +968,21 @@ def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
     finally:
         # Close the database connection
         db.close()
+
+@app.get("/get_email_data/{id_type}/{id}")
+def get_email_data(id_type:str,id:int,db: Session = Depends(get_db)):
+    try:
+        if id_type=="agent":
+            query = db.query(Agent.agent_email).filter(Agent.id == id)
+            result = query.first()
+            print(result,type(result))
+            print(result.id)
+            return result
+        
+        elif id_type=="customer":
+            query = db.query(Customer).filter(Customer.id == id)
+            result = query.first()
+            return result
+    except Exception as e:
+        return e
 
