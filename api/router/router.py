@@ -992,9 +992,8 @@ from sqlalchemy.orm import joinedload
 @app.post("/list/cancelled_appointments/{agent_id}", tags=['appointment'])
 def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
     try:
-        query = db.query(AgentSchedule, Customer,Appointment).\
-    join(Customer, AgentSchedule.customer_id == Customer.id).\
-    filter(AgentSchedule.status == "cancelled") # Optional: to load Customer objects along with AgentSchedule objects
+        query = db.query(AgentSchedule, Customer, Appointment).join(Customer, AgentSchedule.customer_id == Customer.id).filter(AgentSchedule.status == "cancelled").filter(AgentSchedule.agent_id == agent_id)
+ # Optional: to load Customer objects along with AgentSchedule objects
 
         results = query.all()
         print(results)
