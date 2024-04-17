@@ -414,8 +414,9 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
             }
         )
         query = db.query(Agent).filter(Agent.id ==appointment.agent_id )
-        agent_email = query.first()
-        agent_email = agent_email.agent_email
+        agent_data = query.first()
+        agent_email = agent_data.agent_email
+        product_id = agent_data.product_id
         query = db.query(Customer).filter(Customer.id == existing_appointment['customer_id'] )
         Customer_email = query.first()
         Customer_email= Customer_email.email_id
