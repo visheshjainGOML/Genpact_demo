@@ -32,6 +32,7 @@ AWS_ACCESS_KEY=os.getenv('AWS_ACCESS_KEY')
 AWS_SECRET_KEY=os.getenv('AWS_SECRET_KEY')
 AWS_REGION=os.getenv('AWS_REGION')
 
+
 client = boto3.client(
     'ses',
     region_name=AWS_REGION,
@@ -320,7 +321,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         db.refresh(new_customer)
         send_email("Someshwar.Garud@genpact.com", new_customer.email_id, "Schedule Your Appointment with Us", f""" Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-http://localhost:3000/customer/bookedAppointment?customer_id={new_customer.id}product_id={new_customer.product_id}
+http://localhost:3000/customer/bookedAppointment?customer_id={new_customer.id}&product_id={new_customer.product_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 Warm regards,""")
@@ -407,17 +408,25 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
                 "customer_timezone":existing_appointment['customer_timezone']
             }
         )
-        query = db.query(Agent).filter(Agent.id ==appointment.agent_id )
+        query = db.query(Agent).filter(Agent.id == existing_appointment['customer_id'])
         agent_email = query.first()
         agent_email = agent_email.agent_email
-        query = db.query(Customer).filter(Customer.id ==existing_appointment['customer_id'] )
+        query = db.query(Customer).filter(Customer.id == appointment.agent_id)
         Customer_email = query.first()
         Customer_email= Customer_email.email_id
+        agent_portal_link = 'https://main.d2el3bzkhp7t3w.amplifyapp.com/'
         
-        send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment confirmation", "Set ready to speak to our agent to find answers for all your questions")
-        send_email("Someshwar.Garud@genpact.com", agent_email, "appointment confirmation", "You have an upcoming meeting scheduled")
+        send_email("Someshwar.Garud@genpact.com", Customer_email, "Your Appointment is Confirmed", "Congratulations! Your appointment is scheduled. We look forward to meeting you and discussing your needs in detail. /n/n Warm Regards,/nGenpact Team")
+        send_email("Someshwar.Garud@genpact.com", agent_email, "New Appointment Booked", f"""We are pleased to inform you that a new appointment has been booked. Please log in to your agent portal to view the details and prepare for the upcoming meeting. We are pleased to inform you that a new appointment has been booked. Please log in to your agent portal to view the details and prepare for the upcoming meeting.
+Quick Reminder:
+Check the Appointment Date and Time: Ensure your schedule is updated.
+Review Customer Details: Familiarize yourself with the customer's requirements and previous interactions to provide a tailored experience.
+Access your portal here: {agent_portal_link}
+Thank you for your dedication and hard work. Let's continue providing exceptional service to our clients!
+Best Regards, 
+Genpact Team""")
         db.commit()
-        return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id})
+        return ResponseModel(message=success_message)#, payload={"appointment_id": new_appointment.id})
     except Exception as e:
         # raise e
         raise HTTPException(
@@ -674,55 +683,69 @@ async def get_user_detail(customer_id: int, db: Session = Depends(get_db)):
 
 @app.get("/appointments/{customer_id}", tags=['appointment'])
 def get_appointments(customer_id: int, db: Session = Depends(get_db)):
-    # Create session
     try:
-        appointment = db.query(AgentSchedule).filter(
-            AgentSchedule.customer_id == customer_id).all()
-        # schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
-        if not appointment:
+        # Fetch agent schedules with related appointment details
+        appointments = db.query(AgentSchedule, Appointment).\
+            join(Appointment, AgentSchedule.appointment_id == Appointment.id).\
+            filter(AgentSchedule.customer_id == customer_id).all()
+
+        if not appointments:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="appointment not found in appointmaent table")
-        print(appointment)
-        # agent_ids = db.query(Agent.id).filter(Agent.product_id == product_id).all()
-        appointments =  format_db_response(appointment)
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="Appointments not found for the customer"
+            )
 
-        new_data = []
-        print(appointments, "\n\n")
-        for value in appointments:
-            print(value)
-            agent_id = value['agent_id']
-            agent_info = db.query(Agent).filter(Agent.id == agent_id).first()
-
+        formatted_appointments = []
+        for agent_schedule, appointment in appointments:
+            appointment_dict = appointment.__dict__
+            agent_schedule_dict = agent_schedule.__dict__
+            
+            # Convert SQLAlchemy objects to dictionaries and merge them
+            appointment_info = appointment_dict | agent_schedule_dict
+            
+            # Fetch agent info
+            agent_info = db.query(Agent).filter(Agent.id == agent_schedule.agent_id).first()
+            
             if not agent_info:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="agent not found")
-            # Convert the object to a dictionary
+                    status_code=status.HTTP_404_NOT_FOUND, 
+                    detail="Agent not found"
+                )
+            
             agent_info_dict = agent_info.__dict__
-            timezone = value['customer_timezone']
-            start_time = value['start_time']
-            end_time = value['end_time']
-            date = value['date']
-            start_time, date = convert_timezone(start_time,date,timezone)
-            end_time,_ = convert_timezone(end_time,date,timezone)
-            value['start_time']=start_time
-            value['end_time']=end_time
-            value['date']=date
-            # Remove the attribute holding the reference to the database session
-            # item_dict.pop('_sa_instance_state', None)
-            result = value | agent_info_dict
-            new_data.append(result)
-        new_data_sorted = sorted(new_data, key=lambda x: x['date'], reverse=True)
-        return new_data_sorted
+
+            # Convert timezone
+            timezone = appointment_info['customer_timezone']
+            start_time = appointment_info['start_time']
+            end_time = appointment_info['end_time']
+            date = appointment_info['date']
+            start_time, date = convert_timezone(start_time, date, timezone)
+            end_time, _ = convert_timezone(end_time, date, timezone)
+
+            appointment_info['start_time'] = start_time
+            appointment_info['end_time'] = end_time
+            appointment_info['date'] = date
+
+            # Merge agent info with appointment info
+            result = appointment_info | agent_info_dict
+            formatted_appointments.append(result)
+
+        # Sort appointments by date
+        formatted_appointments_sorted = sorted(formatted_appointments, key=lambda x: x['date'], reverse=True)
+        
+        return formatted_appointments_sorted
 
     except Exception as e:
         # Rollback transaction in case of error
         db.rollback()
 
         # Raise HTTPException with error message
-        raise HTTPException(status_code=200, detail=f"No record found - {e}")
+        raise HTTPException(status_code=500, detail=f"Error fetching appointments: {e}")
+    
     finally:
         # Close session
         db.close()
+
 
 
 @app.get("/appointments/list/{agent_id}", tags=['appointment'])
