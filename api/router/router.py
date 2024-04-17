@@ -72,6 +72,47 @@ class Appointment(Base):
 
 # ---------- Utilities --------------------
 
+def convert_timezone(input_time, input_date, output_timezone):
+    # input_time = HH:MM:SS
+    # input_date = DD/MM/YYYY
+    # output_timezone = +/-HH:MM (UTC)
+    
+    # Convert input time and date to datetime object in IST
+    time_format = "%H:%M:%S"
+    date_format = "%Y-%m-%d"
+
+    input_datetime_str = f"{input_date} {input_time}"
+    input_datetime = datetime.strptime(input_datetime_str, f"{date_format} {time_format}")
+    
+    # Step 1: Convert to UTC time
+    utc_offset_sign = '+'
+    utc_offset_hours = 5  # IST is UTC+5
+    utc_offset_minutes = 30
+    
+    if utc_offset_sign == '-':
+        utc_time = input_datetime + timedelta(hours=utc_offset_hours, minutes=utc_offset_minutes)
+    elif utc_offset_sign == '+':
+        utc_time = input_datetime - timedelta(hours=utc_offset_hours, minutes=utc_offset_minutes)
+
+    # Step 2: Convert to output time zone
+    output_offset_sign = output_timezone[0]
+    output_offset_hours = int(output_timezone[1:3])  # Corrected indexing
+    output_offset_minutes = int(output_timezone[4:])
+    
+    if output_offset_sign == '-':
+        output_time = utc_time - timedelta(hours=output_offset_hours, minutes=output_offset_minutes)
+    elif output_offset_sign == '+':
+        output_time = utc_time + timedelta(hours=output_offset_hours, minutes=output_offset_minutes)
+
+    # Format output time and date
+    output_time_format = output_time.strftime(time_format)
+    output_date_format = output_time.strftime(date_format)
+    output_utc_offset = output_time.strftime("%z")
+    
+    # output_time_str = f"{output_time_format} {output_date_format} {output_utc_offset}"
+    
+    return output_time_format, output_date_format
+
 
 async def row2dict(row):
     return {column.name: getattr(row, column.name) for column in row.__table__.columns}
@@ -94,6 +135,8 @@ async def generate_time_slots(start_time, end_time, duration=30):
 
     return time_slots
 
+
+
 async def make_contact_visible(date, start_time):
     if date != datetime.now().date().strftime('%Y-%m-%d'):
         return False
@@ -113,6 +156,8 @@ async def make_contact_visible(date, start_time):
         return True
     else:
         return False
+    
+
 
 async def send_email(email, user_id, product_id):
     try:
@@ -207,6 +252,7 @@ class AppointmentSchema(BaseModel):
     date: str
     start_time: str
     end_time: str
+    customer_timezone: str
 
 
 class OriginalAppointmentSchema(BaseModel):
@@ -353,7 +399,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
 
 
 @app.get(path="/slots/{product_id}/{date}", response_model=ResponseModel, tags=["customer", "agent"])
-async def get_agent_schedules(product_id: int, date: str, reschedule_time:str, db: Session = Depends(get_db)): # type: Literal["customer", "agent"] = Header(), agent_id: int = Query(default=None), db: Session = Depends(get_db)):
+async def get_agent_schedules(product_id: int, date: str, slot_time:str, db: Session = Depends(get_db)): # type:Literal["customer", "agent"] = Header(), agent_id: int = Query(default=None), db: Session = Depends(get_db)):
     try:
         Agents = db.query(Agent).filter(Agent.product_id == product_id).all()
         if not Agents:
@@ -361,7 +407,7 @@ async def get_agent_schedules(product_id: int, date: str, reschedule_time:str, d
                 status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
         print(Agents)
         date_obj = datetime.strptime(date, '%d-%m-%y').date()
-        time_obj = time.fromisoformat(reschedule_time)
+        time_obj = time.fromisoformat(slot_time)
 
         # agent_ids = db.query(Agent.id).filter(Agent.product_id == product_id).all()
         Agents = format_db_response(Agents)
@@ -602,6 +648,15 @@ def get_appointments(customer_id: int, db: Session = Depends(get_db)):
             # Convert the object to a dictionary
             item_dict = schedules.__dict__
             agent_info_dict = agent_info.__dict__
+            timezone = item_dict['customer_timezone']
+            start_time = item_dict['start_time']
+            end_time = item_dict['end_time']
+            date = item_dict['date']
+            start_time, date = convert_timezone(start_time,date,timezone)
+            end_time,_ = convert_timezone(end_time,date,timezone)
+            item_dict['start_time']=start_time
+            item_dict['end_time']=end_time
+            item_dict['date']=date
             # Remove the attribute holding the reference to the database session
             # item_dict.pop('_sa_instance_state', None)
 
