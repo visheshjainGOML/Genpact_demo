@@ -549,6 +549,18 @@ WHERE genpact.appointment.id = :appointment_id;""")
 
         db.execute(query1, {"appointment_id": appointment_id,"reason":reason})
         db.execute(query2, {"appointment_id": appointment_id})
+        query = db.query(Appointment).filter(Appointment.id == appointment_id)
+        cust_id = query.first()
+        cust_id= cust_id.customer_id
+        agent_id= cust_id.agent_id
+        query = db.query(Customer).filter(Customer.id == cust_id)
+        Customer_email = query.first()
+        Customer_email= Customer_email.email_id
+        query = db.query(Agent).filter(Agent.id == agent_id)
+        agent_email = query.first()
+        agent_email = agent_email.agent_email
+        send_email("sriya.b@goml.io", Customer_email, "appointment cancelled successfully", "We will catch up soon with your desired data, Get back us soon !!")
+        send_email("sriya.b@goml.io", agent_email, "appointment Cancelled", "The booked meeting has been Cancelled")
 
         # Commit transaction
         db.commit()
