@@ -375,7 +375,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         db.refresh(new_appointment)
         # Update agent_schedule status to "booked" for the corresponding appointment
         query = text("""
-           INSERT INTO genpact.agent_schedule (status, customer_id, agent_id, start_time,end_time,date,appointment_id) VALUES ('booked', :customer_id, :agent_id, :start_time,:end_time,:date,:appointment_id);""")
+           INSERT INTO genpact.agent_schedule (status, customer_id, agent_id, start_time,end_time,date,appointment_id,customer_timezone) VALUES ('booked', :customer_id, :agent_id, :start_time,:end_time,:date,:appointment_id,:customer_timezone);""")
         db.execute(
             query,
             {
@@ -384,7 +384,8 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
                 "start_time": start_time_obj,
                 "end_time": end_time_obj,
                 "date": date_obj,
-                "appointment_id": new_appointment.id
+                "appointment_id": new_appointment.id,
+                "customer_timezone":existing_appointment['customer_timezone']
             }
         )
         db.commit()
@@ -622,46 +623,40 @@ async def get_user_detail(customer_id: int, db: Session = Depends(get_db)):
 def get_appointments(customer_id: int, db: Session = Depends(get_db)):
     # Create session
     try:
-        appointments = db.query(Appointment).filter(
-            Appointment.customer_id == customer_id).all()
+        appointment = db.query(AgentSchedule).filter(
+            AgentSchedule.customer_id == customer_id).all()
         # schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
-        if not appointments:
+        if not appointment:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-        print(appointments)
+                status_code=status.HTTP_404_NOT_FOUND, detail="appointment not found in appointmaent table")
+        print(appointment)
         # agent_ids = db.query(Agent.id).filter(Agent.product_id == product_id).all()
-        appointments =  format_db_response(appointments)
+        appointments =  format_db_response(appointment)
 
         new_data = []
         print(appointments, "\n\n")
-        for i in appointments:
-            print(i)
-            data = i
-            appointment_id = i['id']
-            agent_id = i['agent_id']
+        for value in appointments:
+            print(value)
+            agent_id = value['agent_id']
             agent_info = db.query(Agent).filter(Agent.id == agent_id).first()
-            schedules = db.query(AgentSchedule).filter(
-                AgentSchedule.appointment_id == appointment_id).first()
-            if not schedules:
+
+            if not agent_info:
                 raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+                    status_code=status.HTTP_404_NOT_FOUND, detail="agent not found")
             # Convert the object to a dictionary
-            item_dict = schedules.__dict__
             agent_info_dict = agent_info.__dict__
-            timezone = item_dict['customer_timezone']
-            start_time = item_dict['start_time']
-            end_time = item_dict['end_time']
-            date = item_dict['date']
+            timezone = value['customer_timezone']
+            start_time = value['start_time']
+            end_time = value['end_time']
+            date = value['date']
             start_time, date = convert_timezone(start_time,date,timezone)
             end_time,_ = convert_timezone(end_time,date,timezone)
-            item_dict['start_time']=start_time
-            item_dict['end_time']=end_time
-            item_dict['date']=date
+            value['start_time']=start_time
+            value['end_time']=end_time
+            value['date']=date
             # Remove the attribute holding the reference to the database session
             # item_dict.pop('_sa_instance_state', None)
-
-            print(item_dict)
-            result = data | item_dict | agent_info_dict
+            result = value | agent_info_dict
             new_data.append(result)
 
         return new_data
