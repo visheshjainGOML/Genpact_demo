@@ -214,7 +214,7 @@ class AgentSchema(BaseModel):
     slot_time: int
     buffer_time: int
     product_id: int
-    agent_email: int
+    agent_email: str
     shift_from: time
     shift_to: time
     weekly_off: list[str]
