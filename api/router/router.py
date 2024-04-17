@@ -554,18 +554,18 @@ WHERE genpact.appointment.id = :appointment_id;""")
 
         db.execute(query1, {"appointment_id": appointment_id,"reason":reason})
         db.execute(query2, {"appointment_id": appointment_id})
-        query = db.query(Appointment).filter(Appointment.id == appointment_id)
-        data = query.first()
-        cust_id= data.customer_id
-        agent_id= data.agent_id
-        query = db.query(Customer).filter(Customer.id == cust_id)
-        Customer_email = query.first()
-        Customer_email= Customer_email.email_id
-        query = db.query(Agent).filter(Agent.id == agent_id)
-        agent_email = query.first()
-        agent_email = agent_email.agent_email
-        send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment cancelled successfully", "We will catch up soon with your desired data, Get back us soon !!")
-        send_email("Someshwar.Garud@genpact.com", agent_email, "appointment Cancelled", "The booked meeting has been Cancelled")
+        # query = db.query(Appointment).filter(Appointment.id == appointment_id)
+        # data = query.first()
+        # cust_id= data.customer_id
+        # agent_id= data.agent_id
+        # query = db.query(Customer).filter(Customer.id == cust_id)
+        # Customer_email = query.first()
+        # Customer_email= Customer_email.email_id
+        # query = db.query(Agent).filter(Agent.id == agent_id)
+        # agent_email = query.first()
+        # agent_email = agent_email.agent_email
+        # send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment cancelled successfully", "We will catch up soon with your desired data, Get back us soon !!")
+        # send_email("Someshwar.Garud@genpact.com", agent_email, "appointment Cancelled", "The booked meeting has been Cancelled")
 
         # Commit transaction
         db.commit()
@@ -607,18 +607,18 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         db.execute(query, {"appointment_id": appointment_id,
                    "scheduled_at": scheduled_at})
         
-        query = db.query(Appointment).filter(Appointment.id == appointment_id)
-        cust_id = query.first()
-        cust_id= data.customer_id
-        agent_id= data.agent_id
-        query = db.query(Customer).filter(Customer.id == cust_id)
-        Customer_email = query.first()
-        Customer_email= Customer_email.email_id
-        query = db.query(Agent).filter(Agent.id == agent_id)
-        agent_email = query.first()
-        agent_email = agent_email.agent_email
-        send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment update", "Set ready to speak to our agent to find answers for all your questions")
-        send_email("Someshwar.Garud@genpact.com", agent_email, "appointment rescheduled", "The booked meeting has be rescheduled")
+        # query = db.query(Appointment).filter(Appointment.id == appointment_id)
+        # cust_id = query.first()
+        # cust_id= data.customer_id
+        # agent_id= data.agent_id
+        # query = db.query(Customer).filter(Customer.id == cust_id)
+        # Customer_email = query.first()
+        # Customer_email= Customer_email.email_id
+        # query = db.query(Agent).filter(Agent.id == agent_id)
+        # agent_email = query.first()
+        # agent_email = agent_email.agent_email
+        # send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment update", "Set ready to speak to our agent to find answers for all your questions")
+        # send_email("Someshwar.Garud@genpact.com", agent_email, "appointment rescheduled", "The booked meeting has be rescheduled")
 
         # Commit transaction
         db.commit()
