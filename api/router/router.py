@@ -417,7 +417,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment confirmation", "Set ready to speak to our agent to find answers for all your questions")
         send_email("Someshwar.Garud@genpact.com", agent_email, "appointment confirmation", "You have an upcoming meeting scheduled")
         db.commit()
-        return ResponseModel(message=success_message)#, payload={"appointment_id": new_appointment.id})
+        return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id})
     except Exception as e:
         # raise e
         raise HTTPException(
