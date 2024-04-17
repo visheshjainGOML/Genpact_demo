@@ -245,6 +245,7 @@ class CustomerSchema(BaseModel):
     mobile_no: str
     product_id: int
     pre_screening: dict = None
+    case_id : int
 
 
 class ProductSchema(BaseModel):
