@@ -1064,3 +1064,11 @@
 2024-04-18 13:08:39,464 - INFO - Request received: GET http://localhost:8000/appointments/list/4
 2024-04-18 13:08:40,338 - INFO - Response code: 200
 2024-04-18 13:08:40,338 - INFO - Response code: 200
+2024-04-18 13:29:26,638 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-18 13:29:26,638 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-18 13:29:26,640 - INFO - Response code: 200
+2024-04-18 13:29:26,640 - INFO - Response code: 200
+2024-04-18 13:29:26,762 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-18 13:29:26,762 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-18 13:29:26,785 - INFO - Response code: 200
+2024-04-18 13:29:26,785 - INFO - Response code: 200

@@ -231,13 +231,11 @@ class AgentSchema(BaseModel):
     shift_from: time
     shift_to: time
     weekly_off: list[str]
-    case_id: str
 
 
 class FeedbackSchema(BaseModel):
     appointment_id: int
     rating: int
-    case_id:str
 
 
 class CustomerSchema(BaseModel):
@@ -269,7 +267,6 @@ class AppointmentSchema(BaseModel):
     start_time: str
     end_time: str
     customer_timezone: str
-    case_id:int
 
 
 class OriginalAppointmentSchema(BaseModel):
@@ -281,7 +278,6 @@ class OriginalAppointmentSchema(BaseModel):
     is_booked: bool = None
     appointment_description: str
     scheduled_at: Optional[datetime]
-    case_id:str
 
 
 class TriggerCallSchema(BaseModel):
