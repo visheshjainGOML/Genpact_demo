@@ -113,6 +113,10 @@ class Appointment(Base):
                       schema=schema, autoload_with=engine)
 
 
+class AgentLeave(Base):
+    __table__ = Table('agent_leave', Base.metadata,
+                      schema=schema, autoload_with=engine)
+
 # ---------- Utilities --------------------
 
 def convert_timezone(input_time, input_date, output_timezone):
@@ -1105,101 +1109,31 @@ def get_email_data(id_type:str,id:int,db: Session = Depends(get_db)):
             return result
     except Exception as e:
         return e
+class LeaveSchema(BaseModel):
+    leave_type:str
+    leave_from:str
+    leave_to:str
 
+@app.post('/agents/create-leave/{agent_id}', tags=["agent"])
+async def create_leave(agent_id:int, leave_data: LeaveSchema, db: Session = Depends(get_db)):
+    try:
+        leave_data = leave_data.__dict__
+        date_format = "%y-%m-%d"
+        leave_data["agent_id"]=agent_id
+        leave_data["leave_from"] = datetime.strptime( leave_data["leave_from"], date_format)
+        leave_data["leave_to"]=datetime.strptime( leave_data["leave_to"], date_format)
+        new_customer = AgentLeave(**leave_data)
+        db.add(new_customer)
+        db.commit()
+        db.refresh(new_customer)
 
-# @app.put('/agents/update/{agent_id}', tags=["agent"])
-# async def update_all_agent_detials(agent_id:int, agent_data: dict, db: Session = Depends(get_db)):
-#     try:
-#         date_format = "%y-%m-%d"
+        return ResponseModel(message="Agent details updated successfully")
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
 
-#         query = db.query(Agent).filter(Agent.id ==agent_id )
-#         agent_query_data = query.first()
-       
-# #         {
-# #   "agents_details": {
-# #     "id": 16, 
-# #     "shift_start_date": "05-04-24", 
-# #     "shift_to_date": "25-04-24",   
-# #     "shift_from": "09:00",           
-# #     "shift_to": "17:00",            
-# #     "leaveDetails": [                
-# #       {
-# #         "from_date": "10-04-24",    
-# #         "to_date": "12-04-24",      
-# #         "leave_type": "Sick Leave"  
-# #       },
-# #       {
-# #         "from_date": "20-04-24",    
-# #         "to_date": "20-04-24",       
-# #         "leave_type": "Personal Leave"
-# #       }
-# #     ]
-# #   }
-# # }     
-#         value={
-            
-#         }
-#         value={
-#                 "id":agent_id,
-#                "full_name":agent_data["full_name"],
-#                 "date_of_joining":agent_query_data.date_of_joining,
-#                 "leave_from":datetime.strptime(agent_data[""], date_format),
-#                 "leave_to":datetime.strptime(date_string, date_format),
-#                 "slot_time":agent_query_data.slot_time,
-#                 "buffer_time": agent_query_data.buffer_time,
-#                 "product_id":agent_query_data.product_id,
-#                 "agent_email": "str",
-#                 "shift_from":"time",
-#                 "shift_to": "time",
-#                 "weekly_off"= "list[str]",
-#                 "password"=  'agent' 
-#         }
-#         db.query(Agent).filter(Agent.id == agent_id).update(value)
-#         data=db.query(Agent).filter(Agent.id == id).all()
-#         print(format_db_response(data),"\n\n")
-#         db.commit()
-
-#         # Update shift details
-#         shift_data = {
-#             "shift_date_from": datetime.strptime(agent_data["shift_start_date"], "%d-%m-%y").date(),
-#             "shift_date_to": datetime.strptime(agent_data["shift_to_date"], "%d-%m-%y").date(),
-#         }
-#         # Assuming agent_shifts table has a foreign key referencing agent.id
-#         db.query(AgentShifts).filter(AgentShifts.agent_id == agent_id).update(shift_data)
-#         db.commit()
-#         time_data = {
-#             "shift_from": agent_data["shift_from"],
-#             "shift_to": agent_data["shift_to"],
-#         }
-#         db.query(Agent).filter(Agent.id == agent_id).update(time_data)
-#         db.commit()
-
-#         # Update leave details (handle multiple leaves)
-#         leave_details = agent_data['leaveDetails']
-#         for leave in leave_details:
-#             print("********************", leave)
-#             print(agent_id)
-#             print(leave["leave_type"])
-#             print(datetime.strptime(leave["from_date"], "%d-%m-%y").date())
-#             print(datetime.strptime(leave["to_date"], "%d-%m-%y").date())
-#             new_leave = AgentLeave(
-#                 agent_id=agent_id,
-#                 id = id,
-#                 leave_type=leave["leave_type"],
-#                 leave_from=datetime.strptime(leave["from_date"], "%d-%m-%y").date(),
-#                 leave_to=datetime.strptime(leave["to_date"], "%d-%m-%y").date(),
-#             )
-#             print("$$$$$$$$$$$$$$$$$$$$$$$", new_leave)
-#             db.commit()
-#         # db.commit()
-
-#         return ResponseModel(message="Agent details updated successfully")
-#     except Exception as e:
-#         # Rollback transaction in case of error
-#         db.rollback()
-
-#         # Raise HTTPException with error message
-#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error updating agent: {e}")
-#     finally:
-#         # Close session
-#         db.close()
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error updating agent: {e}")
+    finally:
+        # Close session
+        db.close()
