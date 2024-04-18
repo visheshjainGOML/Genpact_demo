@@ -1012,7 +1012,7 @@ def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
         result = []
         for agent_schedule, customer,appointment in results:
             entry = {
-                "agent_id": agent_schedule.id,
+                "agent_schedule": agent_schedule.id,
                 "start_time": agent_schedule.start_time,
                 "end_time": agent_schedule.end_time,
                 "status": agent_schedule.status,
@@ -1023,7 +1023,6 @@ def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
                 "status": agent_schedule.status,
                 "date": agent_schedule.date,
                 "reason":agent_schedule.reason,
-                "appointment_id":appointment.id,
                 "appointment_description":appointment.appointment_description
             }
             if agent_id==agent_schedule.agent_id:
