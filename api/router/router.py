@@ -682,12 +682,19 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         query = db.query(Agent).filter(Agent.id == agent_id)
         agent_email = query.first()
         agent_email = agent_email.agent_email
-        send_email("Someshwar.Garud@genpact.com", Customer_email, f"appointment update - Case ID: {case_id}", f"""
+        send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}", f"""
                    Case ID: {case_id}
-                   Your appointment has been udpated""")
-        send_email("Someshwar.Garud@genpact.com", agent_email, f"appointment rescheduled - Case ID: {case_id}", f"""
+                   We have successfully updated your appointment details as requested. Thank you for continuing to choose us for your needs!
+
+                   Please review the updated appointment information to ensure everything is correct. If you need further adjustments or have specific requirements for our meeting, feel free to reach out to us directly through this email.
+
+                   Best Regards,
+
+                   Genpact Team
+                   """)
+        send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Rescheduled - Case ID: {case_id}", f"""
                    Case ID: {case_id}
-                   The booked meeting has been rescheduled""")
+                   The booked appointment has been rescheduled""")
 
         # Commit transaction
         db.commit()
