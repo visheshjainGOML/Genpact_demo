@@ -418,7 +418,6 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         agent_data = query.first()
         agent_email = agent_data.agent_email
         product_id = agent_data.product_id
-        case_id = agent_data.case_id
         query = db.query(Customer).filter(Customer.id == existing_appointment['customer_id'] )
         customer_data = query.first()
         Customer_email= customer_data.email_id
