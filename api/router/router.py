@@ -675,9 +675,9 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         data = query.first()
         cust_id= data.customer_id
         agent_id= data.agent_id
-        case_id = data.case_id
         query = db.query(Customer).filter(Customer.id == cust_id)
         Customer_email = query.first()
+        case_id = Customer_email.case_id
         Customer_email= Customer_email.email_id
         query = db.query(Agent).filter(Agent.id == agent_id)
         agent_email = query.first()
