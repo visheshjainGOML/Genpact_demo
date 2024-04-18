@@ -276,7 +276,6 @@ class OriginalAppointmentSchema(BaseModel):
     agent_id: int
     created_at: Optional[datetime] = None
     is_booked: bool = None
-    appointment_description: str
     scheduled_at: Optional[datetime]
 
 
@@ -384,7 +383,6 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
             customer_id=(existing_appointment['customer_id']),
             agent_id=existing_appointment['agent_id'],
             created_at=existing_appointment['created_at'],
-            appointment_description=existing_appointment['appointment_description'],
             scheduled_at=datetime.strptime(
                 existing_appointment['date'] + ' ' + existing_appointment['start_time'], '%d-%m-%y %H:%M')
         )
@@ -401,7 +399,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         db.refresh(new_appointment)
         # Update agent_schedule status to "booked" for the corresponding appointment
         query = text("""
-           INSERT INTO genpact.agent_schedule (status, customer_id, agent_id, start_time,end_time,date,appointment_id,customer_timezone) VALUES ('booked', :customer_id, :agent_id, :start_time,:end_time,:date,:appointment_id,:customer_timezone);""")
+           INSERT INTO genpact.agent_schedule (status, customer_id, agent_id, start_time,end_time,date,appointment_id,customer_timezone,appointment_description) VALUES ('booked', :customer_id, :agent_id, :start_time,:end_time,:date,:appointment_id,:customer_timezone,:appointment_description);""")
         db.execute(
             query,
             {
@@ -411,14 +409,15 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
                 "end_time": end_time_obj,
                 "date": date_obj,
                 "appointment_id": new_appointment.id,
-                "customer_timezone":existing_appointment['customer_timezone']
+                "customer_timezone":existing_appointment['customer_timezone'],
+                "appointment_description":existing_appointment['appointment_description'],
+
             }
         )
         query = db.query(Agent).filter(Agent.id ==appointment.agent_id )
         agent_data = query.first()
         agent_email = agent_data.agent_email
         product_id = agent_data.product_id
-        case_id = agent_data.case_id
         query = db.query(Customer).filter(Customer.id == existing_appointment['customer_id'] )
         customer_data = query.first()
         Customer_email= customer_data.email_id
@@ -769,6 +768,8 @@ def get_appointments(customer_id: int, db: Session = Depends(get_db)):
         formatted_appointments_sorted = sorted(formatted_appointments, key=lambda x: x['date'], reverse=True)
         
         return formatted_appointments_sorted
+        
+        return formatted_appointments_sorted
 
     except Exception as e:
         # Rollback transaction in case of error
@@ -795,6 +796,7 @@ def get_agent_appointments(agent_id: int, db: Session = Depends(get_db)):
     customer.username,
     customer.email_id,
     customer.mobile_no,
+    customer.case_id,
     schedule.start_time,
     schedule.end_time,
     schedule.date
@@ -918,8 +920,8 @@ def filter_json_by_time(json_data):
 def get_appointments(appointment_id: int, db: Session = Depends(get_db)):
     # Create session
     try:
-        appointments = db.query(Appointment).filter(
-            Appointment.id == appointment_id).all()
+        appointments = db.query(AgentSchedule).filter(
+            AgentSchedule.appointment_id == appointment_id).all()
         # schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
         if not appointments:
             raise HTTPException(
@@ -1007,13 +1009,13 @@ from sqlalchemy.orm import joinedload
 @app.post("/list/cancelled_appointments/{agent_id}", tags=['appointment'])
 def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
     try:
-        query = db.query(AgentSchedule, Customer, Appointment).join(Customer, AgentSchedule.customer_id == Customer.id).filter(AgentSchedule.status == "cancelled").filter(AgentSchedule.agent_id == agent_id)
+        query = db.query(AgentSchedule, Customer).join(Customer, AgentSchedule.customer_id == Customer.id).filter(AgentSchedule.status == "cancelled").filter(AgentSchedule.agent_id == agent_id)
  # Optional: to load Customer objects along with AgentSchedule objects
 
         results = query.all()
-        print(results)
+        print(len(results))
         result = []
-        for agent_schedule, customer,appointment in results:
+        for agent_schedule, customer in results:
             entry = {
                 "agent_schedule": agent_schedule.id,
                 "start_time": agent_schedule.start_time,
@@ -1026,12 +1028,11 @@ def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
                 "status": agent_schedule.status,
                 "date": agent_schedule.date,
                 "reason":agent_schedule.reason,
-                "appointment_description":agent_schedule.appointment_description,
-                "case_id":customer.case_id
+                "appointment_description":agent_schedule.appointment_description
             }
-            if agent_id==agent_schedule.agent_id:
-                result.append(entry)
-        print(result)
+
+            result.append(entry)
+        print(len(result))
         result_sorted = sorted(result, key=lambda x: x['date'], reverse=True)
         return result_sorted
        
