@@ -715,6 +715,12 @@ def get_appointments(customer_id: int, db: Session = Depends(get_db)):
         appointments = db.query(AgentSchedule, Appointment).\
             join(Appointment, AgentSchedule.appointment_id == Appointment.id).\
             filter(AgentSchedule.customer_id == customer_id).all()
+        
+        case_id = db.query(Customer).filter(Customer.id == customer_id)
+        case_id = case_id.first()
+
+        case_id = case_id.case_id
+        
 
         if not appointments:
             raise HTTPException(
@@ -755,10 +761,13 @@ def get_appointments(customer_id: int, db: Session = Depends(get_db)):
 
             # Merge agent info with appointment info
             result = appointment_info | agent_info_dict
+            result['case_id'] = case_id
             formatted_appointments.append(result)
 
         # Sort appointments by date
         formatted_appointments_sorted = sorted(formatted_appointments, key=lambda x: x['date'], reverse=True)
+        
+        return formatted_appointments_sorted
         
         return formatted_appointments_sorted
 
@@ -911,8 +920,8 @@ def filter_json_by_time(json_data):
 def get_appointments(appointment_id: int, db: Session = Depends(get_db)):
     # Create session
     try:
-        appointments = db.query(Appointment).filter(
-            Appointment.id == appointment_id).all()
+        appointments = db.query(AgentSchedule).filter(
+            AgentSchedule.appointment_id == appointment_id).all()
         # schedules = db.query(AgentSchedule).filter(AgentSchedule.agent_id == 4).first()
         if not appointments:
             raise HTTPException(
