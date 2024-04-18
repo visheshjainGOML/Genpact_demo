@@ -231,11 +231,13 @@ class AgentSchema(BaseModel):
     shift_from: time
     shift_to: time
     weekly_off: list[str]
+    case_id: int
 
 
 class FeedbackSchema(BaseModel):
     appointment_id: int
     rating: int
+    case_id:int
 
 
 class CustomerSchema(BaseModel):
@@ -267,6 +269,7 @@ class AppointmentSchema(BaseModel):
     start_time: str
     end_time: str
     customer_timezone: str
+    case_id:int
 
 
 class OriginalAppointmentSchema(BaseModel):
@@ -278,6 +281,7 @@ class OriginalAppointmentSchema(BaseModel):
     is_booked: bool = None
     appointment_description: str
     scheduled_at: Optional[datetime]
+    case_id:int
 
 
 class TriggerCallSchema(BaseModel):
@@ -324,7 +328,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={new_customer.id}&product_id={new_customer.product_id}
+https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={new_customer.id}&product_id={new_customer.product_id}&{new_customer.case_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
@@ -333,7 +337,7 @@ Warm regards
 Genpact Team """)
 
         # await send_email(email, user_id, product_id)
-        return ResponseModel(message=success_message, payload={"customer_id": new_customer.id})
+        return ResponseModel(message=success_message, payload={"customer_id": new_customer.id, "case_id": new_customer.case_id})
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -359,7 +363,7 @@ async def create_agent(agent: AgentSchema, db: Session = Depends(get_db)):
         db.add(new_agent)
         db.commit()
         db.refresh(new_agent)
-        return ResponseModel(message=success_message, payload={"agent_id": new_agent.id})
+        return ResponseModel(message=success_message, payload={"agent_id": new_agent.id, "case_id": new_agent.case_id})
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -418,17 +422,18 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         agent_data = query.first()
         agent_email = agent_data.agent_email
         product_id = agent_data.product_id
+        case_id = agent_data.case_id
         query = db.query(Customer).filter(Customer.id == existing_appointment['customer_id'] )
-        Customer_email = query.first()
-        Customer_email= Customer_email.email_id
-        agent_portal_link = 'https://main.d2el3bzkhp7t3w.amplifyapp.com/'
+        customer_data = query.first()
+        Customer_email= customer_data.email_id
+        case_id = customer_data.case_id
         
         send_email("Someshwar.Garud@genpact.com", Customer_email, "Confirmation of Your Scheduled Appointment",f"""
 We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
 To view the details of your appointment, please click the following link: https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
 Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
-Reschedule Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
-Cancel Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
+Reschedule Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
+Cancel Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
 If you have any specific requests or questions prior to our meeting, do not hesitate to contact us directly through this email.
 We look forward to our conversation and are here to assist you with any questions you may have prior to our meeting.
 Warm regards,
@@ -447,7 +452,7 @@ Best Regards,
 Genpact Team
 """)
         db.commit()
-        return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id})
+        return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id, "case_id":case_id})
     except Exception as e:
         # raise e
         raise HTTPException(
@@ -569,6 +574,23 @@ async def cancel_appointment_route(appointment_id: int,reason:str, db: Session =
     # Create session
     try:
         # Execute SQL query to delete appointment
+        try:
+            query = db.query(Appointment).filter(Appointment.id == appointment_id)
+            data = query.first()
+            print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", data)
+            cust_id= data.customer_id
+            agent_id= data.agent_id
+            query = db.query(Customer).filter(Customer.id == cust_id)
+            customer_data = query.first()
+            Customer_email= customer_data.email_id
+            case_id = customer_data.case_id
+            query = db.query(Agent).filter(Agent.id == agent_id)
+            agent_email = query.first()
+            agent_email = agent_email.agent_email
+            send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment cancelled successfully", "We will catch up soon with your desired data, Get back us soon !!")
+            send_email("Someshwar.Garud@genpact.com", agent_email, "appointment Cancelled", "The booked meeting has been Cancelled")
+        except:
+            return ResponseModel(message="No appointment found")
         query1 = text("""
     UPDATE 
         genpact.agent_schedule
@@ -581,27 +603,17 @@ async def cancel_appointment_route(appointment_id: int,reason:str, db: Session =
 """)
         query2 = text("""DELETE FROM genpact.appointment
 WHERE genpact.appointment.id = :appointment_id;""")
+        
 
         db.execute(query1, {"appointment_id": appointment_id,"reason":reason})
         db.execute(query2, {"appointment_id": appointment_id})
-        # query = db.query(Appointment).filter(Appointment.id == appointment_id)
-        # data = query.first()
-        # cust_id= data.customer_id
-        # agent_id= data.agent_id
-        # query = db.query(Customer).filter(Customer.id == cust_id)
-        # Customer_email = query.first()
-        # Customer_email= Customer_email.email_id
-        # query = db.query(Agent).filter(Agent.id == agent_id)
-        # agent_email = query.first()
-        # agent_email = agent_email.agent_email
-        # send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment cancelled successfully", "We will catch up soon with your desired data, Get back us soon !!")
-        # send_email("Someshwar.Garud@genpact.com", agent_email, "appointment Cancelled", "The booked meeting has been Cancelled")
+        
 
         # Commit transaction
         db.commit()
 
         # Return success message
-        return ResponseModel(message="Appointment canceled successfully.")
+        return ResponseModel(message="Appointment canceled successfully.",payload={"case_id":case_id})
     except Exception as e:
         # Rollback transaction in case of error
         db.rollback()
@@ -618,37 +630,37 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
     # Create session
     try:
         # Execute SQL query to delete appointment
-        data = data.dict()
-        query = text("""UPDATE genpact.agent_schedule SET start_time = :start_time, end_time =:end_time, date = :date, reason=:reason WHERE agent_schedule.appointment_id = :appointment_id""")
-        start_time_obj = time.fromisoformat(data['start_time'])
-        end_time_obj = time.fromisoformat(data['end_time'])
-        date_obj = datetime.strptime(data['date'], '%d-%m-%y').date()
+        # data = data.dict()
+        # query = text("""UPDATE genpact.agent_schedule SET start_time = :start_time, end_time =:end_time, date = :date, reason=:reason WHERE agent_schedule.appointment_id = :appointment_id""")
+        # start_time_obj = time.fromisoformat(data['start_time'])
+        # end_time_obj = time.fromisoformat(data['end_time'])
+        # date_obj = datetime.strptime(data['date'], '%d-%m-%y').date()
 
-        db.execute(query, {"date": date_obj, "start_time": start_time_obj,
-                   "end_time": end_time_obj, "appointment_id": appointment_id,"reason":data['reason']})
+        # db.execute(query, {"date": date_obj, "start_time": start_time_obj,
+        #            "end_time": end_time_obj, "appointment_id": appointment_id,"reason":data['reason']})
 
-        # Commit transaction
-        db.commit()
-        query = text(
-            """UPDATE genpact.appointment SET scheduled_at = :scheduled_at WHERE appointment.id = :appointment_id """)
+        # # Commit transaction
+        # db.commit()
+        # query = text(
+        #     """UPDATE genpact.appointment SET scheduled_at = :scheduled_at WHERE appointment.id = :appointment_id """)
 
-        scheduled_at = datetime.strptime(
-            data['date'] + ' ' + data['start_time'], '%d-%m-%y %H:%M')
-        db.execute(query, {"appointment_id": appointment_id,
-                   "scheduled_at": scheduled_at})
+        # scheduled_at = datetime.strptime(
+        #     data['date'] + ' ' + data['start_time'], '%d-%m-%y %H:%M')
+        # db.execute(query, {"appointment_id": appointment_id,
+        #            "scheduled_at": scheduled_at})
         
-        # query = db.query(Appointment).filter(Appointment.id == appointment_id)
-        # cust_id = query.first()
-        # cust_id= data.customer_id
-        # agent_id= data.agent_id
-        # query = db.query(Customer).filter(Customer.id == cust_id)
-        # Customer_email = query.first()
-        # Customer_email= Customer_email.email_id
-        # query = db.query(Agent).filter(Agent.id == agent_id)
-        # agent_email = query.first()
-        # agent_email = agent_email.agent_email
-        # send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment update", "Set ready to speak to our agent to find answers for all your questions")
-        # send_email("Someshwar.Garud@genpact.com", agent_email, "appointment rescheduled", "The booked meeting has be rescheduled")
+        query = db.query(Appointment).filter(Appointment.id == appointment_id)
+        cust_id = query.first()
+        cust_id= data.customer_id
+        agent_id= data.agent_id
+        query = db.query(Customer).filter(Customer.id == cust_id)
+        Customer_email = query.first()
+        Customer_email= Customer_email.email_id
+        query = db.query(Agent).filter(Agent.id == agent_id)
+        agent_email = query.first()
+        agent_email = agent_email.agent_email
+        send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment update", "Set ready to speak to our agent to find answers for all your questions")
+        send_email("Someshwar.Garud@genpact.com", agent_email, "appointment rescheduled", "The booked meeting has be rescheduled")
 
         # Commit transaction
         db.commit()
