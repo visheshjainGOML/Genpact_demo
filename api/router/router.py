@@ -427,8 +427,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
 We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
 To view the details of your appointment, please click the following link: https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
 Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
-Reschedule Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
-Cancel Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
+Reschedule Or Cancel Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
 If you have any specific requests or questions prior to our meeting, do not hesitate to contact us directly through this email.
 We look forward to our conversation and are here to assist you with any questions you may have prior to our meeting.
 Warm regards,
@@ -648,8 +647,9 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         cust_id= data.customer_id
         agent_id= data.agent_id
         query = db.query(Customer).filter(Customer.id == cust_id)
-        Customer_email = query.first()
-        Customer_email= Customer_email.email_id
+        customer_data = query.first()
+        Customer_email= customer_data.email_id
+        case_id = customer_data.case_id
         query = db.query(Agent).filter(Agent.id == agent_id)
         agent_email = query.first()
         agent_email = agent_email.agent_email
@@ -659,7 +659,7 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         # Commit transaction
         db.commit()
         # Return success message
-        return {"message": "Appointment updated successfully."}
+        return ResponseModel(message="Appointment updated successfully.",payload={"case_id":case_id})
     except Exception as e:
         # Rollback transaction in case of error
         db.rollback()
