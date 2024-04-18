@@ -1010,3 +1010,57 @@
 2024-04-15 11:38:30,640 - INFO - Request received: GET http://localhost:8000/appointments/description/39
 2024-04-15 11:38:31,754 - INFO - Response code: 200
 2024-04-15 11:38:31,754 - INFO - Response code: 200
+2024-04-18 11:41:53,837 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-18 11:41:53,837 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-18 11:41:53,841 - INFO - Response code: 200
+2024-04-18 11:41:53,841 - INFO - Response code: 200
+2024-04-18 11:41:54,343 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-18 11:41:54,343 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-18 11:41:54,459 - INFO - Response code: 200
+2024-04-18 11:41:54,459 - INFO - Response code: 200
+2024-04-18 11:42:24,420 - INFO - Request received: POST http://localhost:8000/cancel_appointment/76?reason=noo
+2024-04-18 11:42:24,420 - INFO - Request received: POST http://localhost:8000/cancel_appointment/76?reason=noo
+2024-04-18 11:42:29,495 - INFO - Response code: 200
+2024-04-18 11:42:29,495 - INFO - Response code: 200
+2024-04-18 11:44:20,942 - INFO - Request received: POST http://localhost:8000/cancel_appointment/76?reason=noo
+2024-04-18 11:44:20,942 - INFO - Request received: POST http://localhost:8000/cancel_appointment/76?reason=noo
+2024-04-18 11:44:22,584 - INFO - Response code: 500
+2024-04-18 11:44:22,584 - INFO - Response code: 500
+2024-04-18 11:48:43,182 - INFO - Request received: POST http://localhost:8000/cancel_appointment/76?reason=noo
+2024-04-18 11:48:43,182 - INFO - Request received: POST http://localhost:8000/cancel_appointment/76?reason=noo
+2024-04-18 11:48:48,321 - INFO - Response code: 200
+2024-04-18 11:48:48,321 - INFO - Response code: 200
+2024-04-18 11:49:01,236 - INFO - Request received: POST http://localhost:8000/cancel_appointment/76?reason=noo
+2024-04-18 11:49:01,236 - INFO - Request received: POST http://localhost:8000/cancel_appointment/76?reason=noo
+2024-04-18 11:49:02,238 - INFO - Response code: 500
+2024-04-18 11:49:02,238 - INFO - Response code: 500
+2024-04-18 11:51:47,577 - INFO - Request received: POST http://localhost:8000/cancel_appointment/76?reason=noo
+2024-04-18 11:51:47,577 - INFO - Request received: POST http://localhost:8000/cancel_appointment/76?reason=noo
+2024-04-18 11:51:48,724 - INFO - Response code: 200
+2024-04-18 11:51:48,724 - INFO - Response code: 200
+2024-04-18 11:57:24,560 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-18 11:57:24,560 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-18 11:57:24,566 - INFO - Response code: 200
+2024-04-18 11:57:24,566 - INFO - Response code: 200
+2024-04-18 11:57:25,103 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-18 11:57:25,103 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-18 11:57:25,172 - INFO - Response code: 200
+2024-04-18 11:57:25,172 - INFO - Response code: 200
+2024-04-18 11:58:09,947 - INFO - Request received: POST http://localhost:8000/update_appointment/77
+2024-04-18 11:58:09,947 - INFO - Request received: POST http://localhost:8000/update_appointment/77
+2024-04-18 11:58:11,087 - INFO - Response code: 500
+2024-04-18 11:58:11,087 - INFO - Response code: 500
+2024-04-18 12:05:36,816 - INFO - Request received: GET http://localhost:8000/appointments/list/76
+2024-04-18 12:05:36,816 - INFO - Request received: GET http://localhost:8000/appointments/list/76
+2024-04-18 12:05:37,929 - INFO - Response code: 200
+2024-04-18 12:05:37,929 - INFO - Response code: 200
+2024-04-18 12:09:12,107 - INFO - Request received: GET http://localhost:8000/appointments/list/4
+2024-04-18 12:09:12,107 - INFO - Request received: GET http://localhost:8000/appointments/list/4
+2024-04-18 12:09:13,135 - INFO - Response code: 200
+2024-04-18 12:09:13,135 - INFO - Response code: 200
+2024-04-18 13:07:55,380 - INFO - Request received: GET http://localhost:8000/appointments/list/4
+2024-04-18 13:07:55,380 - INFO - Request received: GET http://localhost:8000/appointments/list/4
+2024-04-18 13:08:39,464 - INFO - Request received: GET http://localhost:8000/appointments/list/4
+2024-04-18 13:08:39,464 - INFO - Request received: GET http://localhost:8000/appointments/list/4
+2024-04-18 13:08:40,338 - INFO - Response code: 200
+2024-04-18 13:08:40,338 - INFO - Response code: 200
