@@ -113,9 +113,7 @@ class Appointment(Base):
                       schema=schema, autoload_with=engine)
 
 
-class AgentLeave(Base):
-    __table__ = Table('agent_leave', Base.metadata,
-                      schema=schema, autoload_with=engine)
+
 
 # ---------- Utilities --------------------
 
@@ -1113,6 +1111,10 @@ class LeaveSchema(BaseModel):
     leave_type:str
     leave_from:str
     leave_to:str
+class AgentLeave(Base):
+    __table__ = Table('agent_leave', Base.metadata,
+                      schema=schema, autoload_with=engine)
+
 
 @app.post('/agents/create-leave/{agent_id}', tags=["agent"])
 async def create_leave(agent_id:int, leave_data: LeaveSchema, db: Session = Depends(get_db)):
@@ -1128,6 +1130,104 @@ async def create_leave(agent_id:int, leave_data: LeaveSchema, db: Session = Depe
         db.refresh(new_customer)
 
         return ResponseModel(message="Agent details updated successfully")
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
+
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error updating agent: {e}")
+    finally:
+        # Close session
+        db.close()
+# @app.post('/agents/create-leave/{agent_id}', tags=["agent"])
+# async def create_leave(agent_id:int, leave_data: LeaveSchema, db: Session = Depends(get_db)):
+#     try:
+#         leave_data = leave_data.__dict__
+#         print(leave_data)
+#         date_format = "%y-%m-%d"
+#         leave_data["agent_id"]=agent_id
+#         # leave_data["leave_from"] = datetime.strptime( leave_data["leave_from"], date_format)
+#         # leave_data["leave_to"]=datetime.strptime( leave_data["leave_to"], date_format)
+#         new_customer = AgentLeave(
+#             agent_id = agent_id,
+#             leave_from = datetime.strptime(leave_data["leave_from"], date_format).date(),
+#             leave_to = datetime.strptime( leave_data["leave_to"], date_format).date()
+#         )
+#         db.add()
+#         db.commit()
+#         db.refresh(new_customer)
+
+#         return ResponseModel(message="Agent details updated successfully")
+#     except Exception as e:
+#         # Rollback transaction in case of error
+#         db.rollback()
+
+#         # Raise HTTPException with error message
+#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error updating agent: {e}")
+#     finally:
+#         # Close session
+#         db.close()
+
+class AgentShiftSchema(BaseModel):
+    agent_id:int
+    shift_date_from:str
+    shift_date_to:str
+class AgentShift(Base):
+    __table__ = Table('agent_shifts', Base.metadata,
+                      schema=schema, autoload_with=engine)
+
+
+@app.post('/agents/create-shift/{agent_id}', tags=["agent"])
+async def create_shift(agent_id:int, leave_data: AgentShiftSchema, db: Session = Depends(get_db)):
+    try:
+        leave_data = leave_data.__dict__
+        date_format = "%y-%m-%d"
+        leave_data["agent_id"]=agent_id
+        leave_data["leave_from"] = datetime.strptime( leave_data["shift_date_from"], date_format)
+        leave_data["leave_to"]=datetime.strptime( leave_data["shift_date_to"], date_format)
+        new_customer = AgentShift(**leave_data)
+        db.add(new_customer)
+        db.commit()
+        db.refresh(new_customer)
+
+        return ResponseModel(message="Agent details updated successfully")
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
+
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error updating agent: {e}")
+    finally:
+        # Close session
+        db.close()
+
+@app.post('/agents/update/leave-shift/{agent_id}', tags=["agent"])
+async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(get_db)):
+    
+    try:
+        date_format = "%y-%m-%d"
+       
+        for value in source_data["leaveDetails"]:
+            leave_data = {}
+            print(value)
+            leave_data["agent_id"]=agent_id
+            leave_data["leave_type"]=value["leave_type"]
+            leave_data["leave_from"] = datetime.strptime( value["from_date"], date_format)
+            leave_data["leave_to"]=datetime.strptime( value["to_date"], date_format)
+            new_customer = AgentLeave(**leave_data)
+            db.add(new_customer)
+            db.commit()
+            db.refresh(new_customer)
+
+        shift_data= {}
+        shift_data["agent_id"]=agent_id
+        shift_data["shift_date_from"] = datetime.strptime( source_data["shift_start_date"], date_format)
+        shift_data["shift_date_to"]=datetime.strptime( source_data["shift_to_date"], date_format)
+        new_customer = AgentShift(**shift_data)
+        db.add(new_customer)
+        db.commit()
+        db.refresh(new_customer)
+        return ResponseModel(message="successfully updated")
     except Exception as e:
         # Rollback transaction in case of error
         db.rollback()
