@@ -788,6 +788,7 @@ def get_agent_appointments(agent_id: int, db: Session = Depends(get_db)):
     query = text("""
         SELECT
     appointments.*,
+    schedule.reason,
     customer.username,
     customer.email_id,
     customer.mobile_no,
