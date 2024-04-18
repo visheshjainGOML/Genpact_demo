@@ -1022,7 +1022,7 @@ def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
             }
             if agent_id==agent_schedule.agent_id:
                 result.append(entry)
-        print(result)
+        print(list(set(result)))
         result_sorted = sorted(result, key=lambda x: x['date'], reverse=True)
         return result_sorted
        
