@@ -319,7 +319,8 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         db.add(new_customer)
         db.commit()
         db.refresh(new_customer)
-        send_email("Someshwar.Garud@genpact.com", new_customer.email_id, "Schedule Your Appointment with Us", f""" 
+        send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {new_customer.case_id}", f"""
+Case ID: {new_customer.case_id} 
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
@@ -423,7 +424,8 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         Customer_email= customer_data.email_id
         case_id = customer_data.case_id
         
-        send_email("Someshwar.Garud@genpact.com", Customer_email, "Confirmation of Your Scheduled Appointment",f"""
+        send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
+Case ID: {case_id}
 We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
 To view the details of your appointment, please click the following link: https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
 Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
@@ -433,7 +435,8 @@ We look forward to our conversation and are here to assist you with any question
 Warm regards,
 Genpact Team 
 """)
-        send_email("Someshwar.Garud@genpact.com", agent_email, "New Appointment Booked", f""" 
+        send_email("Someshwar.Garud@genpact.com", agent_email, f"New Appointment Booked - Case ID: {case_id}", f""" 
+Case ID: {case_id}
 We are pleased to inform you that a new appointment has been booked. Please log in to your agent portal to view the details and prepare for the upcoming meeting.
 Quick Reminder:
 Check the Appointment Date and Time: Ensure your schedule is updated.
@@ -580,8 +583,21 @@ async def cancel_appointment_route(appointment_id: int,reason:str, db: Session =
             query = db.query(Agent).filter(Agent.id == agent_id)
             agent_email = query.first()
             agent_email = agent_email.agent_email
-            send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment cancelled successfully", "We will catch up soon with your desired data, Get back us soon !!")
-            send_email("Someshwar.Garud@genpact.com", agent_email, "appointment Cancelled", "The booked meeting has been Cancelled")
+            send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}", f"""
+                       Case ID: {case_id}
+We have received your request and successfully cancelled your scheduled appointment. We are sorry to see you go, but understand that circumstances can change.
+
+If you wish to reschedule at a later time or if there is anything else we can assist you with, please do not hesitate to reach out.
+
+Thank you for your interest in our services. We hope to have the opportunity to assist you in the future.
+
+Best regards,
+
+Genpact Team
+""")
+            send_email("Someshwar.Garud@genpact.com", agent_email, f"appointment Cancelled - Case ID: {case_id}", f"""
+                       Case ID: {case_id}
+                       Hello, your scheduled appointment has been cancelled""")
         except:
             return ResponseModel(message="No appointment found")
         query1 = text("""
@@ -653,8 +669,12 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         query = db.query(Agent).filter(Agent.id == agent_id)
         agent_email = query.first()
         agent_email = agent_email.agent_email
-        send_email("Someshwar.Garud@genpact.com", Customer_email, "appointment update", "Set ready to speak to our agent to find answers for all your questions")
-        send_email("Someshwar.Garud@genpact.com", agent_email, "appointment rescheduled", "The booked meeting has be rescheduled")
+        send_email("Someshwar.Garud@genpact.com", Customer_email, f"appointment update - Case ID: {case_id}", f"""
+                   Case ID: {case_id}
+                   Your appointment has been udpated""")
+        send_email("Someshwar.Garud@genpact.com", agent_email, f"appointment rescheduled - Case ID: {case_id}", f"""
+                   Case ID: {case_id}
+                   The booked meeting has been rescheduled""")
 
         # Commit transaction
         db.commit()
