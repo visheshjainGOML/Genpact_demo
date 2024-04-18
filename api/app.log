@@ -1080,3 +1080,7 @@
 2024-04-18 14:37:09,461 - INFO - Request received: POST http://localhost:8000/list/cancelled_appointments/4
 2024-04-18 14:37:10,362 - INFO - Response code: 500
 2024-04-18 14:37:10,362 - INFO - Response code: 500
+2024-04-18 14:37:54,802 - INFO - Request received: POST http://localhost:8000/list/cancelled_appointments/4
+2024-04-18 14:37:54,802 - INFO - Request received: POST http://localhost:8000/list/cancelled_appointments/4
+2024-04-18 14:37:55,654 - INFO - Response code: 200
+2024-04-18 14:37:55,654 - INFO - Response code: 200

@@ -716,6 +716,12 @@ def get_appointments(customer_id: int, db: Session = Depends(get_db)):
         appointments = db.query(AgentSchedule, Appointment).\
             join(Appointment, AgentSchedule.appointment_id == Appointment.id).\
             filter(AgentSchedule.customer_id == customer_id).all()
+        
+        case_id = db.query(Customer).filter(Customer.id == customer_id)
+        case_id = case_id.first()
+
+        case_id = case_id.case_id
+        
 
         if not appointments:
             raise HTTPException(
@@ -756,6 +762,7 @@ def get_appointments(customer_id: int, db: Session = Depends(get_db)):
 
             # Merge agent info with appointment info
             result = appointment_info | agent_info_dict
+            result['case_id'] = case_id
             formatted_appointments.append(result)
 
         # Sort appointments by date
