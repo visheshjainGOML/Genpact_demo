@@ -231,13 +231,13 @@ class AgentSchema(BaseModel):
     shift_from: time
     shift_to: time
     weekly_off: list[str]
-    case_id: int
+    case_id: str
 
 
 class FeedbackSchema(BaseModel):
     appointment_id: int
     rating: int
-    case_id:int
+    case_id:str
 
 
 class CustomerSchema(BaseModel):
@@ -247,7 +247,7 @@ class CustomerSchema(BaseModel):
     mobile_no: str
     product_id: int
     pre_screening: dict = None
-    case_id : int
+    case_id : str
 
 
 class ProductSchema(BaseModel):
@@ -281,7 +281,7 @@ class OriginalAppointmentSchema(BaseModel):
     is_booked: bool = None
     appointment_description: str
     scheduled_at: Optional[datetime]
-    case_id:int
+    case_id:str
 
 
 class TriggerCallSchema(BaseModel):
@@ -577,7 +577,6 @@ async def cancel_appointment_route(appointment_id: int,reason:str, db: Session =
         try:
             query = db.query(Appointment).filter(Appointment.id == appointment_id)
             data = query.first()
-            print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", data)
             cust_id= data.customer_id
             agent_id= data.agent_id
             query = db.query(Customer).filter(Customer.id == cust_id)
@@ -630,27 +629,27 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
     # Create session
     try:
         # Execute SQL query to delete appointment
-        # data = data.dict()
-        # query = text("""UPDATE genpact.agent_schedule SET start_time = :start_time, end_time =:end_time, date = :date, reason=:reason WHERE agent_schedule.appointment_id = :appointment_id""")
-        # start_time_obj = time.fromisoformat(data['start_time'])
-        # end_time_obj = time.fromisoformat(data['end_time'])
-        # date_obj = datetime.strptime(data['date'], '%d-%m-%y').date()
+        data = data.dict()
+        query = text("""UPDATE genpact.agent_schedule SET start_time = :start_time, end_time =:end_time, date = :date, reason=:reason WHERE agent_schedule.appointment_id = :appointment_id""")
+        start_time_obj = time.fromisoformat(data['start_time'])
+        end_time_obj = time.fromisoformat(data['end_time'])
+        date_obj = datetime.strptime(data['date'], '%d-%m-%y').date()
 
-        # db.execute(query, {"date": date_obj, "start_time": start_time_obj,
-        #            "end_time": end_time_obj, "appointment_id": appointment_id,"reason":data['reason']})
+        db.execute(query, {"date": date_obj, "start_time": start_time_obj,
+                   "end_time": end_time_obj, "appointment_id": appointment_id,"reason":data['reason']})
 
-        # # Commit transaction
-        # db.commit()
-        # query = text(
-        #     """UPDATE genpact.appointment SET scheduled_at = :scheduled_at WHERE appointment.id = :appointment_id """)
+        # Commit transaction
+        db.commit()
+        query = text(
+            """UPDATE genpact.appointment SET scheduled_at = :scheduled_at WHERE appointment.id = :appointment_id """)
 
-        # scheduled_at = datetime.strptime(
-        #     data['date'] + ' ' + data['start_time'], '%d-%m-%y %H:%M')
-        # db.execute(query, {"appointment_id": appointment_id,
-        #            "scheduled_at": scheduled_at})
+        scheduled_at = datetime.strptime(
+            data['date'] + ' ' + data['start_time'], '%d-%m-%y %H:%M')
+        db.execute(query, {"appointment_id": appointment_id,
+                   "scheduled_at": scheduled_at})
         
         query = db.query(Appointment).filter(Appointment.id == appointment_id)
-        cust_id = query.first()
+        data = query.first()
         cust_id= data.customer_id
         agent_id= data.agent_id
         query = db.query(Customer).filter(Customer.id == cust_id)
@@ -1012,7 +1011,7 @@ def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
         result = []
         for agent_schedule, customer,appointment in results:
             entry = {
-                "id": agent_schedule.id,
+                "agent_id": agent_schedule.id,
                 "start_time": agent_schedule.start_time,
                 "end_time": agent_schedule.end_time,
                 "status": agent_schedule.status,
@@ -1023,10 +1022,12 @@ def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
                 "status": agent_schedule.status,
                 "date": agent_schedule.date,
                 "reason":agent_schedule.reason,
+                "appointment_id":appointment.id,
                 "appointment_description":appointment.appointment_description
             }
             if agent_id==agent_schedule.agent_id:
                 result.append(entry)
+        print(result)
         result_sorted = sorted(result, key=lambda x: x['date'], reverse=True)
         return result_sorted
        
