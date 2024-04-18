@@ -1019,7 +1019,8 @@ def get_cancelled_appointments(agent_id:int, db: Session = Depends(get_db)):
                 "status": agent_schedule.status,
                 "date": agent_schedule.date,
                 "reason":agent_schedule.reason,
-                "appointment_description":appointment.appointment_description
+                "appointment_description":agent_schedule.appointment_description,
+                "case_id":customer.case_id
             }
             if agent_id==agent_schedule.agent_id:
                 result.append(entry)
