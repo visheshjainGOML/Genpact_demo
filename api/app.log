@@ -1412,3 +1412,7 @@
 2024-04-19 15:08:45,522 - INFO - Request received: POST http://localhost:8000/agents/login
 2024-04-19 15:08:46,772 - INFO - Response code: 200
 2024-04-19 15:08:46,772 - INFO - Response code: 200
+2024-04-19 15:12:02,892 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:12:02,892 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:12:04,195 - INFO - Response code: 200
+2024-04-19 15:12:04,195 - INFO - Response code: 200

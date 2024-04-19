@@ -1208,7 +1208,7 @@ async def create_shift(agent_id:int, leave_data: AgentShiftSchema, db: Session =
         db.close()
 
 @app.post('/agents/login', tags=["agent"])
-async def create_shift(agent_info:dict, db: Session = Depends(get_db)):
+async def agent_login(agent_info:dict, db: Session = Depends(get_db)):
     try:
         results = db.query(Agent).filter(Agent.agent_email == agent_info['username']).filter(Agent.password == agent_info['password']).all()
         results = format_db_response(results)
