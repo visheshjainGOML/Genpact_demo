@@ -1207,6 +1207,28 @@ async def create_shift(agent_id:int, leave_data: AgentShiftSchema, db: Session =
         # Close session
         db.close()
 
+@app.post('/agents/login', tags=["agent"])
+async def create_shift(agent_info:dict, db: Session = Depends(get_db)):
+    try:
+        results = db.query(Agent).filter(Agent.agent_email == agent_info['username']).filter(Agent.password == agent_info['password']).all()
+        results = format_db_response(results)
+        role = results[0]['role']
+        id = results[0]['id']
+        name = results[0]['full_name']
+        # db.commit()
+        # db.refresh(new_customer)
+
+        return ResponseModel(message="Login successful.",payload={"role":role, "userDetails":{"id":id, "name":name}})
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
+
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error logging in: {e}")
+    finally:
+        # Close session
+        db.close()
+
 @app.post('/agents/update/leave-shift/{agent_id}', tags=["agent"])
 async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(get_db)):
     

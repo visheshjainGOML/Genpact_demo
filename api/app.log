@@ -1372,3 +1372,43 @@
 2024-04-19 14:32:43,700 - INFO - Request received: GET http://localhost:8000/openapi.json
 2024-04-19 14:32:43,723 - INFO - Response code: 200
 2024-04-19 14:32:43,723 - INFO - Response code: 200
+2024-04-19 14:33:38,860 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/25
+2024-04-19 14:33:38,860 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/25
+2024-04-19 14:33:38,869 - INFO - Response code: 400
+2024-04-19 14:33:38,869 - INFO - Response code: 400
+2024-04-19 14:34:58,518 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/25
+2024-04-19 14:34:58,518 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/25
+2024-04-19 14:35:02,011 - INFO - Response code: 200
+2024-04-19 14:35:02,011 - INFO - Response code: 200
+2024-04-19 14:54:47,723 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-19 14:54:47,723 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-19 14:54:47,723 - INFO - Response code: 200
+2024-04-19 14:54:47,723 - INFO - Response code: 200
+2024-04-19 14:54:47,845 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-19 14:54:47,845 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-19 14:54:47,858 - INFO - Response code: 200
+2024-04-19 14:54:47,858 - INFO - Response code: 200
+2024-04-19 14:58:02,964 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 14:58:02,964 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 14:58:04,207 - INFO - Response code: 200
+2024-04-19 14:58:04,207 - INFO - Response code: 200
+2024-04-19 15:01:15,592 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:01:15,592 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:01:16,761 - INFO - Response code: 200
+2024-04-19 15:01:16,761 - INFO - Response code: 200
+2024-04-19 15:04:23,331 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:04:23,331 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:04:23,343 - INFO - Response code: 400
+2024-04-19 15:04:23,343 - INFO - Response code: 400
+2024-04-19 15:05:22,972 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:05:22,972 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:05:24,155 - INFO - Response code: 400
+2024-04-19 15:05:24,155 - INFO - Response code: 400
+2024-04-19 15:07:45,748 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:07:45,748 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:07:46,954 - INFO - Response code: 200
+2024-04-19 15:07:46,954 - INFO - Response code: 200
+2024-04-19 15:08:45,522 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:08:45,522 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:08:46,772 - INFO - Response code: 200
+2024-04-19 15:08:46,772 - INFO - Response code: 200
