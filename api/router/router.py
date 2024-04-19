@@ -5,6 +5,7 @@ from sqlalchemy import Table, create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.orm import declarative_base
 from datetime import datetime
+import uuid
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Literal, Optional
@@ -259,7 +260,7 @@ class CustomerSchema(BaseModel):
     mobile_no: str
     product_id: int
     pre_screening: dict = None
-    case_id : str
+    case_id: str
 
 
 class ProductSchema(BaseModel):
@@ -329,16 +330,20 @@ async def get_products(db: Session = Depends(get_db)):
 @app.post(path="/customer/create", response_model=ResponseModel, tags=["customer"],status_code=201)
 async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db)):
     try:
-        new_customer = Customer(**customer.dict())
+        case_id = str(uuid.uuid4())
+        case_id = case_id[:8]
+        customer = customer.__dict__
+        customer['case_id'] = case_id
+        new_customer = Customer(**customer)
         db.add(new_customer)
         db.commit()
         db.refresh(new_customer)
-        send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {new_customer.case_id}", f"""
+        send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={new_customer.id}&product_id={new_customer.product_id}&case_id={new_customer.case_id}
+https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={new_customer.id}&product_id={new_customer.product_id}&case_id={case_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
@@ -347,7 +352,7 @@ Warm regards
 Genpact Team """)
 
         # await send_email(email, user_id, product_id)
-        return ResponseModel(message=success_message, payload={"customer_id": new_customer.id, "case_id": new_customer.case_id})
+        return ResponseModel(message=success_message, payload={"customer_id": new_customer.id, "case_id": case_id})
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

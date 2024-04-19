@@ -1416,3 +1416,35 @@
 2024-04-19 15:12:02,892 - INFO - Request received: POST http://localhost:8000/agents/login
 2024-04-19 15:12:04,195 - INFO - Response code: 200
 2024-04-19 15:12:04,195 - INFO - Response code: 200
+2024-04-19 15:14:04,099 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:14:04,099 - INFO - Request received: POST http://localhost:8000/agents/login
+2024-04-19 15:14:05,193 - INFO - Response code: 200
+2024-04-19 15:14:05,193 - INFO - Response code: 200
+2024-04-19 17:07:15,636 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-19 17:07:15,636 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-19 17:07:15,637 - INFO - Response code: 200
+2024-04-19 17:07:15,637 - INFO - Response code: 200
+2024-04-19 17:07:15,776 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-19 17:07:15,776 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-19 17:07:15,823 - INFO - Response code: 200
+2024-04-19 17:07:15,823 - INFO - Response code: 200
+2024-04-19 17:07:30,259 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-19 17:07:30,259 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-19 17:07:30,264 - INFO - Response code: 400
+2024-04-19 17:07:30,264 - INFO - Response code: 400
+2024-04-19 17:08:47,831 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-19 17:08:47,831 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-19 17:08:47,836 - INFO - Response code: 400
+2024-04-19 17:08:47,836 - INFO - Response code: 400
+2024-04-19 17:10:56,656 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-19 17:10:56,656 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-19 17:10:56,658 - INFO - Response code: 200
+2024-04-19 17:10:56,658 - INFO - Response code: 200
+2024-04-19 17:10:56,782 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-19 17:10:56,782 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-19 17:10:56,819 - INFO - Response code: 200
+2024-04-19 17:10:56,819 - INFO - Response code: 200
+2024-04-19 17:11:51,790 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-19 17:11:51,790 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-19 17:12:07,546 - INFO - Response code: 201
+2024-04-19 17:12:07,546 - INFO - Response code: 201
