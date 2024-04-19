@@ -1211,7 +1211,7 @@ async def create_shift(agent_id:int, leave_data: AgentShiftSchema, db: Session =
 async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(get_db)):
     
     try:
-        date_format = "%y-%m-%d"
+        date_format = "%d-%m-%y"
        
         for value in source_data["leaveDetails"]:
             leave_data = {}

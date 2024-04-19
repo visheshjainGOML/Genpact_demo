@@ -1364,3 +1364,11 @@
 2024-04-19 14:26:08,644 - INFO - Request received: POST http://localhost:8000/agents/create-leave/25
 2024-04-19 14:26:10,709 - INFO - Response code: 200
 2024-04-19 14:26:10,709 - INFO - Response code: 200
+2024-04-19 14:32:43,596 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-19 14:32:43,596 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-19 14:32:43,598 - INFO - Response code: 200
+2024-04-19 14:32:43,598 - INFO - Response code: 200
+2024-04-19 14:32:43,700 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-19 14:32:43,700 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-19 14:32:43,723 - INFO - Response code: 200
+2024-04-19 14:32:43,723 - INFO - Response code: 200
