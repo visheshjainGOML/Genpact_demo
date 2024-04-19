@@ -687,14 +687,14 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         agent_email = query.first()
         agent_email = agent_email.agent_email
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}", f"""
-                   Case ID: {case_id}
-                   We have successfully updated your appointment details as requested. Thank you for continuing to choose us for your needs!
+Case ID: {case_id}
+We have successfully updated your appointment details as requested. Thank you for continuing to choose us for your needs!
 
-                   Please review the updated appointment information to ensure everything is correct. If you need further adjustments or have specific requirements for our meeting, feel free to reach out to us directly through this email.
+Please review the updated appointment information to ensure everything is correct. If you need further adjustments or have specific requirements for our meeting, feel free to reach out to us directly through this email.
 
-                   Best Regards,
+Best Regards,
 
-                   Genpact Team
+Genpact Team
                    """)
         send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Rescheduled - Case ID: {case_id}", f"""
                    Case ID: {case_id}
@@ -1118,11 +1118,17 @@ class LeaveSchema(BaseModel):
 async def create_leave(agent_id:int, leave_data: LeaveSchema, db: Session = Depends(get_db)):
     try:
         leave_data = leave_data.__dict__
-        date_format = "%y-%m-%d"
+        print(leave_data)
+        date_format = "%d-%m-%y"
         leave_data["agent_id"]=agent_id
         leave_data["leave_from"] = datetime.strptime( leave_data["leave_from"], date_format)
         leave_data["leave_to"]=datetime.strptime( leave_data["leave_to"], date_format)
-        new_customer = AgentLeave(**leave_data)
+        new_customer = AgentLeave(
+            agent_id = agent_id,
+            leave_from = leave_data["leave_from"],
+            leave_to = leave_data["leave_to"],
+            leave_type = leave_data["leave_type"]
+        )
         db.add(new_customer)
         db.commit()
         db.refresh(new_customer)
