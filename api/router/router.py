@@ -389,14 +389,14 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         customer['case_id'] = case_id
         new_customer = Customer(**customer)
         db.add(new_customer)
-        print(new_customer)
-
+        print(new_customer.id)
+        customer_id = new_customer.id
         send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={new_customer.id}&product_id={new_customer.product_id}&case_id={case_id}
+https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
