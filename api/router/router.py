@@ -649,6 +649,35 @@ WHERE genpact.appointment.id = :appointment_id;""")
 
         db.execute(query1, {"appointment_id": appointment_id,"reason":reason})
         db.execute(query2, {"appointment_id": appointment_id})
+
+        event_details = {
+            "event_name": "Appointment Cancelled",
+            "event_details": {
+                "email": f"""
+From: Someshwar.Garud@genpact.com
+To: {Customer_email}
+
+Subject: Confirmation of Your Appointment Cancellation - Case ID: {case_id}
+
+We have received your request and successfully cancelled your scheduled appointment. We are sorry to see you go, but understand that circumstances can change.
+
+If you wish to reschedule at a later time or if there is anything else we can assist you with, please do not hesitate to reach out.
+
+Thank you for your interest in our services. We hope to have the opportunity to assist you in the future.
+
+Best regards,
+
+Genpact Team
+""",
+                "details": f"Appointment for Case ID {case_id} cancelled due to {reason}"
+            },
+            "timestamp": str(datetime.now()),
+            "case_id": case_id,
+            "status": "cancelled"
+        }
+        
+        new_event = Event(**event_details)
+        db.add(new_event)
         
 
         # Commit transaction
