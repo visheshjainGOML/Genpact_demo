@@ -542,7 +542,7 @@ If you have any specific requests or questions prior to our meeting, do not hesi
 We look forward to our conversation and are here to assist you with any questions you may have prior to our meeting.
 Warm regards,
 Genpact Team 
-""",start_time_obj,end_time_obj,date_obj)
+""")#,start_time_obj,end_time_obj,date_obj)
 
         send_email("Someshwar.Garud@genpact.com", agent_email, f"New Appointment Booked - Case ID: {case_id}", f""" 
 Case ID: {case_id}
@@ -556,7 +556,7 @@ Thank you for your dedication and hard work. Let's continue providing exceptiona
 Best Regards,
                    
 Genpact Team
-""",start_time_obj,end_time_obj,date_obj)
+""")#,start_time_obj,end_time_obj,date_obj)
         event1_details = {
             "event_name": "Appointment notification is sent",
             "event_details": {
