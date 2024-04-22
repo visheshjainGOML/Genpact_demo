@@ -1656,3 +1656,19 @@ async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(ge
     finally:
         # Close session
         db.close()
+
+class Question(Base):
+    __table__ = Table('questions', Base.metadata,
+                      schema=schema, autoload_with=engine)
+@app.get("/questions/")
+async def get_questions(db: Session = Depends(get_db)):
+    try:
+        questions = db.query(Question.question).all()
+
+        # Extract the 'question' attribute from each row
+        question_list = [row.question for row in questions]
+        return question_list
+    except Exception as e:
+        print("Eror fecthing the records")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
