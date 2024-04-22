@@ -1249,9 +1249,7 @@ async def get_event_logs(case_id:str, db: Session = Depends(get_db)):
         results = db.query(Event).filter(Event.case_id == case_id)
         results = format_db_response(results)
         print(results)
-        formatted_results = []
-        for result in results:
-            print(result)
+            
         # db.commit()
         # db.refresh(new_customer)
 
