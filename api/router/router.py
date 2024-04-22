@@ -1660,6 +1660,7 @@ async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(ge
 class Question(Base):
     __table__ = Table('questions', Base.metadata,
                       schema=schema, autoload_with=engine)
+    
 @app.get("/questions/")
 async def get_questions(db: Session = Depends(get_db)):
     try:
@@ -1672,3 +1673,22 @@ async def get_questions(db: Session = Depends(get_db)):
         print("Eror fecthing the records")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    
+class QuestionAnswer(Base):
+    __table__ = Table('questions_answers', Base.metadata,
+                      schema=schema, autoload_with=engine)
+    
+class QuestionAnswerSchema(BaseModel):
+    case_id :str
+    question_answer_pair: dict
+
+@app.post('/question_answer/create')
+def question_answer_create(data:QuestionAnswerSchema,db: Session = Depends(get_db)):
+    try:
+        new_product = Product(**data.dict())
+        db.add(new_product)
+        db.commit()
+        db.refresh(new_product)
+        return ResponseModel(message=success_message, payload={"product_id": new_product.id})
+    except Exception as e:
+        return HTTPException(status_code=400,detail="unable to create new record "+e)
