@@ -19,6 +19,7 @@ import os
 from datetime import datetime, time
 import pytz
 from icalendar import Calendar, Event
+from icalendar import Event as CalEvent
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
@@ -56,7 +57,7 @@ def send_email(sender, recipient, subject, body, start_time=None, end_time=None,
 
 def create_calendar_invite(sender, recipient, subject, body, start_time, end_time, date):
     cal = Calendar()
-    event = Event()
+    event = CalEvent()
     event.add('summary', subject)
     event.add('dtstart', datetime.combine(date, start_time))
     event.add('dtend', datetime.combine(date, end_time))
@@ -598,9 +599,9 @@ Warm regards,
 Genpact Team
                 """,
                 "details": f"Appointment notification successfully sent to {Customer_email} at {str(datetime.now())}",
-                #    "start_time":existing_appointment['start_time'],
-                # "end_time":existing_appointment['end_time'],
-                # 'date':existing_appointment['date']
+                   "start_time":existing_appointment['start_time'],
+                "end_time":existing_appointment['end_time'],
+                'date':existing_appointment['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
@@ -612,9 +613,9 @@ Genpact Team
             "event_details": {
                 "email": "",
                 "details": f"Awaiting customer response for Case ID: {case_id} at {str(datetime.now())}",
-                #  "start_time":existing_appointment['start_time'],
-                # "end_time":existing_appointment['end_time'],
-                # 'date':existing_appointment['date']
+                 "start_time":existing_appointment['start_time'],
+                "end_time":existing_appointment['end_time'],
+                'date':existing_appointment['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
@@ -626,9 +627,9 @@ Genpact Team
             "event_details": {
                 "email": "",
                 "details": f"The appointment confirmation has been received for Case ID: {case_id} at {str(datetime.now())}",
-                #  "start_time":existing_appointment['start_time'],
-                # "end_time":existing_appointment['end_time'],
-                # 'date':existing_appointment['date']
+                 "start_time":existing_appointment['start_time'],
+                "end_time":existing_appointment['end_time'],
+                'date':existing_appointment['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
@@ -640,9 +641,9 @@ Genpact Team
             "event_details": {
                 "email": "",
                 "details": f"The appointment with Case ID: {case_id} is ready for interview at {str(datetime.now())}",
-                #  "start_time":existing_appointment['start_time'],
-                # "end_time":existing_appointment['end_time'],
-                # 'date':existing_appointment['date']
+                 "start_time":existing_appointment['start_time'],
+                "end_time":existing_appointment['end_time'],
+                'date':existing_appointment['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
