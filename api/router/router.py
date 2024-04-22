@@ -482,13 +482,10 @@ Best Regards,
                    
 Genpact Team
 """)
-        events_to_insert = []
-
-        # Define the events to be inserted
-        events = [
-            {
-                "event_name": "Appointment notification sent",
-                "event_details": {"email": f"""
+        event1_details = {
+            "event_name": "Appointment notification is sent",
+            "event_details": {
+                "email": f"""
 From: Someshwar.Garud@genpact.com
 To: {Customer_email}
 
@@ -507,29 +504,44 @@ If you have any specific requests or questions prior to our meeting, do not hesi
 We look forward to our conversation and are here to assist you with any questions you may have prior to our meeting.
 
 Warm regards,
-Genpact Team 
-""", 
-
-"details": f"Appointment notification successfully sent at {str(datetime.now())}"}
+Genpact Team
+                """,
+                "details": f"Appointment notification successfully sent to {Customer_email} at {str(datetime.now())}"
             },
-            {
-                "event_name": "Awaiting Customer Response",
-                "event_details": {"email": "", "details": f"Awaiting customer response for Case ID: {case_id} at {str(datetime.now())}"}
-            }
-        ]
+            "timestamp": str(datetime.now()),
+            "case_id": case_id,
+            "status": "Appointment Notification Sent"
+        }
 
-        for event in events:
-            completed = {}
-            completed["timestamp"] = str(datetime.now())
-            completed["case_id"] = case_id
-            completed["status"] = "completed"
-            completed.update(event)  # Update completed dictionary with event details
+        event2_details = {
+            "event_name": "Customer Response is awaiting",
+            "event_details": {
+                "email": "",
+                "details": f"Awaiting customer response for Case ID: {case_id} at {str(datetime.now())}"
+            },
+            "timestamp": str(datetime.now()),
+            "case_id": case_id,
+            "status": "Awaiting Customer Response"
+        }
 
-            new_event = Event(**completed)
-            events_to_insert.append(new_event)
+        event3_details = {
+            "event_name": "The appointment confirmation is received",
+            "event_details": {
+                "email": "",
+                "details": f"The appointment confirmation has been received for Case ID: {case_id} at {str(datetime.now())}"
+            },
+            "timestamp": str(datetime.now()),
+            "case_id": case_id,
+            "status": "Appointment Confirmation Received"
+        }
 
-        db.add_all(events_to_insert)
-        db.commit()
+        event1 = Event(**event1_details)
+        event2 = Event(**event2_details)
+        event3 = Event(**event3_details)
+
+        db.add(event1)
+        db.add(event2)
+        db.add(event3)
         db.commit()
         return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id, "case_id":case_id})
     except Exception as e:
@@ -700,7 +712,7 @@ WHERE genpact.appointment.id = :appointment_id;""")
         db.execute(query2, {"appointment_id": appointment_id})
 
         event_details = {
-            "event_name": "Appointment Cancelled",
+            "event_name": "Appointment has been cancelled",
             "event_details": {
                 "email": f"""
 From: Someshwar.Garud@genpact.com
@@ -722,7 +734,7 @@ Genpact Team
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
-            "status": "cancelled"
+            "status": "Appointment Cancelled"
         }
         
         new_event = Event(**event_details)
@@ -797,7 +809,7 @@ Genpact Team
 
         # Commit transaction
         event_details = {
-            "event_name": "Appointment Rescheduled",
+            "event_name": "Appointment has been rescheduled",
             "event_details": {
                 "email": f"""
 From: Someshwar.Garud@genpact.com
@@ -818,7 +830,7 @@ Genpact Team
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
-            "status": "rescheduled"
+            "status": "Appointment Rescheduled"
         }
         
         new_event = Event(**event_details)
@@ -1378,35 +1390,46 @@ async def get_event_logs(case_id:str, db: Session = Depends(get_db)):
 @app.post('/appointment/completed', tags=["appoinment"])
 async def mark_appointment_as_completed(case_id: str, db: Session = Depends(get_db)):
     try:
-        events_to_insert = []
-
-        # Define the events to be inserted
-        events = [
-            {
-                "event_name": "Appointment Completed",
-                "event_details": {"email": "", "details": f"Appointment completed successfully at {str(datetime.now())}"}
+        event1_details = {
+            "event_name": "Appointment has been completed",
+            "event_details": {
+                "email": "",
+                "details": f"Appointment with Case ID: {case_id} has been completed at {str(datetime.now())}"
             },
-            {
-                "event_name": "Case Successfully Completed",
-                "event_details": {"email": "", "details": f"Case Successfully Completed at {str(datetime.now())}"}
+            "timestamp": str(datetime.now()),
+            "case_id": case_id,
+            "status": "Appointment Completed"
+        }
+
+        event2_details = {
+            "event_name": "Case has been successfully completed",
+            "event_details": {
+                "email": "",
+                "details": f"The case with Case ID: {case_id} has been successfully completed at {str(datetime.now())}"
             },
-            {
-                "event_name": "Case Closed",
-                "event_details": {"email": "", "details": f"Case Closed at {str(datetime.now())}"}
-            }
-        ]
+            "timestamp": str(datetime.now()),
+            "case_id": case_id,
+            "status": "Case Successfully Completed"
+        }
 
-        for event in events:
-            completed = {}
-            completed["timestamp"] = str(datetime.now())
-            completed["case_id"] = case_id
-            completed["status"] = "completed"
-            completed.update(event)  # Update completed dictionary with event details
+        event3_details = {
+            "event_name": "Case has been successfully closed",
+            "event_details": {
+                "email": "",
+                "details": f"The case with Case ID: {case_id} has been successfully closed at {str(datetime.now())}"
+            },
+            "timestamp": str(datetime.now()),
+            "case_id": case_id,
+            "status": "Case Closed"
+        }
 
-            new_event = Event(**completed)
-            events_to_insert.append(new_event)
+        event1 = Event(**event1_details)
+        event2 = Event(**event2_details)
+        event3 = Event(**event3_details)
 
-        db.add_all(events_to_insert)
+        db.add(event1)
+        db.add(event2)
+        db.add(event3)
         db.commit()
 
         return ResponseModel(message="Appointment marked completed.")
