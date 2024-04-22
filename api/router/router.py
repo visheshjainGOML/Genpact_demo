@@ -346,6 +346,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         case_id = str(uuid.uuid4())
         case_id = case_id[:8]
         customer = customer.__dict__
+        print(customer)
         customer['case_id'] = case_id
         new_customer = Customer(**customer)
         db.add(new_customer)
@@ -481,6 +482,54 @@ Best Regards,
                    
 Genpact Team
 """)
+        events_to_insert = []
+
+        # Define the events to be inserted
+        events = [
+            {
+                "event_name": "Appointment notification sent",
+                "event_details": {"email": f"""
+From: Someshwar.Garud@genpact.com
+To: {Customer_email}
+
+Subject: Confirmation of Your Scheduled Appointment - Case ID: {case_id}
+
+Case ID: {case_id}
+We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
+
+To view the details of your appointment, please click the following link: https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
+Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
+
+Reschedule Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
+Cancel Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
+
+If you have any specific requests or questions prior to our meeting, do not hesitate to contact us directly through this email.
+We look forward to our conversation and are here to assist you with any questions you may have prior to our meeting.
+
+Warm regards,
+Genpact Team 
+""", 
+
+"details": f"Appointment notification successfully sent at {str(datetime.now())}"}
+            },
+            {
+                "event_name": "Awaiting Customer Response",
+                "event_details": {"email": "", "details": f"Awaiting customer response for Case ID: {case_id} at {str(datetime.now())}"}
+            }
+        ]
+
+        for event in events:
+            completed = {}
+            completed["timestamp"] = str(datetime.now())
+            completed["case_id"] = case_id
+            completed["status"] = "completed"
+            completed.update(event)  # Update completed dictionary with event details
+
+            new_event = Event(**completed)
+            events_to_insert.append(new_event)
+
+        db.add_all(events_to_insert)
+        db.commit()
         db.commit()
         return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id, "case_id":case_id})
     except Exception as e:
@@ -747,6 +796,33 @@ Genpact Team
                    The booked appointment has been rescheduled""")
 
         # Commit transaction
+        event_details = {
+            "event_name": "Appointment Rescheduled",
+            "event_details": {
+                "email": f"""
+From: Someshwar.Garud@genpact.com
+To: {Customer_email}
+
+Subject: Confirmation of Your Rescheduled Appointment - Case ID: {case_id}
+
+Case ID: {case_id}
+We have successfully updated your appointment details as requested. Thank you for continuing to choose us for your needs!
+
+Please review the updated appointment information to ensure everything is correct. If you need further adjustments or have specific requirements for our meeting, feel free to reach out to us directly through this email.
+
+Best Regards,
+
+Genpact Team
+""",
+                "details": f"Appointment Rescheduled for Case ID {case_id}"
+            },
+            "timestamp": str(datetime.now()),
+            "case_id": case_id,
+            "status": "rescheduled"
+        }
+        
+        new_event = Event(**event_details)
+        db.add(new_event)
         db.commit()
         # Return success message
         return {"message": "Appointment updated successfully."}
