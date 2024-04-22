@@ -112,6 +112,10 @@ class AgentSchedule(Base):
 class Appointment(Base):
     __table__ = Table('appointment', Base.metadata,
                       schema=schema, autoload_with=engine)
+    
+class Event(Base):
+    __table__ = Table('event', Base.metadata,
+                      schema=schema, autoload_with=engine)
 
 
 
@@ -261,6 +265,9 @@ class CustomerSchema(BaseModel):
     product_id: int
     pre_screening: dict = None
     case_id: str
+    email_body: str
+    email_subject: str
+    email_author: str
 
 
 class ProductSchema(BaseModel):
@@ -653,6 +660,7 @@ WHERE genpact.appointment.id = :appointment_id;""")
     finally:
         # Close session
         db.close()
+
 
 @app.post("/update_appointment/{appointment_id}", tags=['appointment'])
 async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment, db: Session = Depends(get_db)):
@@ -1233,6 +1241,31 @@ async def agent_login(agent_info:dict, db: Session = Depends(get_db)):
     finally:
         # Close session
         db.close()
+
+
+@app.post('/get_logs', tags=["events"])
+async def get_event_logs(case_id:str, db: Session = Depends(get_db)):
+    try:
+        results = db.query(Event).filter(Event.case_id == case_id)
+        results = format_db_response(results)
+        print(results)
+        formatted_results = []
+        for result in results:
+            print(result)
+        # db.commit()
+        # db.refresh(new_customer)
+
+        return ResponseModel(message="Logs successful.",payload={"data":results})
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
+
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error getting logs: {e}")
+    finally:
+        # Close session
+        db.close()
+
 
 @app.post('/agents/update/leave-shift/{agent_id}', tags=["agent"])
 async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(get_db)):
