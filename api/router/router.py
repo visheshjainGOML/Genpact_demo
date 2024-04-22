@@ -351,26 +351,6 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         new_customer = Customer(**customer)
         db.add(new_customer)
 
-        event_data = {
-            'status': 'New Email Received',
-            'event_name': 'A new email has been received',
-            'event_details': {
-                'from': "Someshwar.Garud@genpact.com",
-                'to': new_customer.email_id,
-                'subject': new_customer.email_subject,
-                'body': new_customer.email_body
-            },
-            'timestamp': str(datetime.now()),
-            'case_id': case_id
-        }
-        new_event = Event(**event_data)
-        db.add(new_event)
-
-        db.commit()
-        db.refresh(new_customer)
-
-        db.refresh(new_event)
-
         send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
@@ -383,6 +363,39 @@ We look forward to meeting you and are here to assist you every step of the way.
 Warm regards
 
 Genpact Team """)
+        event1_data = {
+            'status': 'New Email Received',
+            'event_name': 'A new email has been received',
+            'event_details': {"email":f"""
+From: Someshwar.Garud@genpact.com
+To: {new_customer.email_id}
+
+Subject: {new_customer.email_subject}
+
+{new_customer.email_body}
+""",
+"details": f"New Email has been received from {new_customer.email_id} at {str(datetime.now())}"
+            },
+            'timestamp': str(datetime.now()),
+            'case_id': case_id
+        }
+
+        event2_data = {
+            'status': 'Unique Case ID created',
+            'event_name': 'A unique Case ID has been created',
+            'event_details': {
+                "email":"",
+                "details":f"A new unique Case ID has been created"
+            },
+            'timestamp': str(datetime.now()),
+            'case_id': case_id
+        }
+        event1 = Event(**event1_data)
+        event2 = Event(**event2_data)
+        db.add(event1)
+        db.add(event2)
+        db.commit()
+        db.refresh(new_customer)
 
         # await send_email(email, user_id, product_id)
         return ResponseModel(message=success_message, payload={"customer_id": new_customer.id, "case_id": case_id})
@@ -697,7 +710,7 @@ async def cancel_appointment_route(appointment_id: int,reason:str, db: Session =
             agent_email = query.first()
             agent_email = agent_email.agent_email
             send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}", f"""
-                       Case ID: {case_id}
+Case ID: {case_id}
 We have received your request and successfully cancelled your scheduled appointment. We are sorry to see you go, but understand that circumstances can change.
 
 If you wish to reschedule at a later time or if there is anything else we can assist you with, please do not hesitate to reach out.
@@ -709,8 +722,8 @@ Best regards,
 Genpact Team
 """)
             send_email("Someshwar.Garud@genpact.com", agent_email, f"appointment Cancelled - Case ID: {case_id}", f"""
-                       Case ID: {case_id}
-                       Hello, your scheduled appointment has been cancelled""")
+Case ID: {case_id}
+Hello, your scheduled appointment has been cancelled""")
         except:
             return ResponseModel(message="No appointment found")
         query1 = text("""
@@ -1402,6 +1415,57 @@ async def get_event_logs(case_id:str, db: Session = Depends(get_db)):
 
         # Raise HTTPException with error message
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error getting logs: {e}")
+    finally:
+        # Close session
+        db.close()
+
+@app.post('/send_reminder', tags=["events"])
+async def send_reminder(case_id: str, db: Session = Depends(get_db)):
+    try:
+        # Fetch customer details
+        customer = db.query(Customer).filter(Customer.case_id == case_id).first()
+        
+        if not customer:
+            return ResponseModel(message="No customer found.", payload={"data": []})
+        
+        email_id = customer.email_id
+        customer_name = customer.username  # Assuming you have a 'username' field in the Customer model
+        
+        # Fetch appointment details using customer_id
+        appointment_query = db.query(Appointment).filter(Appointment.customer_id == customer.id).first()
+        
+        if not appointment_query:
+            return ResponseModel(message="No appointment found.", payload={"data": []})
+        
+        appointment_date = appointment_query.scheduled_at.strftime('%Y-%m-%d')
+        
+        # Fetch slot details using appointment_id
+        slot_query = db.query(AgentSchedule).filter(AgentSchedule.appointment_id == appointment_query.id).first()
+        
+        if not slot_query:
+            return ResponseModel(message="No slot found.", payload={"data": []})
+        
+        start_time = slot_query.start_time.strftime('%H:%M')
+        end_time = slot_query.end_time.strftime('%H:%M')
+        
+        send_email("Someshwar.Garud@genpact.com", 'atharva.patil@goml.io', f"Appointment Reminder - Case ID: {case_id}", f"""
+Hi {customer_name},
+
+Your appointment is scheduled for {appointment_date} from {start_time} to {end_time}. Please make sure to attend your appointment on time.
+
+Best Regards,
+Genpact Team
+                   """)
+        
+        return ResponseModel(message="Email sent successfully.")
+    
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
+
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error sending reminder: {e}")
+    
     finally:
         # Close session
         db.close()
