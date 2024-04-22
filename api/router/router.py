@@ -350,8 +350,27 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         customer['case_id'] = case_id
         new_customer = Customer(**customer)
         db.add(new_customer)
+
+        event_data = {
+            'status': 'New Email Received',
+            'event_name': 'A new email has been received',
+            'event_details': {
+                'from': "Someshwar.Garud@genpact.com",
+                'to': new_customer.email_id,
+                'subject': new_customer.email_subject,
+                'body': new_customer.email_body
+            },
+            'timestamp': str(datetime.now()),
+            'case_id': case_id
+        }
+        new_event = Event(**event_data)
+        db.add(new_event)
+
         db.commit()
         db.refresh(new_customer)
+
+        db.refresh(new_event)
+
         send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
@@ -456,7 +475,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         customer_data = query.first()
         Customer_email= customer_data.email_id
         case_id = customer_data.case_id
-        
+
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
 Case ID: {case_id}
 We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
