@@ -582,9 +582,9 @@ Warm regards,
 Genpact Team
                 """,
                 "details": f"Appointment notification successfully sent to {Customer_email} at {str(datetime.now())}",
-                   "start_time":existing_appointment['start_time'],
-                "end_time":existing_appointment['end_time'],
-                'date':existing_appointment['date']
+                #    "start_time":existing_appointment['start_time'],
+                # "end_time":existing_appointment['end_time'],
+                # 'date':existing_appointment['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
@@ -596,9 +596,9 @@ Genpact Team
             "event_details": {
                 "email": "",
                 "details": f"Awaiting customer response for Case ID: {case_id} at {str(datetime.now())}",
-                 "start_time":existing_appointment['start_time'],
-                "end_time":existing_appointment['end_time'],
-                'date':existing_appointment['date']
+                #  "start_time":existing_appointment['start_time'],
+                # "end_time":existing_appointment['end_time'],
+                # 'date':existing_appointment['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
@@ -610,9 +610,9 @@ Genpact Team
             "event_details": {
                 "email": "",
                 "details": f"The appointment confirmation has been received for Case ID: {case_id} at {str(datetime.now())}",
-                 "start_time":existing_appointment['start_time'],
-                "end_time":existing_appointment['end_time'],
-                'date':existing_appointment['date']
+                #  "start_time":existing_appointment['start_time'],
+                # "end_time":existing_appointment['end_time'],
+                # 'date':existing_appointment['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
@@ -624,9 +624,9 @@ Genpact Team
             "event_details": {
                 "email": "",
                 "details": f"The appointment with Case ID: {case_id} is ready for interview at {str(datetime.now())}",
-                 "start_time":existing_appointment['start_time'],
-                "end_time":existing_appointment['end_time'],
-                'date':existing_appointment['date']
+                #  "start_time":existing_appointment['start_time'],
+                # "end_time":existing_appointment['end_time'],
+                # 'date':existing_appointment['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
