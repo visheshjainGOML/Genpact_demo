@@ -910,21 +910,8 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         query = db.query(Agent).filter(Agent.id == agent_id)
         agent_email = query.first()
         agent_email = agent_email.agent_email
-        send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}", f"""
-Case ID: {case_id}
-We have successfully updated your appointment details as requested. Thank you for continuing to choose us for your needs!
-
-Please review the updated appointment information to ensure everything is correct. If you need further adjustments or have specific requirements for our meeting, feel free to reach out to us directly through this email.
-
-Best Regards,
-
-Genpact Team
-                   """,start_time_obj,end_time_obj,date_obj)
-        send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Rescheduled - Case ID: {case_id}", f"""
-                   Case ID: {case_id}
-                   The booked appointment has been rescheduled""",start_time_obj,end_time_obj,date_obj)
-
-        # Commit transaction
+        print("111111111111111111111111111111111111")
+         # Commit transaction
         event_details = {
             "event_name": "Appointment has been rescheduled",
             "event_details": {
@@ -944,9 +931,9 @@ Best Regards,
 Genpact Team
 """,
                 "details": f"Appointment Rescheduled for Case ID {case_id}",
-                "start_time":data['start_time'],
-                "end_time":data['end_time'],
-                'date':data['date']
+                # "start_time":data['start_time'],
+                # "end_time":data['end_time'],
+                # 'date':data['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
@@ -956,6 +943,23 @@ Genpact Team
         new_event = Event(**event_details)
         db.add(new_event)
         db.commit()
+        print("111111111111111111111111111111111111")
+
+        send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}", f"""
+Case ID: {case_id}
+We have successfully updated your appointment details as requested. Thank you for continuing to choose us for your needs!
+
+Please review the updated appointment information to ensure everything is correct. If you need further adjustments or have specific requirements for our meeting, feel free to reach out to us directly through this email.
+
+Best Regards,
+
+Genpact Team
+                   """,start_time_obj,end_time_obj,date_obj)
+        send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Rescheduled - Case ID: {case_id}", f"""
+                   Case ID: {case_id}
+                   The booked appointment has been rescheduled""",start_time_obj,end_time_obj,date_obj)
+
+       
         # Return success message
         return {"message": "Appointment updated successfully."}
     except Exception as e:
