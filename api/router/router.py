@@ -350,6 +350,15 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         customer['case_id'] = case_id
         new_customer = Customer(**customer)
         db.add(new_customer)
+        unwanted_text = (
+        ">\n\n\nWARNING\u00a0-\u00a0This email originated outside of Genpact.\n"
+        "Do\u00a0not\u00a0reply,\u00a0click on links\u00a0or\u00a0open attachments\u00a0unless you recognize the sender\n"
+        "and know the content is safe. If you believe the content of this email may be\n"
+        "unsafe, please forward it as an attachment to\u00a0thislooksphishy@genpact.com\u00a0or use\n"
+        "the 'This Looks Phishy' Outlook button.\n\n"
+    )
+        body = body.replace(unwanted_text, "")
+        body = body.replace("\\n", "\n")
 
         send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
@@ -372,7 +381,7 @@ To: {new_customer.email_id}
 
 Subject: {new_customer.email_subject}
 
-{new_customer.email_body}
+{body}
 """,
 "details": f"New Email has been received from {new_customer.email_id} at {str(datetime.now())}"
             },
@@ -567,13 +576,26 @@ Genpact Team
             "status": "Appointment Confirmation Received"
         }
 
+        event4_details = {
+            "event_name": "The appointment is ready for interview",
+            "event_details": {
+                "email": "",
+                "details": f"The appointment with Case ID: {case_id} is ready for interview at {str(datetime.now())}"
+            },
+            "timestamp": str(datetime.now()),
+            "case_id": case_id,
+            "status": "Ready For Interview"
+        }
+
         event1 = Event(**event1_details)
         event2 = Event(**event2_details)
         event3 = Event(**event3_details)
+        event4 = Event(**event4_details)
 
         db.add(event1)
         db.add(event2)
         db.add(event3)
+        db.add(event4)
         db.commit()
         return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id, "case_id":case_id})
     except Exception as e:
