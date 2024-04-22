@@ -1682,13 +1682,13 @@ class QuestionAnswerSchema(BaseModel):
     case_id :str
     question_answer_pair: dict
 
-@app.post('/question_answer/create')
+@app.post('/question_answer/create',status_code=201)
 def question_answer_create(data:QuestionAnswerSchema,db: Session = Depends(get_db)):
     try:
-        new_product = Product(**data.dict())
+        new_product = QuestionAnswer(**data.dict())
         db.add(new_product)
         db.commit()
         db.refresh(new_product)
-        return ResponseModel(message=success_message, payload={"product_id": new_product.id})
+        return ResponseModel(message=success_message, payload={"question_answer_id": new_product.id})
     except Exception as e:
-        return HTTPException(status_code=400,detail="unable to create new record "+e)
+        return HTTPException(status_code=400,detail=f"unable to create new record {e}")
