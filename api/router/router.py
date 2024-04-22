@@ -290,6 +290,12 @@ class AppointmentSchema(BaseModel):
     end_time: str
     customer_timezone: str
 
+class EventSchema(BaseModel):
+    status: str
+    event_name: str
+    timestamp: str
+    event_details: Optional[dict] = {}
+    case_id: str
 
 class OriginalAppointmentSchema(BaseModel):
     customer_id: int
@@ -1260,6 +1266,56 @@ async def get_event_logs(case_id:str, db: Session = Depends(get_db)):
 
         # Raise HTTPException with error message
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error getting logs: {e}")
+    finally:
+        # Close session
+        db.close()
+
+@app.post('/appointment/completed', tags=["appoinment"])
+async def mark_appointment_as_completed(case_id: str, db: Session = Depends(get_db)):
+    try:
+        events_to_insert = []
+
+        # Define the events to be inserted
+        events = [
+            {
+                "event_name": "Appointment Completed",
+                "event_details": {"email": "", "details": f"Appointment completed successfully at {str(datetime.now())}"}
+            },
+            {
+                "event_name": "Case Successfully Completed",
+                "event_details": {"email": "", "details": f"Case Successfully Completed at {str(datetime.now())}"}
+            },
+            {
+                "event_name": "Case Closed",
+                "event_details": {"email": "", "details": f"Case Closed at {str(datetime.now())}"}
+            }
+        ]
+
+        for event in events:
+            completed = {}
+            completed["timestamp"] = str(datetime.now())
+            completed["case_id"] = case_id
+            completed["status"] = "completed"
+            completed.update(event)  # Update completed dictionary with event details
+
+            new_event = Event(**completed)
+            events_to_insert.append(new_event)
+
+        db.add_all(events_to_insert)
+        db.commit()
+
+        return ResponseModel(message="Appointment marked completed.")
+    
+    except Exception as e:
+        # Rollback transaction in case of error
+        db.rollback()
+        
+        # Log the exception details
+        print(f"Error marking appointment as completed: {e}")
+        
+        # Raise HTTPException with error message
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error marking appointment as completed: {e}")
+    
     finally:
         # Close session
         db.close()
