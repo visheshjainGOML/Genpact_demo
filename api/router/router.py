@@ -18,12 +18,17 @@ from dotenv import load_dotenv
 import os   
 from datetime import datetime, time
 import pytz
+from icalendar import Calendar, Event
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
+
 
 load_dotenv()
 
 # --------- Constants -------------
 schema = 'genpact'
-SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:postgres123@d1.c1mggvnkwauf.us-east-1.rds.amazonaws.com:5432/demo'#os.getenv('postgres_url')
+SQLALCHEMY_DATABASE_URL = os.getenv('postgres_url')
 success_message = "Request processed successfully "
 
 # ----------- DB schema & connection -------------
@@ -41,16 +46,51 @@ client = boto3.client(
     aws_secret_access_key=AWS_SECRET_KEY
 )
 
-def send_email(sender, recipient, subject, body):
-    # Create an SES client
-    # Try to send the email
+def send_email(sender, recipient, subject, body, start_time=None, end_time=None, date=None):
+    # Check if date, start time, and end time are provided
+    if start_time and end_time and date:
+        ics_content = create_calendar_invite(sender, recipient, subject, body, start_time, end_time, date)
+        send_email_with_attachment(sender, recipient, subject, body, ics_content)
+    else:
+        send_plain_email(sender, recipient, subject, body)
+
+def create_calendar_invite(sender, recipient, subject, body, start_time, end_time, date):
+    cal = Calendar()
+    event = Event()
+    event.add('summary', subject)
+    event.add('dtstart', datetime.combine(date, start_time))
+    event.add('dtend', datetime.combine(date, end_time))
+    event.add('description', body)
+    cal.add_component(event)
+    return cal.to_ical()
+def send_email_with_attachment(sender, recipient, subject, body, attachment_content):
+    msg = MIMEMultipart()
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = recipient
+
+    text = MIMEText(body)
+    msg.attach(text)
+
+    attachment = MIMEApplication(attachment_content, "octet-stream")
+    attachment.add_header('Content-Disposition', 'attachment', filename="invite.ics")
+    msg.attach(attachment)
+
     try:
-        # Provide the contents of the email
+        response = client.send_raw_email(
+            Source=sender,
+            Destinations=[recipient],
+            RawMessage={'Data': msg.as_string()}
+        )
+        print("Email with calendar invite sent! Message ID:", response['MessageId'])
+    except ClientError as e:
+        print("Error sending email: ", e.response['Error']['Message'])
+
+def send_plain_email(sender, recipient, subject, body):
+    try:
         response = client.send_email(
             Destination={
-                'ToAddresses': [
-                    recipient,
-                ],
+                'ToAddresses': [recipient],
             },
             Message={
                 'Body': {
@@ -66,11 +106,10 @@ def send_email(sender, recipient, subject, body):
             },
             Source=sender,
         )
+        print("Plain email sent! Message ID:", response['MessageId'])
     except ClientError as e:
-        # Print error if something goes wrong
         print("Error sending email: ", e.response['Error']['Message'])
-    else:
-        print("Email sent! Message ID:", response['MessageId'])
+
 
 def setup_db():
     engine = create_engine(SQLALCHEMY_DATABASE_URL,
@@ -366,14 +405,16 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
 
 
         db.add(new_customer)
-
-
+        db.commit()
+        db.refresh(new_customer)
+        print(new_customer.id)
+        customer_id = new_customer.id
         send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={new_customer.id}&product_id={new_customer.product_id}&case_id={case_id}
+https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
@@ -517,7 +558,8 @@ If you have any specific requests or questions prior to our meeting, do not hesi
 We look forward to our conversation and are here to assist you with any questions you may have prior to our meeting.
 Warm regards,
 Genpact Team 
-""")
+""",start_time_obj,end_time_obj,date_obj)
+
         send_email("Someshwar.Garud@genpact.com", agent_email, f"New Appointment Booked - Case ID: {case_id}", f""" 
 Case ID: {case_id}
 We are pleased to inform you that a new appointment has been booked. Please log in to your agent portal to view the details and prepare for the upcoming meeting.
@@ -530,7 +572,7 @@ Thank you for your dedication and hard work. Let's continue providing exceptiona
 Best Regards,
                    
 Genpact Team
-""")
+""",start_time_obj,end_time_obj,date_obj)
         event1_details = {
             "event_name": "Appointment notification is sent",
             "event_details": {
@@ -555,7 +597,10 @@ We look forward to our conversation and are here to assist you with any question
 Warm regards,
 Genpact Team
                 """,
-                "details": f"Appointment notification successfully sent to {Customer_email} at {str(datetime.now())}"
+                "details": f"Appointment notification successfully sent to {Customer_email} at {str(datetime.now())}",
+                   "start_time":existing_appointment['start_time'],
+                "end_time":existing_appointment['end_time'],
+                'date':existing_appointment['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
@@ -566,7 +611,10 @@ Genpact Team
             "event_name": "Customer Response is awaiting",
             "event_details": {
                 "email": "",
-                "details": f"Awaiting customer response for Case ID: {case_id} at {str(datetime.now())}"
+                "details": f"Awaiting customer response for Case ID: {case_id} at {str(datetime.now())}",
+                 "start_time":existing_appointment['start_time'],
+                "end_time":existing_appointment['end_time'],
+                'date':existing_appointment['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
@@ -577,7 +625,10 @@ Genpact Team
             "event_name": "The appointment confirmation is received",
             "event_details": {
                 "email": "",
-                "details": f"The appointment confirmation has been received for Case ID: {case_id} at {str(datetime.now())}"
+                "details": f"The appointment confirmation has been received for Case ID: {case_id} at {str(datetime.now())}",
+                 "start_time":existing_appointment['start_time'],
+                "end_time":existing_appointment['end_time'],
+                'date':existing_appointment['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
@@ -588,7 +639,10 @@ Genpact Team
             "event_name": "The appointment is ready for interview",
             "event_details": {
                 "email": "",
-                "details": f"The appointment with Case ID: {case_id} is ready for interview at {str(datetime.now())}"
+                "details": f"The appointment with Case ID: {case_id} is ready for interview at {str(datetime.now())}",
+                 "start_time":existing_appointment['start_time'],
+                "end_time":existing_appointment['end_time'],
+                'date':existing_appointment['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
@@ -864,10 +918,10 @@ Please review the updated appointment information to ensure everything is correc
 Best Regards,
 
 Genpact Team
-                   """)
+                   """,start_time_obj,end_time_obj,date_obj)
         send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Rescheduled - Case ID: {case_id}", f"""
                    Case ID: {case_id}
-                   The booked appointment has been rescheduled""")
+                   The booked appointment has been rescheduled""",start_time_obj,end_time_obj,date_obj)
 
         # Commit transaction
         event_details = {
@@ -888,7 +942,10 @@ Best Regards,
 
 Genpact Team
 """,
-                "details": f"Appointment Rescheduled for Case ID {case_id}"
+                "details": f"Appointment Rescheduled for Case ID {case_id}",
+                "start_time":data['start_time'],
+                "end_time":data['end_time'],
+                'date':data['date']
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
