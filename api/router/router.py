@@ -349,6 +349,22 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         print(customer)
         customer['case_id'] = case_id
         new_customer = Customer(**customer)
+
+        # text = """abcdef"""
+
+        text = """WARNING - This email originated outside of Genpact.
+                  Do not reply, click on links or open attachments unless you recognize the sender
+                  and know the content is safe. If you believe the content of this email may be
+                  unsafe, please forward it as an attachment to thislooksphishy@genpact.com or use
+                  the 'This Looks Phishy' Outlook button."""
+
+        if text in new_customer.email_body:
+            # Remove the warning message
+            new_customer.email_body = new_customer.email_body.replace(text, "").strip()
+
+        print(new_customer.email_body)
+
+
         db.add(new_customer)
 
 
