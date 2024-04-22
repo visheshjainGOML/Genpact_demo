@@ -389,6 +389,8 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         customer['case_id'] = case_id
         new_customer = Customer(**customer)
         db.add(new_customer)
+        db.commit()
+        db.refresh(new_customer)
         print(new_customer.id)
         customer_id = new_customer.id
         send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
