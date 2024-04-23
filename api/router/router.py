@@ -1848,6 +1848,8 @@ https://main.d2el3bzkhp7t3w.amplifyapp.com/agent/appointmentDetails?appointment_
             }
         ]
 
+        
+
         for event_data in events:
             # Convert time objects to strings for JSON serialization
             event_data["event_details"]["start_time"] = event_data["event_details"]["start_time"]
