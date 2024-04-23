@@ -1972,7 +1972,7 @@ FROM
             cust.email_id AS "customer_email",
             cust.mobile_no AS "customer_phone",
             schedule.appointment_description AS "appointment_description",
-            schedule.agent_id AS 'agent_id'
+            schedule.agent_id AS 'agent_id',
             schedule.reason AS "comments",
             cust.product_id AS "products",
             agent.full_name AS "agent_name",
