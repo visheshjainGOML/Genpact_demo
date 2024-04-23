@@ -483,7 +483,7 @@ async def create_agent(agent: AgentSchema, db: Session = Depends(get_db)):
         db.add(new_agent)
         db.commit()
         db.refresh(new_agent)
-        return ResponseModel(message=success_message, payload={"agent_id": new_agent.id, "case_id": new_agent.case_id})
+        return ResponseModel(message=success_message, payload={"agent_id": new_agent.id})
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
