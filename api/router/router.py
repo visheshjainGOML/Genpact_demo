@@ -1816,3 +1816,60 @@ def create_or_update_frequency(frequency: FrequencySchema, db: Session = Depends
         raise HTTPException(status_code=500, detail="Internal server error")
     finally:
         db.close()
+
+
+@app.get("/admin/appointments/list", tags=['appointment'])
+def get_all_agent_appointments(db: Session = Depends(get_db)):
+    # Connect to the PostgreSQL database
+
+    # Execute raw SQL query
+    query = text("""
+        SELECT
+    main_query.*
+FROM
+    (
+        SELECT
+            cust.case_id AS "Case ID",
+            schedule.date AS "Appointment Date",
+            schedule.start_time AS "Start Time",
+            schedule.end_time AS "End Time",
+            cust.username AS "Customer Name",
+            cust.email_id AS "Customer Email",
+            cust.mobile_no AS "Customer Phone",
+            schedule.appointment_description AS "Appointment Description",
+            schedule.reason AS "Comments",
+            cust.product_id AS "Products",
+            agent.full_name AS "Agent Name",
+            event.status AS "Status",
+            event.timestamp AS "Timestamp",
+            ROW_NUMBER() OVER (PARTITION BY cust.case_id ORDER BY event.timestamp DESC) AS row_num
+        FROM
+            genpact.customer AS cust
+       LEFT JOIN
+            genpact.agent_schedule AS schedule ON cust.id = schedule.customer_id
+       LEFT JOIN
+            genpact.event AS event ON cust.case_id = event.case_id
+       LEFT JOIN
+            genpact.agent AS agent ON schedule.agent_id = agent.id
+    ) AS main_query
+WHERE
+    main_query.row_num = 1 and main_query."Case ID" is not NULL
+ORDER BY
+    main_query."Case ID";
+    """)
+
+    # Execute the query
+    result = db.execute(query)
+    columns = result.keys()
+
+    # Convert each row into a dictionary with column names as keys
+    appointments_with_schedule = [
+        {col: val for col, val in zip(columns, row)} for row in result.fetchall()]
+
+    print(appointments_with_schedule, type(appointments_with_schedule))
+    # Close the connection
+    db.close()
+    # result = filter_json_by_time(appointments_with_schedule)
+    # return result
+
+    return appointments_with_schedule
