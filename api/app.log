@@ -1700,3 +1700,27 @@
 2024-04-23 12:23:34,248 - INFO - Request received: POST http://localhost:8000/appointment/change_agent?appointment_id=102&new_agent_id=17&reason=previous%20agent%20is%20not%20well
 2024-04-23 12:24:20,371 - INFO - Response code: 200
 2024-04-23 12:24:20,371 - INFO - Response code: 200
+2024-04-23 15:29:14,400 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-23 15:29:14,400 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-23 15:29:14,403 - INFO - Response code: 200
+2024-04-23 15:29:14,403 - INFO - Response code: 200
+2024-04-23 15:29:14,549 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-23 15:29:14,549 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-23 15:29:14,585 - INFO - Response code: 200
+2024-04-23 15:29:14,585 - INFO - Response code: 200
+2024-04-23 15:29:21,451 - INFO - Request received: GET http://localhost:8000/agents
+2024-04-23 15:29:21,451 - INFO - Request received: GET http://localhost:8000/agents
+2024-04-23 15:29:22,462 - INFO - Response code: 200
+2024-04-23 15:29:22,462 - INFO - Response code: 200
+2024-04-23 15:32:42,332 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=e527f749
+2024-04-23 15:32:42,332 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=e527f749
+2024-04-23 15:32:43,596 - INFO - Response code: 200
+2024-04-23 15:32:43,596 - INFO - Response code: 200
+2024-04-23 15:38:44,737 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=e527f749
+2024-04-23 15:38:44,737 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=e527f749
+2024-04-23 15:39:07,373 - INFO - Response code: 400
+2024-04-23 15:39:07,373 - INFO - Response code: 400
+2024-04-23 15:42:02,813 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=e527f749
+2024-04-23 15:42:02,813 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=e527f749
+2024-04-23 15:42:16,836 - INFO - Response code: 200
+2024-04-23 15:42:16,836 - INFO - Response code: 200

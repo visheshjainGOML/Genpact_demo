@@ -445,6 +445,18 @@ We look forward to meeting you and are here to assist you every step of the way.
 Warm regards
 
 Genpact Team """)
+        send_email("Someshwar.Garud@genpact.com", new_customer.email_author, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
+Case ID: {new_customer.case_id} 
+Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
+                   
+To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
+https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}
+ 
+We look forward to meeting you and are here to assist you every step of the way.
+
+Warm regards
+
+Genpact Team """)
         event1_data = {
             'status': 'New Email Received',
             'event_name': 'A new email has been received',
@@ -1563,7 +1575,7 @@ async def send_reminder(case_id: str, db: Session = Depends(get_db)):
         start_time = slot_query.start_time.strftime('%H:%M')
         end_time = slot_query.end_time.strftime('%H:%M')
         
-        send_email("Someshwar.Garud@genpact.com", {email_id}, f"Appointment Reminder - Case ID: {case_id}", f"""
+        send_email("Someshwar.Garud@genpact.com", ", ".join({email_id}), f"Appointment Reminder - Case ID: {case_id}", f"""
 Hi {customer_name},
 
 Your appointment is scheduled for {appointment_date} from {start_time} to {end_time}. Please make sure to attend your appointment on time.
@@ -1584,6 +1596,7 @@ Genpact Team
     finally:
         # Close session
         db.close()
+
 
 @app.post('/appointment/completed', tags=["appoinment"])
 async def mark_appointment_as_completed(case_id: str, db: Session = Depends(get_db)):
@@ -1847,8 +1860,6 @@ https://main.d2el3bzkhp7t3w.amplifyapp.com/agent/appointmentDetails?appointment_
                 "status": "Appointment Updated"
             }
         ]
-
-        
 
         for event_data in events:
             # Convert time objects to strings for JSON serialization
