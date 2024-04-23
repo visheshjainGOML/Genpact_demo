@@ -28,7 +28,7 @@ load_dotenv()
 
 # --------- Constants -------------
 schema = 'genpact'
-SQLALCHEMY_DATABASE_URL = os.getenv('postgres_url')
+SQLALCHEMY_DATABASE_URL = os.getenv('POSTGRES_URL')
 success_message = "Request processed successfully "
 
 # ----------- DB schema & connection -------------
@@ -154,6 +154,10 @@ class Appointment(Base):
     
 class Event(Base):
     __table__ = Table('event', Base.metadata,
+                      schema=schema, autoload_with=engine)
+
+class Template(Base):
+    __table__ = Table('templates', Base.metadata,
                       schema=schema, autoload_with=engine)
 
 
@@ -360,6 +364,13 @@ class UpdateAppointment(BaseModel):
     start_time: str
     end_time: str
     reason:str
+
+
+class TemplateSchema(BaseModel):
+    template_name: str
+    template_type: str
+    content: str
+
 # ---------- API endpoints -------------
 app = APIRouter()
 
@@ -397,6 +408,15 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
                   unsafe, please forward it as an attachment to thislooksphishy@genpact.com or use
                   the 'This Looks Phishy' Outlook button."""
 
+        # start_index = new_customer.email_body.find(text)
+        # if start_index != -1:
+        #     end_index = start_index + len(text)
+
+
+            # new_customer.email_body = new_customer.email_body[:start_index] + new_customer.email_body[end_index:]
+            #
+            # print(new_customer.email_body)
+
         if text in new_customer.email_body:
             # Remove the warning message
             new_customer.email_body = new_customer.email_body.replace(text, "").strip()
@@ -431,6 +451,7 @@ To: {new_customer.email_id}
 Subject: {new_customer.email_subject}
 
 {new_customer.email_body}
+
 """,
 "details": f"New Email has been received from {new_customer.email_id} at {str(datetime.now())}"
             },
@@ -460,6 +481,11 @@ Subject: {new_customer.email_subject}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+
+
+
 
 
 @app.post(path="/product/create", response_model=ResponseModel, tags=["product"], status_code=201)
@@ -1654,4 +1680,32 @@ async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(ge
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error updating agent: {e}")
     finally:
         # Close session
+        db.close()
+
+
+
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+@app.post("/templates/update", response_model=ResponseModel, tags=["templated"], status_code=201)
+def create_or_update_template(templates: TemplateSchema, db: Session = Depends(get_db)):
+    try:
+        logger.info("Starting template creation or update process")
+        db_template = db.query(Template).filter_by(template_name=templates.template_name, template_type=templates.template_type).first()
+
+        if db_template:
+            db_template.content = templates.content
+        else:
+            new_template = Template(**templates.dict())
+            db.add(new_template)
+
+        db.commit()
+        logger.info("Template created or updated successfully")
+        return ResponseModel(message="Updated successfully")
+    except Exception as e:
+        logger.exception("An error occurred during template creation or update process")
+        raise HTTPException(status_code=500, detail="Internal server error")
+    finally:
         db.close()
