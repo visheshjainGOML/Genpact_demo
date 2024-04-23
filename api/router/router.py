@@ -374,9 +374,6 @@ class UpdateAppointment(BaseModel):
     start_time: str
     end_time: str
     reason:str
-<<<<<<< HEAD
-=======
-
 
 class TemplateSchema(BaseModel):
     template_name: str
@@ -387,7 +384,6 @@ class FrequencySchema(BaseModel):
     minimum_days: str
     maximum_days: str
 
->>>>>>> cea5e1711dd522ea3301b7034242326e1ed29186
 # ---------- API endpoints -------------
 app = APIRouter()
 
@@ -1726,12 +1722,8 @@ def create_or_update_template(templates: TemplateSchema):
             db.add(new_template)
         
         db.commit()
-<<<<<<< HEAD
-        return ResponseModel(message="Template created or updated successfully")
-=======
         logger.info("Template created or updated successfully")
         return ResponseModel(message="Template Updated successfully")
->>>>>>> cea5e1711dd522ea3301b7034242326e1ed29186
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
     finally:
@@ -1741,7 +1733,6 @@ def create_or_update_template(templates: TemplateSchema):
 from fastapi import HTTPException, status
 from sqlalchemy import update
 
-<<<<<<< HEAD
 @app.post(path="/appointment/change_agent", response_model=ResponseModel, tags=["appointment"])
 async def change_appointment_agent(appointment_id: int, new_agent_id: int, reason: str, db: Session = Depends(get_db)):
     try:
@@ -1871,18 +1862,19 @@ https://main.d2el3bzkhp7t3w.amplifyapp.com/agent/appointmentDetails?appointment_
     
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-=======
+    
+
 @app.post("/reminderfrequency/update", response_model=ResponseModel, tags=["frequency"], status_code=201)
 def create_or_update_frequency(frequency: FrequencySchema, db: Session = Depends(get_db)):
     try:
-        db_frequency = db.query(Frequency).first()
+        db_frequency = db.query(frequency).first()
         if db_frequency:
             # If the record exists, update it
             db_frequency.minimum_days = frequency.minimum_days
             db_frequency.maximum_days = frequency.maximum_days
         else:
             # If the record doesn't exist, create a new one
-            new_frequency = Frequency(minimum_days=frequency.minimum_days, maximum_days=frequency.maximum_days)
+            new_frequency = frequency(minimum_days=frequency.minimum_days, maximum_days=frequency.maximum_days)
             db.add(new_frequency)
 
         db.commit()
@@ -1893,4 +1885,3 @@ def create_or_update_frequency(frequency: FrequencySchema, db: Session = Depends
         raise HTTPException(status_code=500, detail="Internal server error")
     finally:
         db.close()
->>>>>>> cea5e1711dd522ea3301b7034242326e1ed29186
