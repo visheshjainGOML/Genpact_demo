@@ -160,6 +160,10 @@ class Template(Base):
     __table__ = Table('templates', Base.metadata,
                       schema=schema, autoload_with=engine)
 
+class Frequency(Base):
+    __table__ = Table('frequency', Base.metadata,
+                      schema=schema, autoload_with=engine)
+
 
 
 
@@ -370,6 +374,10 @@ class TemplateSchema(BaseModel):
     template_name: str
     template_type: str
     content: str
+
+class FrequencySchema(BaseModel):
+    minimum_days: int
+    maximum_days: int
 
 # ---------- API endpoints -------------
 app = APIRouter()
@@ -1532,36 +1540,88 @@ async def get_event_logs(case_id:str, db: Session = Depends(get_db)):
         # Close session
         db.close()
 
+# @app.post('/send_reminder', tags=["events"])
+# async def send_reminder(case_id: str, db: Session = Depends(get_db)):
+#     try:
+#         # Fetch customer details
+#         customer = db.query(Customer).filter(Customer.case_id == case_id).first()
+#
+#         if not customer:
+#             return ResponseModel(message="No customer found.", payload={"data": []})
+#
+#         email_id = customer.email_id
+#         customer_name = customer.username  # Assuming you have a 'username' field in the Customer model
+#
+#         # Fetch appointment details using customer_id
+#         appointment_query = db.query(Appointment).filter(Appointment.customer_id == customer.id).first()
+#
+#         if not appointment_query:
+#             return ResponseModel(message="No appointment found.", payload={"data": []})
+#
+#         appointment_date = appointment_query.scheduled_at.strftime('%Y-%m-%d')
+#
+#         # Fetch slot details using appointment_id
+#         slot_query = db.query(AgentSchedule).filter(AgentSchedule.appointment_id == appointment_query.id).first()
+#
+#         if not slot_query:
+#             return ResponseModel(message="No slot found.", payload={"data": []})
+#
+#         start_time = slot_query.start_time.strftime('%H:%M')
+#         end_time = slot_query.end_time.strftime('%H:%M')
+#
+#         send_email("Someshwar.Garud@genpact.com", 'atharva.patil@goml.io', f"Appointment Reminder - Case ID: {case_id}", f"""
+# Hi {customer_name},
+#
+# Your appointment is scheduled for {appointment_date} from {start_time} to {end_time}. Please make sure to attend your appointment on time.
+#
+# Best Regards,
+# Genpact Team
+#                    """)
+#
+#         return ResponseModel(message="Email sent successfully.")
+#
+#     except Exception as e:
+#         # Rollback transaction in case of error
+#         db.rollback()
+#
+#         # Raise HTTPException with error message
+#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error sending reminder: {e}")
+#
+#     finally:
+#         # Close session
+#         db.close()
+
+
 @app.post('/send_reminder', tags=["events"])
 async def send_reminder(case_id: str, db: Session = Depends(get_db)):
     try:
         # Fetch customer details
         customer = db.query(Customer).filter(Customer.case_id == case_id).first()
-        
+
         if not customer:
             return ResponseModel(message="No customer found.", payload={"data": []})
-        
+
         email_id = customer.email_id
         customer_name = customer.username  # Assuming you have a 'username' field in the Customer model
-        
+
         # Fetch appointment details using customer_id
         appointment_query = db.query(Appointment).filter(Appointment.customer_id == customer.id).first()
-        
+
         if not appointment_query:
             return ResponseModel(message="No appointment found.", payload={"data": []})
-        
+
         appointment_date = appointment_query.scheduled_at.strftime('%Y-%m-%d')
-        
+
         # Fetch slot details using appointment_id
         slot_query = db.query(AgentSchedule).filter(AgentSchedule.appointment_id == appointment_query.id).first()
-        
+
         if not slot_query:
             return ResponseModel(message="No slot found.", payload={"data": []})
-        
+
         start_time = slot_query.start_time.strftime('%H:%M')
         end_time = slot_query.end_time.strftime('%H:%M')
-        
-        send_email("Someshwar.Garud@genpact.com", 'atharva.patil@goml.io', f"Appointment Reminder - Case ID: {case_id}", f"""
+
+        send_email("Someshwar.Garud@genpact.com", {email_id}, f"Appointment Reminder - Case ID: {case_id}", f"""
 Hi {customer_name},
 
 Your appointment is scheduled for {appointment_date} from {start_time} to {end_time}. Please make sure to attend your appointment on time.
@@ -1569,19 +1629,22 @@ Your appointment is scheduled for {appointment_date} from {start_time} to {end_t
 Best Regards,
 Genpact Team
                    """)
-        
+
         return ResponseModel(message="Email sent successfully.")
-    
+
     except Exception as e:
         # Rollback transaction in case of error
         db.rollback()
 
         # Raise HTTPException with error message
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error sending reminder: {e}")
-    
+
     finally:
         # Close session
         db.close()
+
+
+
 
 @app.post('/appointment/completed', tags=["appoinment"])
 async def mark_appointment_as_completed(case_id: str, db: Session = Depends(get_db)):
@@ -1709,3 +1772,6 @@ def create_or_update_template(templates: TemplateSchema, db: Session = Depends(g
         raise HTTPException(status_code=500, detail="Internal server error")
     finally:
         db.close()
+
+
+
