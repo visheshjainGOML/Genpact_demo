@@ -445,18 +445,14 @@ We look forward to meeting you and are here to assist you every step of the way.
 Warm regards
 
 Genpact Team """)
-        send_email("Someshwar.Garud@genpact.com", new_customer.email_author, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
+        send_email("Someshwar.Garud@genpact.com", new_customer.email_author, f"Case ID creation acknowledgement - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
-Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
+Hi, a unique Case ID has been created for the following details:
+Name: {new_customer.username}
+Email ID: {new_customer.email_id}
+Mobile: {new_customer.mobile_no}
                    
-To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}
- 
-We look forward to meeting you and are here to assist you every step of the way.
-
-Warm regards
-
-Genpact Team """)
+Warm regards""")
         event1_data = {
             'status': 'New Email Received',
             'event_name': 'A new email has been received',
@@ -609,6 +605,17 @@ Best Regards,
                    
 Genpact Team
 """,start_time_obj,end_time_obj,date_obj)
+        
+        send_email("Someshwar.Garud@genpact.com", customer_data.email_author, f"Appointment creation acknowledgment - Case ID: {case_id}", f"""
+Case ID: {customer_data.case_id} 
+Hi, a new appointmnet has been created for the following details:
+Customer Name: {customer_data.username}
+Customer Email ID: {customer_data.email_id}
+Customer Mobile: {customer_data.mobile_no}
+Agent Name: {agent_data.full_name}
+Agent Email: {agent_data.agent_email}
+                   
+Warm regards""")
         event1_details = {
             "event_name": "Appointment notification is sent",
             "event_details": {
@@ -827,8 +834,8 @@ async def cancel_appointment_route(appointment_id: int,reason:str, db: Session =
             Customer_email= customer_data.email_id
             case_id = customer_data.case_id
             query = db.query(Agent).filter(Agent.id == agent_id)
-            agent_email = query.first()
-            agent_email = agent_email.agent_email
+            agent_data = query.first()
+            agent_email = agent_data.agent_email
             send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}", f"""
 Case ID: {case_id}
 We have received your request and successfully cancelled your scheduled appointment. We are sorry to see you go, but understand that circumstances can change.
@@ -844,6 +851,17 @@ Genpact Team
             send_email("Someshwar.Garud@genpact.com", agent_email, f"appointment Cancelled - Case ID: {case_id}", f"""
 Case ID: {case_id}
 Hello, your scheduled appointment has been cancelled""")
+            
+            send_email("Someshwar.Garud@genpact.com", customer_data.email_author, f"Appointment cancellation acknowledgement - Case ID: {case_id}", f"""
+Case ID: {case_id}
+Hi, the appointment has been cancelled for the following details:
+Customer Name: {customer_data.username}
+Customer Email ID: {customer_data.email_id}
+Customer Mobile: {customer_data.mobile_no}
+Agent Name: {agent_data.full_name}
+Agent Email: {agent_data.agent_email}
+                   
+Warm regards""")
         except:
             return ResponseModel(message="No appointment found")
         query1 = text("""
@@ -939,12 +957,12 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         cust_id= data.customer_id
         agent_id= data.agent_id
         query = db.query(Customer).filter(Customer.id == cust_id)
-        Customer_email = query.first()
-        case_id = Customer_email.case_id
-        Customer_email= Customer_email.email_id
+        customer_data = query.first()
+        case_id = customer_data.case_id
+        Customer_email= customer_data.email_id
         query = db.query(Agent).filter(Agent.id == agent_id)
-        agent_email = query.first()
-        agent_email = agent_email.agent_email
+        agent_data = query.first()
+        agent_email = agent_data.agent_email
         print("111111111111111111111111111111111111")
          # Commit transaction
         event_details = {
@@ -990,9 +1008,24 @@ Best Regards,
 
 Genpact Team
                    """,start_time_obj,end_time_obj,date_obj)
+        
         send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Rescheduled - Case ID: {case_id}", f"""
                    Case ID: {case_id}
                    The booked appointment has been rescheduled""",start_time_obj,end_time_obj,date_obj)
+        
+        send_email("Someshwar.Garud@genpact.com", customer_data.email_author, f"Appointment updation acknowledgement - Case ID: {case_id}", f"""
+Case ID: {case_id}
+Hi, the appointment has been rescheduled for the following details:
+
+Customer Name: {customer_data.username}
+Customer Email ID: {customer_data.email_id}
+Customer Mobile: {customer_data.mobile_no}
+Agent Name: {agent_data.full_name}
+Agent Email: {agent_data.agent_email}
+New slot time: {start_time_obj, end_time_obj}
+New slot date: {date_obj}
+                   
+Warm regards""")
 
        
         # Return success message
