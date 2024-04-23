@@ -29,7 +29,7 @@ load_dotenv()
 
 # --------- Constants -------------
 schema = 'genpact'
-SQLALCHEMY_DATABASE_URL = os.getenv('postgres_url')
+SQLALCHEMY_DATABASE_URL = os.getenv('POSTGRES_URL')
 success_message = "Request processed successfully "
 
 # ----------- DB schema & connection -------------
@@ -157,7 +157,9 @@ class Event(Base):
     __table__ = Table('event', Base.metadata,
                       schema=schema, autoload_with=engine)
 
-
+class Template(Base):
+    __table__ = Table('templates', Base.metadata,
+                      schema=schema, autoload_with=engine)
 
 
 # ---------- Utilities --------------------
@@ -308,6 +310,12 @@ class CustomerSchema(BaseModel):
     email_body: str
     email_subject: str
     email_author: str
+
+class TemplateSchema(BaseModel):
+    template_name: str
+    template_type: str
+    content: str
+ 
 
 
 class ProductSchema(BaseModel):
@@ -1540,7 +1548,7 @@ async def send_reminder(case_id: str, db: Session = Depends(get_db)):
         start_time = slot_query.start_time.strftime('%H:%M')
         end_time = slot_query.end_time.strftime('%H:%M')
         
-        send_email("Someshwar.Garud@genpact.com", 'atharva.patil@goml.io', f"Appointment Reminder - Case ID: {case_id}", f"""
+        send_email("Someshwar.Garud@genpact.com", {email_id}, f"Appointment Reminder - Case ID: {case_id}", f"""
 Hi {customer_name},
 
 Your appointment is scheduled for {appointment_date} from {start_time} to {end_time}. Please make sure to attend your appointment on time.
@@ -1696,3 +1704,158 @@ def question_answer_create(data:QuestionAnswerSchema,db: Session = Depends(get_d
         return ResponseModel(message=success_message, payload={"question_answer_id": new_product.id})
     except Exception as e:
         return HTTPException(status_code=400,detail=f"unable to create new record {e}")
+    
+
+@app.post("/templates/update", response_model=ResponseModel, tags=["templated"], status_code=201)
+def create_or_update_template(templates: TemplateSchema):
+    db = get_db()  # Assuming get_db() returns a new db session
+    try:
+        db_template = db.query(Template).filter_by(type=templates.template_type, name=templates.template_name).first()
+
+        if db_template:
+            db_template.content = templates.content
+        else:
+            new_template = Template(**templates.dict())
+            db.add(new_template)
+        
+        db.commit()
+        return ResponseModel(message="Template created or updated successfully")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+    finally:
+        db.close()
+
+
+from fastapi import HTTPException, status
+from sqlalchemy import update
+
+@app.post(path="/appointment/change_agent", response_model=ResponseModel, tags=["appointment"])
+async def change_appointment_agent(appointment_id: int, new_agent_id: int, reason: str, db: Session = Depends(get_db)):
+    try:
+        # Fetch the appointment details
+        appointment_record = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+        
+        if not appointment_record:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found")
+
+        old_agent_id = appointment_record.agent_id
+        
+        # Fetch customer_timezone from agent_schedule
+        agent_schedule_record = db.query(AgentSchedule).filter(AgentSchedule.appointment_id == appointment_id).first()
+        print(agent_schedule_record)
+        
+        if not agent_schedule_record:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent schedule record not found")
+        
+        customer_timezone = agent_schedule_record.customer_timezone
+        appointment_description = agent_schedule_record.appointment_description
+        
+        # Update agent_schedule record
+        query = text("""
+            UPDATE genpact.agent_schedule 
+            SET status = 'agent_changed', appointment_id = null, reason = :reason
+            WHERE appointment_id = :appointment_id
+        """)
+        db.execute(query, {"reason": reason, "appointment_id": appointment_id})
+        
+        # Delete the old appointment record
+        db.delete(appointment_record)
+        
+        # Create a new appointment record
+        new_appointment = Appointment(
+            customer_id=appointment_record.customer_id,
+            agent_id=new_agent_id,
+            created_at=datetime.now(),
+            scheduled_at=appointment_record.scheduled_at,
+            is_booked=True
+        )
+        db.add(new_appointment)
+        db.commit()
+        db.refresh(new_appointment)
+
+        # Add new record to agent_schedule table for the new agent
+        new_schedule_record = AgentSchedule(
+            agent_id=new_agent_id,
+            status='booked',
+            customer_id=appointment_record.customer_id,
+            start_time=appointment_record.scheduled_at.time(),
+            end_time=(appointment_record.scheduled_at + timedelta(hours=1)).time(),
+            date=appointment_record.scheduled_at.date(),
+            appointment_id=new_appointment.id,
+            customer_timezone=customer_timezone,  # Using customer_timezone from agent_schedule
+            appointment_description=appointment_description
+        )
+        db.add(new_schedule_record)
+        db.commit()
+
+        # Fetching agent and customer details for emails
+        agent_data = db.query(Agent).filter(Agent.id == new_agent_id).first()
+        agent_email = agent_data.agent_email
+        product_id = agent_data.product_id
+
+        customer_data = db.query(Customer).filter(Customer.id == appointment_record.customer_id).first()
+        Customer_email = customer_data.email_id
+        case_id = customer_data.case_id
+
+        # Sending emails
+        send_email("Someshwar.Garud@genpact.com", Customer_email, f"Appointment Agent Changed - Case ID: {case_id}",
+                   f""" 
+Case ID: {case_id}
+Your appointment agent has been changed. The new agent is now responsible for your case. 
+For further details, please click the following link: 
+https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/appointmentDetails?appointment_id={new_appointment.id}
+""")
+
+        send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Agent Changed - Case ID: {case_id}",
+                   f""" 
+Case ID: {case_id}
+You have been assigned as the new agent for the appointment. 
+For further details, please click the following link: 
+https://main.d2el3bzkhp7t3w.amplifyapp.com/agent/appointmentDetails?appointment_id={new_appointment.id}
+""")
+        start_time_str = new_appointment.scheduled_at.strftime('%H:%M')
+        end_time_str = (new_appointment.scheduled_at + timedelta(hours=1)).strftime('%H:%M')
+        # Adding events to the event table
+        events = [
+            {
+                "event_name": "Appointment Agent Changed",
+                "event_details": {
+                    "email": "",
+                    "details": f"Agent changed from {old_agent_id} to {new_agent_id} for Case ID: {case_id} at {str(datetime.now())}",
+                    "start_time": start_time_str,
+                    "end_time": end_time_str,
+                    'date': str(appointment_record.scheduled_at.date())
+                },
+                "timestamp": str(datetime.now()),
+                "case_id": case_id,
+                "status": "Agent Changed"
+            },
+            {
+                "event_name": "Appointment Details Updated",
+                "event_details": {
+                    "email": "",
+                    "details": f"Appointment details updated for Case ID: {case_id} at {str(datetime.now())}",
+                    "start_time": start_time_str,
+                    "end_time": end_time_str,
+                    'date': str(new_appointment.scheduled_at.date())
+                },
+                "timestamp": str(datetime.now()),
+                "case_id": case_id,
+                "status": "Appointment Updated"
+            }
+        ]
+
+        for event_data in events:
+            # Convert time objects to strings for JSON serialization
+            event_data["event_details"]["start_time"] = event_data["event_details"]["start_time"]
+            event_data["event_details"]["end_time"] = event_data["event_details"]["end_time"]
+
+            event = Event(**event_data)
+            db.add(event)
+
+        db.commit()
+        
+        return ResponseModel(message="Agent changed successfully", payload={"new_appointment_id": new_appointment.id})
+    
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
