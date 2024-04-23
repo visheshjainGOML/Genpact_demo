@@ -1815,6 +1815,7 @@ https://main.d2el3bzkhp7t3w.amplifyapp.com/agent/appointmentDetails?appointment_
 """)
         start_time_str = new_appointment.scheduled_at.strftime('%H:%M')
         end_time_str = (new_appointment.scheduled_at + timedelta(hours=1)).strftime('%H:%M')
+        
         # Adding events to the event table
         events = [
             {
@@ -1822,9 +1823,9 @@ https://main.d2el3bzkhp7t3w.amplifyapp.com/agent/appointmentDetails?appointment_
                 "event_details": {
                     "email": "",
                     "details": f"Agent changed from {old_agent_id} to {new_agent_id} for Case ID: {case_id} at {str(datetime.now())}",
-                    "start_time": start_time_str,
-                    "end_time": end_time_str,
-                    'date': str(appointment_record.scheduled_at.date())
+                    "start_time": appointment_record.scheduled_at.time(),
+                    "end_time": (appointment_record.scheduled_at + timedelta(hours=1)).time(),
+                    'date': appointment_record.scheduled_at.date()
                 },
                 "timestamp": str(datetime.now()),
                 "case_id": case_id,
@@ -1835,9 +1836,9 @@ https://main.d2el3bzkhp7t3w.amplifyapp.com/agent/appointmentDetails?appointment_
                 "event_details": {
                     "email": "",
                     "details": f"Appointment details updated for Case ID: {case_id} at {str(datetime.now())}",
-                    "start_time": start_time_str,
-                    "end_time": end_time_str,
-                    'date': str(new_appointment.scheduled_at.date())
+                    "start_time": new_appointment.scheduled_at.time(),
+                    "end_time": (new_appointment.scheduled_at + timedelta(hours=1)).time(),
+                    'date': new_appointment.scheduled_at.date()
                 },
                 "timestamp": str(datetime.now()),
                 "case_id": case_id,
@@ -1846,10 +1847,6 @@ https://main.d2el3bzkhp7t3w.amplifyapp.com/agent/appointmentDetails?appointment_
         ]
 
         for event_data in events:
-            # Convert time objects to strings for JSON serialization
-            event_data["event_details"]["start_time"] = event_data["event_details"]["start_time"]
-            event_data["event_details"]["end_time"] = event_data["event_details"]["end_time"]
-
             event = Event(**event_data)
             db.add(event)
 
