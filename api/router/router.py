@@ -376,8 +376,8 @@ class TemplateSchema(BaseModel):
     content: str
 
 class FrequencySchema(BaseModel):
-    minimum_days: int
-    maximum_days: int
+    minimum_days: str
+    maximum_days: str
 
 # ---------- API endpoints -------------
 app = APIRouter()
@@ -1766,7 +1766,7 @@ def create_or_update_template(templates: TemplateSchema, db: Session = Depends(g
 
         db.commit()
         logger.info("Template created or updated successfully")
-        return ResponseModel(message="Updated successfully")
+        return ResponseModel(message="Template Updated successfully")
     except Exception as e:
         logger.exception("An error occurred during template creation or update process")
         raise HTTPException(status_code=500, detail="Internal server error")
@@ -1775,3 +1775,24 @@ def create_or_update_template(templates: TemplateSchema, db: Session = Depends(g
 
 
 
+@app.post("/reminderfrequency/update", response_model=ResponseModel, tags=["frequency"], status_code=201)
+def create_or_update_frequency(frequency: FrequencySchema, db: Session = Depends(get_db)):
+    try:
+        db_frequency = db.query(Frequency).first()
+        if db_frequency:
+            # If the record exists, update it
+            db_frequency.minimum_days = frequency.minimum_days
+            db_frequency.maximum_days = frequency.maximum_days
+        else:
+            # If the record doesn't exist, create a new one
+            new_frequency = Frequency(minimum_days=frequency.minimum_days, maximum_days=frequency.maximum_days)
+            db.add(new_frequency)
+
+        db.commit()
+
+        return ResponseModel(message="Frequency Updated successfully")
+    except Exception as e:
+
+        raise HTTPException(status_code=500, detail="Internal server error")
+    finally:
+        db.close()
