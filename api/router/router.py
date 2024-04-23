@@ -1131,14 +1131,34 @@ def get_agent_appointments(agent_id: int, db: Session = Depends(get_db)):
     schedule.start_time,
     schedule.end_time,
     schedule.date,
-    schedule.appointment_description                 
-                 
+    schedule.appointment_description,
+    latest_event.status,
+    latest_event.timestamp
 FROM
     genpact.appointment AS appointments
 JOIN
     genpact.customer ON appointments.customer_id = customer.id
 JOIN
     genpact.agent_schedule AS schedule ON appointments.id = schedule.appointment_id
+JOIN 
+    (
+        SELECT
+            e.case_id,
+            e.status,
+            e.timestamp
+        FROM
+            genpact.event AS e
+        JOIN
+            (
+                SELECT
+                    case_id,
+                    MAX(timestamp) AS latest_timestamp
+                FROM
+                    genpact.event
+                GROUP BY
+                    case_id
+            ) AS latest ON e.case_id = latest.case_id AND e.timestamp = latest.latest_timestamp
+    ) AS latest_event ON customer.case_id = latest_event.case_id
 WHERE
     appointments.agent_id = :agent_id 
 ORDER BY
