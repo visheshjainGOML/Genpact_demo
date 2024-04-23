@@ -160,6 +160,14 @@ class Event(Base):
 class Template(Base):
     __table__ = Table('templates', Base.metadata,
                       schema=schema, autoload_with=engine)
+    
+class QuestionAnswer(Base):
+    __table__ = Table('questions_answers', Base.metadata,
+                      schema=schema, autoload_with=engine)
+    
+class Question(Base):
+    __table__ = Table('questions', Base.metadata,
+                      schema=schema, autoload_with=engine)
 
 
 # ---------- Utilities --------------------
@@ -288,12 +296,6 @@ class LoginSchema(BaseModel):
     username: str
     password: str
 
-
-class LoginSchema(BaseModel):
-    username: str
-    password: str
-
-
 class FeedbackSchema(BaseModel):
     appointment_id: int
     rating: int
@@ -322,7 +324,10 @@ class ProductSchema(BaseModel):
     name: str
     created_at: Optional[datetime] = str(datetime.now())  # type: ignore
     category: str
-
+    
+class QuestionAnswerSchema(BaseModel):
+    case_id :str
+    question_answer_pair: dict
 
 class AppointmentSchema(BaseModel):
     customer_id: int
@@ -1668,10 +1673,6 @@ async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(ge
     finally:
         # Close session
         db.close()
-
-class Question(Base):
-    __table__ = Table('questions', Base.metadata,
-                      schema=schema, autoload_with=engine)
     
 @app.get("/questions/")
 async def get_questions(db: Session = Depends(get_db)):
@@ -1685,14 +1686,6 @@ async def get_questions(db: Session = Depends(get_db)):
         print("Eror fecthing the records")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    
-class QuestionAnswer(Base):
-    __table__ = Table('questions_answers', Base.metadata,
-                      schema=schema, autoload_with=engine)
-    
-class QuestionAnswerSchema(BaseModel):
-    case_id :str
-    question_answer_pair: dict
 
 @app.post('/question_answer/create',status_code=201)
 def question_answer_create(data:QuestionAnswerSchema,db: Session = Depends(get_db)):
