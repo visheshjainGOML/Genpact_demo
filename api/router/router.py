@@ -1964,19 +1964,19 @@ def get_all_agent_appointments(db: Session = Depends(get_db)):
 FROM
     (
         SELECT
-            cust.case_id AS "Case ID",
-            schedule.date AS "Appointment Date",
-            schedule.start_time AS "Start Time",
-            schedule.end_time AS "End Time",
-            cust.username AS "Customer Name",
-            cust.email_id AS "Customer Email",
-            cust.mobile_no AS "Customer Phone",
-            schedule.appointment_description AS "Appointment Description",
-            schedule.reason AS "Comments",
-            cust.product_id AS "Products",
-            agent.full_name AS "Agent Name",
-            event.status AS "Status",
-            event.timestamp AS "Timestamp",
+            cust.case_id AS "case_id",
+            schedule.date AS "appointment_date",
+            schedule.start_time AS "start_time",
+            schedule.end_time AS "end_time",
+            cust.username AS "customer_name",
+            cust.email_id AS "customer_email",
+            cust.mobile_no AS "customer_phone",
+            schedule.appointment_description AS "appointment_description",
+            schedule.reason AS "comments",
+            cust.product_id AS "products",
+            agent.full_name AS "agent_name",
+            event.status AS "status",
+            event.timestamp AS "timestamp",
             ROW_NUMBER() OVER (PARTITION BY cust.case_id ORDER BY event.timestamp DESC) AS row_num
         FROM
             genpact.customer AS cust
@@ -1988,9 +1988,9 @@ FROM
             genpact.agent AS agent ON schedule.agent_id = agent.id
     ) AS main_query
 WHERE
-    main_query.row_num = 1 and main_query."Case ID" is not NULL
+    main_query.row_num = 1 and main_query."case_id" is not NULL
 ORDER BY
-    main_query."Case ID";
+    main_query."case_id";
     """)
     print("Appointment Query")
     # Execute the query
