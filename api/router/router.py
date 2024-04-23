@@ -1857,7 +1857,7 @@ WHERE
 ORDER BY
     main_query."Case ID";
     """)
-
+    print("Appointment Query")
     # Execute the query
     result = db.execute(query)
     columns = result.keys()
