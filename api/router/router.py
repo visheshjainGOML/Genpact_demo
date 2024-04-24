@@ -409,7 +409,6 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         case_id = str(uuid.uuid4())
         case_id = case_id[:8]
         customer = customer.__dict__
-        print("$$$$$$$$$$$$$$$$$$$$$$", customer['email_author'])
         print(customer)
         customer['case_id'] = case_id
         new_customer = Customer(**customer)
@@ -432,9 +431,8 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         db.add(new_customer)
         db.commit()
         db.refresh(new_customer)
-        print(new_customer.id)
         customer_id = new_customer.id
-        print("^^^^^^^^^^^^^^^^^^", new_customer.email_author)
+        email_author = str(new_customer.email_author).lower()
         send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
@@ -447,7 +445,7 @@ We look forward to meeting you and are here to assist you every step of the way.
 Warm regards
 
 Genpact Team """)
-        send_email("Someshwar.Garud@genpact.com", new_customer.email_author, f"Case ID creation acknowledgement - Case ID: {case_id}", f"""
+        send_email("Someshwar.Garud@genpact.com", email_author, f"Case ID creation acknowledgement - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Hi, a unique Case ID has been created for the following details:
 Name: {new_customer.username}
@@ -473,11 +471,11 @@ Subject: {new_customer.email_subject}
         }
 
         event2_data = {
-            'status': 'Unique Case ID created',
-            'event_name': 'A unique Case ID has been created',
+            'status': 'Case Created',
+            'event_name': 'A new Case has been created',
             'event_details': {
                 "email":"",
-                "details":f"A new unique Case ID has been created"
+                "details":f"A new Case has been created"
             },
             'timestamp': str(datetime.now()),
             'case_id': case_id
