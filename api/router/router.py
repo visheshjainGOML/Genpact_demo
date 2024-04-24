@@ -415,59 +415,59 @@ async def get_products(db: Session = Depends(get_db)):
 @app.post(path="/customer/create", response_model=ResponseModel, tags=["customer"],status_code=201)
 async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db)):
     try:
-        case_id = str(uuid.uuid4())
-        case_id = case_id[:8]
-        print(1)
-        customer = customer.__dict__
-        print(2)
-        print("CUSTOMER: ",customer)
-        customer['case_id'] = case_id
-        print(3)
-        new_customer = Customer(**customer)
-        print(4)
+        try:
+            case_id = str(uuid.uuid4())
+            case_id = case_id[:8]
+            customer = customer.__dict__
+            customer['case_id'] = case_id
+            new_customer = Customer(**customer)
 
-        # text = """abcdef"""
+            # text = """abcdef"""
 
-        text = """WARNING - This email originated outside of Genpact.
-                  Do not reply, click on links or open attachments unless you recognize the sender
-                  and know the content is safe. If you believe the content of this email may be
-                  unsafe, please forward it as an attachment to thislooksphishy@genpact.com or use
-                  the 'This Looks Phishy' Outlook button."""
+            text = """WARNING - This email originated outside of Genpact.
+                    Do not reply, click on links or open attachments unless you recognize the sender
+                    and know the content is safe. If you believe the content of this email may be
+                    unsafe, please forward it as an attachment to thislooksphishy@genpact.com or use
+                    the 'This Looks Phishy' Outlook button."""
 
-        if text in new_customer.email_body:
-            # Remove the warning message
-            new_customer.email_body = new_customer.email_body.replace(text, "").strip()
-        print(5)
-        print("EMAIL BODY: ",new_customer.email_body)
-        print(6)
+            if text in new_customer.email_body:
+                # Remove the warning message
+                new_customer.email_body = new_customer.email_body.replace(text, "").strip()
 
-        db.add(new_customer)
-        print(7)
+            db.add(new_customer)
+            db.commit()
+        except:
+            event_data = {
+            'status': 'Case Creation Failed',
+            'event_name': 'There was error creating a Case',
+            'event_details': {
+                "email":"",
+                "details":f"Case Creation Failed"
+            },
+            'timestamp': str(datetime.now()),
+            'case_id': case_id
+        }
+        event1 = Event(**event_data)
+        db.add(event1)
         db.commit()
-        print(8)
+
         db.refresh(new_customer)
-        print(9)
         customer_id = new_customer.id
-        print("CUSTOMER ID: ", customer_id)
-        print(10)
         email_author = str(new_customer.email_author).lower()
-        print("EMAIL AUTHOR:", email_author)
-        print("EMAIL ID: ", new_customer.email_id)
-        print(11)
-        send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
+        try:
+            send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}
+http://54.175.240.135:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
 Warm regards
 
 Genpact Team """)
-        print(12)
-        send_email("Someshwar.Garud@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f"""
+            send_email("Someshwar.Garud@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Hi, a new case has been created for the following details:
 Name: {new_customer.username}
@@ -475,8 +475,21 @@ Email ID: {new_customer.email_id}
 Mobile: {new_customer.mobile_no}
                    
 Warm regards""")
-        print(13)
-        
+        except:
+           event_data = {
+            'status': 'Appointment Initiation Failed',
+            'event_name': 'The email fetched from mail looks incorrect',
+            'event_details': {
+                "email":"",
+                "details":f"Appointment Initiation Failed"
+            },
+            'timestamp': str(datetime.now()),
+            'case_id': case_id
+        }
+        event1 = Event(**event_data)
+        db.add(event1)
+        db.commit()
+    
         event1_data = {
             'status': 'New Email Received',
             'event_name': 'A new email has been received',
@@ -519,7 +532,7 @@ Case ID: {new_customer.case_id}
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}
+http://54.175.240.135:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
@@ -533,12 +546,25 @@ Genpact Team
             "case_id": case_id,
             "status": "Appointment Notification Sent"
         }
+
+        event4_data = {
+            "event_name": "Customer Response is awaiting",
+            "event_details": {
+                "email": "",
+                "details": f"Awaiting customer response for Case ID: {case_id} at {str(datetime.now())}"
+            },
+            "timestamp": str(datetime.now()),
+            "case_id": case_id,
+            "status": "Awaiting Customer Response"
+        }
         event1 = Event(**event1_data)
         event2 = Event(**event2_data)
         event3 = Event(**event3_data)
+        event4 = Event(**event4_data)
         db.add(event1)
         db.add(event2)
         db.add(event3)
+        db.add(event4)
         db.commit()
         db.refresh(new_customer)
 
@@ -660,10 +686,10 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
 Case ID: {case_id}
 We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
-To view the details of your appointment, please click the following link: https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
+To view the details of your appointment, please click the following link: http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
 Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
-Reschedule Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
-Cancel Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
+Reschedule Your Appointment - http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
+Cancel Your Appointment - http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
 If you have any specific requests or questions prior to our meeting, do not hesitate to contact us directly through this email.
 We look forward to our conversation and are here to assist you with any questions you may have prior to our meeting.
 Warm regards,
@@ -677,7 +703,7 @@ Quick Reminder:
 Check the Appointment Date and Time: Ensure your schedule is updated.
                    
 Review Customer Details: Familiarize yourself with the customer's requirements and previous interactions to provide a tailored experience.
-Access your portal here: https://main.d2el3bzkhp7t3w.amplifyapp.com/  
+Access your portal here: http://54.175.240.135:3000/  
 Thank you for your dedication and hard work. Let's continue providing exceptional service to our clients!
 Best Regards,
                    
@@ -695,21 +721,8 @@ Agent Email: {agent_data.agent_email}
                    
 Warm regards""")
 
-        event1_details = {
-            "event_name": "Customer Response is awaiting",
-            "event_details": {
-                "email": "",
-                "details": f"Awaiting customer response for Case ID: {case_id} at {str(datetime.now())}",
-                 "start_time":existing_appointment['start_time'],
-                "end_time":existing_appointment['end_time'],
-                'date':existing_appointment['date']
-            },
-            "timestamp": str(datetime.now()),
-            "case_id": case_id,
-            "status": "Awaiting Customer Response"
-        }
 
-        event2_details = {
+        event1_details = {
             "event_name": "The appointment confirmation is received",
             "event_details": {
                 "email": "",
@@ -723,7 +736,7 @@ Warm regards""")
             "status": "Appointment Confirmation Received"
         }
 
-        event3_details = {
+        event2_details = {
             "event_name": "The appointment is ready for interview",
             "event_details": {
                 "email": "",
@@ -739,11 +752,9 @@ Warm regards""")
 
         event1 = Event(**event1_details)
         event2 = Event(**event2_details)
-        event3 = Event(**event3_details)
 
         db.add(event1)
         db.add(event2)
-        db.add(event3)
         db.commit()
         return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id, "case_id":case_id})
     except Exception as e:
@@ -1683,6 +1694,19 @@ Your appointment is scheduled for {appointment_date} from {start_time} to {end_t
 Best Regards,
 Genpact Team
                    """)
+        event_data = {
+            'status': 'Reminder Sent',
+            'event_name': 'Reminder has been sent to customer',
+            'event_details': {
+                "email":"",
+                "details":f"Reminder Sent"
+            },
+            'timestamp': str(datetime.now()),
+            'case_id': case_id
+        }
+        event1 = Event(**event_data)
+        db.add(event1)
+        db.commit()
         
         return ResponseModel(message="Email sent successfully.")
     
@@ -1701,47 +1725,57 @@ Genpact Team
 @app.post('/appointment/completed', tags=["appoinment"])
 async def mark_appointment_as_completed(case_id: str, status_expected: str, db: Session = Depends(get_db)):
     try:
-        event1_details = {
-            "event_name": "Appointment has been completed",
-            "event_details": {
-                "email": "",
-                "details": f"Appointment with Case ID: {case_id} has been completed at {str(datetime.now())}"
-            },
-            "timestamp": str(datetime.now()),
-            "case_id": case_id,
-            "status": "Appointment Completed"
-        }
+        if status_expected=="Mark Case as Closed":
+            event1_details = {
+                "event_name": "Case has been successfully closed",
+                "event_details": {
+                    "email": "",
+                    "details": f"The case with Case ID: {case_id} has been successfully closed at {str(datetime.now())}"
+                },
+                "timestamp": str(datetime.now()),
+                "case_id": case_id,
+                "status": status_expected
+            }
 
-        event2_details = {
-            "event_name": "Case has been successfully completed",
-            "event_details": {
-                "email": "",
-                "details": f"The case with Case ID: {case_id} has been successfully completed at {str(datetime.now())}"
-            },
-            "timestamp": str(datetime.now()),
-            "case_id": case_id,
-            "status": "Case Successfully Completed"
-        }
+            event1 = Event(**event1_details)
 
-        event3_details = {
-            "event_name": "Case has been successfully closed",
-            "event_details": {
-                "email": "",
-                "details": f"The case with Case ID: {case_id} has been successfully closed at {str(datetime.now())}"
-            },
-            "timestamp": str(datetime.now()),
-            "case_id": case_id,
-            "status": status_expected
-        }
+            db.add(event1)
+            db.commit()
+        
+        elif status_expected=="Mark Case as Submitted":
+            event1_details = {
+                "event_name": "Case has been successfully submitted",
+                "event_details": {
+                    "email": "",
+                    "details": f"The case with Case ID: {case_id} has been successfully submitted at {str(datetime.now())}"
+                },
+                "timestamp": str(datetime.now()),
+                "case_id": case_id,
+                "status": status_expected
+            }
 
-        event1 = Event(**event1_details)
-        event2 = Event(**event2_details)
-        event3 = Event(**event3_details)
+            event1 = Event(**event1_details)
 
-        db.add(event1)
-        db.add(event2)
-        db.add(event3)
-        db.commit()
+            db.add(event1)
+            db.commit()
+
+        else:
+            event1_details = {
+                "event_name": "Case has been marked as Awaiting Customer Response",
+                "event_details": {
+                    "email": "",
+                    "details": f"The case with Case ID: {case_id} has been marked as Awaiting Customer Response at {str(datetime.now())}"
+                },
+                "timestamp": str(datetime.now()),
+                "case_id": case_id,
+                "status": status_expected
+            }
+
+            event1 = Event(**event1_details)
+
+            db.add(event1)
+
+            db.commit()
 
         return ResponseModel(message="Appointment marked completed.")
     
@@ -1918,7 +1952,7 @@ async def change_appointment_agent(appointment_id: int, new_agent_id: int, reaso
 Case ID: {case_id}
 Your appointment agent has been changed. The new agent is now responsible for your case. 
 For further details, please click the following link: 
-https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/appointmentDetails?appointment_id={new_appointment.id}
+http://54.175.240.135:3000/customer/appointmentDetails?appointment_id={new_appointment.id}
 """)
 
         send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Agent Changed - Case ID: {case_id}",
@@ -1926,7 +1960,7 @@ https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/appointmentDetails?appointme
 Case ID: {case_id}
 You have been assigned as the new agent for the appointment. 
 For further details, please click the following link: 
-https://main.d2el3bzkhp7t3w.amplifyapp.com/agent/appointmentDetails?appointment_id={new_appointment.id}
+http://54.175.240.135:3000/agent/appointmentDetails?appointment_id={new_appointment.id}
 """)
         start_time_str = new_appointment.scheduled_at.strftime('%H:%M')
         end_time_str = (new_appointment.scheduled_at + timedelta(hours=1)).strftime('%H:%M')

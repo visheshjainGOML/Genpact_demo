@@ -2040,3 +2040,19 @@
 2024-04-24 21:03:38,872 - INFO - Request received: POST http://localhost:8000/questions/Update
 2024-04-24 21:03:39,923 - INFO - Response code: 201
 2024-04-24 21:03:39,923 - INFO - Response code: 201
+2024-04-25 01:55:09,607 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 01:55:09,607 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 01:55:09,609 - INFO - Response code: 200
+2024-04-25 01:55:09,609 - INFO - Response code: 200
+2024-04-25 01:55:09,760 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 01:55:09,760 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 01:55:09,803 - INFO - Response code: 200
+2024-04-25 01:55:09,803 - INFO - Response code: 200
+2024-04-25 01:55:52,209 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=205ce27c&status_expected=Mark%20Case%20as%20Submitted
+2024-04-25 01:55:52,209 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=205ce27c&status_expected=Mark%20Case%20as%20Submitted
+2024-04-25 01:55:53,498 - INFO - Response code: 200
+2024-04-25 01:55:53,498 - INFO - Response code: 200
+2024-04-25 01:58:31,156 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=205ce27c&status_expected=Mark%20Case%20as%20Submitted
+2024-04-25 01:58:31,156 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=205ce27c&status_expected=Mark%20Case%20as%20Submitted
+2024-04-25 01:58:32,709 - INFO - Response code: 200
+2024-04-25 01:58:32,709 - INFO - Response code: 200
