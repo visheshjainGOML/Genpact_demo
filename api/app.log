@@ -1952,3 +1952,15 @@
 2024-04-24 17:48:59,722 - INFO - Request received: POST http://localhost:8000/customer/create
 2024-04-24 17:49:14,608 - INFO - Response code: 201
 2024-04-24 17:49:14,608 - INFO - Response code: 201
+2024-04-24 18:01:56,379 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 18:01:56,379 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 18:01:56,385 - INFO - Response code: 200
+2024-04-24 18:01:56,385 - INFO - Response code: 200
+2024-04-24 18:01:56,495 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 18:01:56,495 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 18:01:56,516 - INFO - Response code: 200
+2024-04-24 18:01:56,516 - INFO - Response code: 200
+2024-04-24 18:02:15,857 - INFO - Request received: GET http://localhost:8000/attachments?case_id=ee3399a0
+2024-04-24 18:02:15,857 - INFO - Request received: GET http://localhost:8000/attachments?case_id=ee3399a0
+2024-04-24 18:02:16,926 - INFO - Response code: 200
+2024-04-24 18:02:16,926 - INFO - Response code: 200

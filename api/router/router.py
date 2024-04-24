@@ -1822,6 +1822,20 @@ def question_answer_create(data:QuestionAnswerSchema,db: Session = Depends(get_d
     except Exception as e:
         return HTTPException(status_code=400,detail=f"unable to create new record {e}")
     
+@app.post("/questions/Update", status_code=201)
+async def update_questions(Questions: list[str], db: Session = Depends(get_db)):
+    try:
+        if not Questions:
+            return HTTPException(status_code=400, detail="Questions list is empty")
+        for question_text in Questions:
+            db_question = Question(question_text)
+            db.add(db_question)
+        db.commit()
+        return {"message": "Questions saved successfully"}
+    except Exception as e:
+        db.rollback()
+        return HTTPException(status_code=400, detail=str(e))
+    
 
 @app.post("/templates/update", response_model=ResponseModel, tags=["templated"], status_code=201)
 def create_or_update_template(templates: TemplateSchema, db: Session = Depends(get_db)):
