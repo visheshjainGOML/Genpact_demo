@@ -393,6 +393,11 @@ class TemplateSchema(BaseModel):
     content: str
 
 
+class FrequencySchema(BaseModel):
+    email_count: str
+    email_interval: Optional[dict] = {}
+
+
 
 # ---------- API endpoints -------------
 app = APIRouter()
