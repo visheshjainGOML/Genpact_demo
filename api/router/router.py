@@ -487,10 +487,41 @@ Subject: {new_customer.email_subject}
             'timestamp': str(datetime.now()),
             'case_id': case_id
         }
+
+        event3_data = {
+            "event_name": "Appointment notification is sent",
+            "event_details": {
+                "email": f"""
+From: Someshwar.Garud@genpact.com
+To: {new_customer.email_id}
+
+Subject: Schedule Your Appointment with Us - Case ID: {case_id}
+
+Case ID: {case_id}
+Case ID: {new_customer.case_id} 
+Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
+                   
+To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
+https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}
+ 
+We look forward to meeting you and are here to assist you every step of the way.
+
+Warm regards
+
+Genpact Team
+                """,
+                "details": f"Appointment notification successfully sent to {new_customer.email_id} at {str(datetime.now())}"
+            },
+            "timestamp": str(datetime.now()),
+            "case_id": case_id,
+            "status": "Appointment Notification Sent"
+        }
         event1 = Event(**event1_data)
         event2 = Event(**event2_data)
+        event3 = Event(**event3_data)
         db.add(event1)
         db.add(event2)
+        db.add(event3)
         db.commit()
         db.refresh(new_customer)
 
@@ -646,41 +677,8 @@ Agent Name: {agent_data.full_name}
 Agent Email: {agent_data.agent_email}
                    
 Warm regards""")
+
         event1_details = {
-            "event_name": "Appointment notification is sent",
-            "event_details": {
-                "email": f"""
-From: Someshwar.Garud@genpact.com
-To: {Customer_email}
-
-Subject: Confirmation of Your Scheduled Appointment - Case ID: {case_id}
-
-Case ID: {case_id}
-We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
-
-To view the details of your appointment, please click the following link: https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
-Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
-
-Reschedule Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
-Cancel Your Appointment - https://main.d2el3bzkhp7t3w.amplifyapp.com/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
-
-If you have any specific requests or questions prior to our meeting, do not hesitate to contact us directly through this email.
-We look forward to our conversation and are here to assist you with any questions you may have prior to our meeting.
-
-Warm regards,
-Genpact Team
-                """,
-                "details": f"Appointment notification successfully sent to {Customer_email} at {str(datetime.now())}",
-                   "start_time":existing_appointment['start_time'],
-                "end_time":existing_appointment['end_time'],
-                'date':existing_appointment['date']
-            },
-            "timestamp": str(datetime.now()),
-            "case_id": case_id,
-            "status": "Appointment Notification Sent"
-        }
-
-        event2_details = {
             "event_name": "Customer Response is awaiting",
             "event_details": {
                 "email": "",
@@ -694,7 +692,7 @@ Genpact Team
             "status": "Awaiting Customer Response"
         }
 
-        event3_details = {
+        event2_details = {
             "event_name": "The appointment confirmation is received",
             "event_details": {
                 "email": "",
@@ -708,7 +706,7 @@ Genpact Team
             "status": "Appointment Confirmation Received"
         }
 
-        event4_details = {
+        event3_details = {
             "event_name": "The appointment is ready for interview",
             "event_details": {
                 "email": "",
@@ -725,12 +723,10 @@ Genpact Team
         event1 = Event(**event1_details)
         event2 = Event(**event2_details)
         event3 = Event(**event3_details)
-        event4 = Event(**event4_details)
 
         db.add(event1)
         db.add(event2)
         db.add(event3)
-        db.add(event4)
         db.commit()
         return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id, "case_id":case_id})
     except Exception as e:
