@@ -1824,3 +1824,35 @@
 2024-04-24 11:42:05,691 - INFO - Request received: POST http://127.0.0.1:8000/agent/create
 2024-04-24 11:42:07,433 - INFO - Response code: 201
 2024-04-24 11:42:07,433 - INFO - Response code: 201
+2024-04-24 12:18:40,326 - INFO - Request received: GET http://127.0.0.1:8000/
+2024-04-24 12:18:40,326 - INFO - Request received: GET http://127.0.0.1:8000/
+2024-04-24 12:18:40,327 - INFO - Response code: 404
+2024-04-24 12:18:40,327 - INFO - Response code: 404
+2024-04-24 12:18:45,535 - INFO - Request received: GET http://127.0.0.1:8000/docs
+2024-04-24 12:18:45,535 - INFO - Request received: GET http://127.0.0.1:8000/docs
+2024-04-24 12:18:45,536 - INFO - Response code: 200
+2024-04-24 12:18:45,536 - INFO - Response code: 200
+2024-04-24 12:18:45,666 - INFO - Request received: GET http://127.0.0.1:8000/openapi.json
+2024-04-24 12:18:45,666 - INFO - Request received: GET http://127.0.0.1:8000/openapi.json
+2024-04-24 12:18:45,704 - INFO - Response code: 200
+2024-04-24 12:18:45,704 - INFO - Response code: 200
+2024-04-24 12:19:20,013 - INFO - Request received: POST http://127.0.0.1:8000/reminderfrequency/update
+2024-04-24 12:19:20,013 - INFO - Request received: POST http://127.0.0.1:8000/reminderfrequency/update
+2024-04-24 12:19:21,134 - INFO - Response code: 201
+2024-04-24 12:19:21,134 - INFO - Response code: 201
+2024-04-24 12:19:39,284 - INFO - Request received: POST http://127.0.0.1:8000/reminderfrequency/update
+2024-04-24 12:19:39,284 - INFO - Request received: POST http://127.0.0.1:8000/reminderfrequency/update
+2024-04-24 12:19:39,286 - INFO - Response code: 500
+2024-04-24 12:19:39,286 - INFO - Response code: 500
+2024-04-24 12:20:00,949 - INFO - Request received: POST http://127.0.0.1:8000/appointments/report
+2024-04-24 12:20:00,949 - INFO - Request received: POST http://127.0.0.1:8000/appointments/report
+2024-04-24 12:20:01,907 - INFO - Response code: 200
+2024-04-24 12:20:01,907 - INFO - Response code: 200
+2024-04-24 12:20:05,999 - INFO - Request received: POST http://127.0.0.1:8000/agents/report
+2024-04-24 12:20:05,999 - INFO - Request received: POST http://127.0.0.1:8000/agents/report
+2024-04-24 12:20:06,882 - INFO - Response code: 200
+2024-04-24 12:20:06,882 - INFO - Response code: 200
+2024-04-24 12:20:11,802 - INFO - Request received: POST http://127.0.0.1:8000/events/report
+2024-04-24 12:20:11,802 - INFO - Request received: POST http://127.0.0.1:8000/events/report
+2024-04-24 12:20:12,675 - INFO - Response code: 200
+2024-04-24 12:20:12,675 - INFO - Response code: 200
