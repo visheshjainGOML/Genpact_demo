@@ -290,6 +290,7 @@ class AgentSchema(BaseModel):
     weekly_off: list[str]
     password: str = 'agent'
     role: str
+    agent_activity: str = 'active'
 
 
 
