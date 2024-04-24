@@ -391,10 +391,6 @@ class TemplateSchema(BaseModel):
     template_type: str
     content: str
 
-class FrequencySchema(BaseModel):
-    minimum_days: str
-    maximum_days: str
-
 # ---------- API endpoints -------------
 app = APIRouter()
 
