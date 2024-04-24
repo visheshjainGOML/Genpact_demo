@@ -419,6 +419,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
             case_id = str(uuid.uuid4())
             case_id = case_id[:8]
             customer = customer.__dict__
+            print(customer)
             customer['case_id'] = case_id
             new_customer = Customer(**customer)
 
