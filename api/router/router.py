@@ -417,10 +417,14 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
     try:
         case_id = str(uuid.uuid4())
         case_id = case_id[:8]
+        print(1)
         customer = customer.__dict__
-        print(customer)
+        print(2)
+        print("CUSTOMER: ",customer)
         customer['case_id'] = case_id
+        print(3)
         new_customer = Customer(**customer)
+        print(4)
 
         # text = """abcdef"""
 
@@ -433,15 +437,23 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         if text in new_customer.email_body:
             # Remove the warning message
             new_customer.email_body = new_customer.email_body.replace(text, "").strip()
-
-        print(new_customer.email_body)
-
+        print(5)
+        print("EMAIL BODY: ",new_customer.email_body)
+        print(6)
 
         db.add(new_customer)
+        print(7)
         db.commit()
+        print(8)
         db.refresh(new_customer)
+        print(9)
         customer_id = new_customer.id
+        print("CUSTOMER ID: ", customer_id)
+        print(10)
         email_author = str(new_customer.email_author).lower()
+        print("EMAIL AUTHOR:", email_author)
+        print("EMAIL ID: ", new_customer.email_id)
+        print(11)
         send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
@@ -454,6 +466,7 @@ We look forward to meeting you and are here to assist you every step of the way.
 Warm regards
 
 Genpact Team """)
+        print(12)
         send_email("Someshwar.Garud@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Hi, a new case has been created for the following details:
@@ -462,6 +475,7 @@ Email ID: {new_customer.email_id}
 Mobile: {new_customer.mobile_no}
                    
 Warm regards""")
+        print(13)
         
         event1_data = {
             'status': 'New Email Received',
