@@ -2105,3 +2105,22 @@ def export_events_csv(db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/agent_inactive/{agent_id}", tags=['agent'])
+def agent_inactive(agent_id: int, db: Session = Depends(get_db)):
+    try:
+        # Retrieve the agent with the provided agent_id
+        agent = db.query(Agent).filter(Agent.id == agent_id).first()
+
+        if agent:
+
+            agent.agent_activity = "inactive"
+            db.commit()
+            return {"message": f"Agent with ID {agent_id} has been marked as inactive."}
+        else:
+            raise HTTPException(status_code=404, detail=f"Agent with ID {agent_id} not found.")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
