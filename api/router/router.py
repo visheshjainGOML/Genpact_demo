@@ -1680,7 +1680,7 @@ Genpact Team
 
 
 @app.post('/appointment/completed', tags=["appoinment"])
-async def mark_appointment_as_completed(case_id: str, db: Session = Depends(get_db)):
+async def mark_appointment_as_completed(case_id: str, status_expected: str, db: Session = Depends(get_db)):
     try:
         event1_details = {
             "event_name": "Appointment has been completed",
@@ -1712,7 +1712,7 @@ async def mark_appointment_as_completed(case_id: str, db: Session = Depends(get_
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
-            "status": "Case Closed"
+            "status": {status_expected}
         }
 
         event1 = Event(**event1_details)
