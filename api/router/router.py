@@ -1,8 +1,4 @@
-import csv
-import io
 import random
-import tempfile
-
 from fastapi import FastAPI, HTTPException, Depends, Header, Query, status, APIRouter
 # from grpc import StatusCode
 from sqlalchemy import Table, create_engine
@@ -17,6 +13,10 @@ from sqlalchemy import text
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine, text
 import boto3
+import csv
+import io
+import random
+import tempfile
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 import os   
@@ -27,7 +27,6 @@ from icalendar import Event as CalEvent
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-
 from starlette.responses import FileResponse, StreamingResponse
 
 load_dotenv()
@@ -173,7 +172,7 @@ class QuestionAnswer(Base):
 class Question(Base):
     __table__ = Table('questions', Base.metadata,
                       schema=schema, autoload_with=engine)
-
+    
 class Frequency(Base):
     __table__ = Table('frequency', Base.metadata,
                       schema=schema, autoload_with=engine)
@@ -265,7 +264,7 @@ async def make_contact_visible(date, start_time):
         return True
     else:
         return False
-    
+        
 
 #
 
@@ -301,8 +300,9 @@ class AgentSchema(BaseModel):
     role: str
     agent_activity: str = 'active'
 
-
-
+class FrequencySchema(BaseModel):
+    email_count: str
+    email_interval: Optional[dict] = {}
 
 class LoginSchema(BaseModel):
     username: str
@@ -345,7 +345,6 @@ class AppointmentSchema(BaseModel):
     customer_id: int
     call_status: str = None
     call_rating: int = None
-    agent_id: int
     created_at: Optional[datetime] = None
     is_booked: bool = None
     appointment_description: str
@@ -392,12 +391,9 @@ class TemplateSchema(BaseModel):
     template_type: str
     content: str
 
-
 class FrequencySchema(BaseModel):
-    email_count: str
-    email_interval: Optional[dict] = {}
-
-
+    minimum_days: str
+    maximum_days: str
 
 # ---------- API endpoints -------------
 app = APIRouter()
@@ -540,34 +536,57 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
     try:
         existing_appointment = appointment.dict()
 
-        #checking if the user have a pending appointment
+        # Check if the user has a pending appointment
         query = text("""SELECT COUNT(*) AS num_columns FROM genpact.agent_schedule WHERE status = 'booked' AND customer_id = :customer_id""")
         data = db.execute(query, {"customer_id": existing_appointment['customer_id']})
-        result = data.fetchone()  
+        result = data.fetchone()
 
         db.commit()
         if result[0] > 0:
-            return ResponseModel(message="You already have an exsiting appointment you cannot book one more until that is closed")
+            return ResponseModel(message="You already have an existing appointment. You cannot book one more until that is closed")
 
-        #modifying string into proper datatype
+        # Format date to "YYYY-MM-DD"
+        formatted_date = datetime.strptime(existing_appointment['date'], '%d-%m-%y').strftime('%Y-%m-%d')
+
+        # Find available agents using round-robin method
+        query = text("""SELECT agent_id FROM genpact.agent_schedule WHERE status = 'booked' AND date = :date AND start_time <= :end_time AND end_time >= :start_time""")
+        data = db.execute(query, {
+            "date": formatted_date,
+            "start_time": existing_appointment['start_time'],
+            "end_time": existing_appointment['end_time']
+        })
+        booked_agents = set(row[0] for row in data.fetchall())
+
+        query = db.query(Agent.id).all()
+        all_agents = set(row[0] for row in query)
+        
+        available_agents = list(all_agents - booked_agents)
+
+        if not available_agents:
+            return ResponseModel(message="No agents available for the selected slot. Please choose another time.")
+
+        # Implement round-robin to select an agent
+        selected_agent_id = available_agents[0]  # This is a simple round-robin. You can modify this to rotate the list for fairness.
+
+        # Modify string into proper datatype
         new_appointment = OriginalAppointmentSchema(
-            customer_id=(existing_appointment['customer_id']),
-            agent_id=existing_appointment['agent_id'],
+            customer_id=existing_appointment['customer_id'],
+            agent_id=selected_agent_id,
             created_at=existing_appointment['created_at'],
             scheduled_at=datetime.strptime(
                 existing_appointment['date'] + ' ' + existing_appointment['start_time'], '%d-%m-%y %H:%M')
         )
 
-        date_obj = datetime.strptime(
-            existing_appointment['date'], '%d-%m-%y').date()
-        # Convert start time string to time object
+
+        date_obj = datetime.strptime(existing_appointment['date'], '%d-%m-%y').date()
         start_time_obj = time.fromisoformat(existing_appointment['start_time'])
         end_time_obj = time.fromisoformat(existing_appointment['end_time'])
-        print(start_time_obj, type(start_time_obj))
+
         new_appointment = Appointment(**new_appointment.dict())
         db.add(new_appointment)
         db.commit()
         db.refresh(new_appointment)
+
         # Update agent_schedule status to "booked" for the corresponding appointment
         query = text("""
            INSERT INTO genpact.agent_schedule (status, customer_id, agent_id, start_time,end_time,date,appointment_id,customer_timezone,appointment_description) VALUES ('booked', :customer_id, :agent_id, :start_time,:end_time,:date,:appointment_id,:customer_timezone,:appointment_description);""")
@@ -575,17 +594,16 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
             query,
             {
                 "customer_id": appointment.customer_id,
-                "agent_id": appointment.agent_id,
+                "agent_id": selected_agent_id,
                 "start_time": start_time_obj,
                 "end_time": end_time_obj,
                 "date": date_obj,
                 "appointment_id": new_appointment.id,
-                "customer_timezone":existing_appointment['customer_timezone'],
-                "appointment_description":existing_appointment['appointment_description'],
-
+                "customer_timezone": existing_appointment['customer_timezone'],
+                "appointment_description": existing_appointment['appointment_description'],
             }
         )
-        query = db.query(Agent).filter(Agent.id ==appointment.agent_id )
+        query = db.query(Agent).filter(Agent.id == selected_agent_id)
         agent_data = query.first()
         agent_email = agent_data.agent_email
         product_id = agent_data.product_id
@@ -1794,20 +1812,18 @@ def question_answer_create(data:QuestionAnswerSchema,db: Session = Depends(get_d
     
 
 @app.post("/templates/update", response_model=ResponseModel, tags=["templated"], status_code=201)
-def create_or_update_template(templates: TemplateSchema):
-    db = get_db()  # Assuming get_db() returns a new db session
+def create_or_update_template(templates: TemplateSchema, db: Session = Depends(get_db)):
     try:
-        db_template = db.query(Template).filter_by(type=templates.template_type, name=templates.template_name).first()
-
+        db_template = db.query(Template).filter_by(template_name=templates.template_name, template_type=templates.template_type).first()
+ 
         if db_template:
             db_template.content = templates.content
         else:
             new_template = Template(**templates.dict())
             db.add(new_template)
-        
+ 
         db.commit()
-        logger.info("Template created or updated successfully")
-        return ResponseModel(message="Template Updated successfully")
+        return ResponseModel(message="Updated successfully")
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
     finally:
@@ -1946,34 +1962,6 @@ https://main.d2el3bzkhp7t3w.amplifyapp.com/agent/appointmentDetails?appointment_
     
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    
-
-@app.post("/reminderfrequency/update", response_model=ResponseModel, tags=["frequency"], status_code=201)
-def create_or_update_frequency(frequency: FrequencySchema, db: Session = Depends(get_db)):
-    try:
-
-        if str(len(frequency.email_interval)) != frequency.email_count:
-            print(len(frequency.email_interval),frequency.email_count)
-            raise HTTPException(status_code=400, detail="Number of email intervals does not match the email count")
-
-        db_frequency = db.query(Frequency).first()
-        if db_frequency:
-            # If the record exists, update it
-            db_frequency.email_count = frequency.email_count
-            db_frequency.email_interval = frequency.email_interval
-        else:
-            # If the record doesn't exist, create a new one
-            new_frequency = Frequency(email_count=frequency.email_count, email_interval=frequency.email_interval)
-            db.add(new_frequency)
-
-        db.commit()
-
-        return ResponseModel(message="Frequency Updated successfully")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Internal server error")
-    finally:
-        db.close()
-
 
 
 @app.get("/admin/appointments/list", tags=['appointment'])
@@ -2034,6 +2022,32 @@ ORDER BY
 
     return appointments_with_schedule
 
+
+@app.post("/reminderfrequency/update", response_model=ResponseModel, tags=["frequency"], status_code=201)
+def create_or_update_frequency(frequency: FrequencySchema, db: Session = Depends(get_db)):
+    try:
+
+        if str(len(frequency.email_interval)) != frequency.email_count:
+            print(len(frequency.email_interval),frequency.email_count)
+            raise HTTPException(status_code=400, detail="Number of email intervals does not match the email count")
+
+        db_frequency = db.query(Frequency).first()
+        if db_frequency:
+            # If the record exists, update it
+            db_frequency.email_count = frequency.email_count
+            db_frequency.email_interval = frequency.email_interval
+        else:
+            # If the record doesn't exist, create a new one
+            new_frequency = Frequency(email_count=frequency.email_count, email_interval=frequency.email_interval)
+            db.add(new_frequency)
+
+        db.commit()
+
+        return ResponseModel(message="Frequency Updated successfully")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+    finally:
+        db.close()
 
 @app.post("/appointments/report", tags=['report'])
 def export_appointments_csv(db: Session = Depends(get_db)):
@@ -2105,8 +2119,7 @@ def export_events_csv(db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
+    
 @app.get("/agent_inactive/{agent_id}", tags=['agent'])
 def agent_inactive(agent_id: int, db: Session = Depends(get_db)):
     try:
@@ -2114,7 +2127,7 @@ def agent_inactive(agent_id: int, db: Session = Depends(get_db)):
         agent = db.query(Agent).filter(Agent.id == agent_id).first()
 
         if agent:
-
+            
             agent.agent_activity = "inactive"
             db.commit()
             return {"message": f"Agent with ID {agent_id} has been marked as inactive."}
@@ -2123,4 +2136,3 @@ def agent_inactive(agent_id: int, db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
