@@ -2149,3 +2149,27 @@ def agent_inactive(agent_id: int, db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get("/attachments", tags=["customer"])
+async def get_email_details(case_id: str, db: Session = Depends(get_db)):
+    try:
+        customer_record = db.query(Customer).filter(Customer.case_id == case_id).first()
+        if not customer_record:
+            raise HTTPException(status_code=404, detail="Customer record not found")
+        from_email = customer_record.email_author
+        subject = customer_record.email_subject
+        body = customer_record.email_body
+        print(from_email)
+        print(subject)
+        print(body)
+
+        email = f"""
+From: {from_email}
+
+Subject: {subject}
+
+{body}
+"""
+        return email
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
