@@ -289,6 +289,7 @@ class AgentSchema(BaseModel):
     shift_to: time
     weekly_off: list[str]
     password: str = 'agent'
+    role: str
 
 
 
