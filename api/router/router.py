@@ -1204,7 +1204,8 @@ def get_agent_appointments(agent_id: int, db: Session = Depends(get_db)):
     schedule.date,
     schedule.appointment_description,
     latest_event.status,
-    latest_event.timestamp
+    latest_event.timestamp AS "last_updated_date",
+    latest_event.created_at
 FROM
     genpact.appointment AS appointments
 JOIN
@@ -1216,7 +1217,8 @@ JOIN
         SELECT
             e.case_id,
             e.status,
-            e.timestamp
+            e.timestamp,
+            e.created_at
         FROM
             genpact.event AS e
         JOIN
@@ -1985,7 +1987,8 @@ FROM
             cust.product_id AS "products",
             agent.full_name AS "agent_name",
             event.status AS "status",
-            event.timestamp AS "timestamp",
+            event.timestamp AS "last_updated_date",
+            event.created_at AS "created_date",
             ROW_NUMBER() OVER (PARTITION BY cust.case_id ORDER BY event.timestamp DESC) AS row_num
         FROM
             genpact.customer AS cust
