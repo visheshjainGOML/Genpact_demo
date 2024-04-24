@@ -54,18 +54,11 @@ client = boto3.client(
 
 def send_email(sender, recipient, subject, body, start_time=None, end_time=None, date=None):
     # Check if date, start time, and end time are provided
-    try:
-        if start_time and end_time and date:
-            ics_content = create_calendar_invite(sender, recipient, subject, body, start_time, end_time, date)
-            value = send_email_with_attachment(sender, recipient, subject, body, ics_content)
-            if value == 'error sending email':
-                return "Appointment Initiation failed"
-        else:
-            value = send_plain_email(sender, recipient, subject, body)
-            if value == 'error sending email':
-                return "Appointment Initiation failed"
-    except:
-        return "Appointment Initiation failed"
+    if start_time and end_time and date:
+        ics_content = create_calendar_invite(sender, recipient, subject, body, start_time, end_time, date)
+        send_email_with_attachment(sender, recipient, subject, body, ics_content)
+    else:
+        send_plain_email(sender, recipient, subject, body)
         
 
 def create_calendar_invite(sender, recipient, subject, body, start_time, end_time, date):
@@ -99,7 +92,6 @@ def send_email_with_attachment(sender, recipient, subject, body, attachment_cont
         print("Email with calendar invite sent! Message ID:", response['MessageId'])
     except ClientError as e:
         print("Error sending email: ", e.response['Error']['Message'])
-        return "error sending email"
 
 def send_plain_email(sender, recipient, subject, body):
     try:
@@ -124,7 +116,6 @@ def send_plain_email(sender, recipient, subject, body):
         print("Plain email sent! Message ID:", response['MessageId'])
     except ClientError as e:
         print("Error sending email: ", e.response['Error']['Message'])
-        return "error sending email"
 
 
 def setup_db():
@@ -428,10 +419,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         case_id = case_id[:8]
         customer = customer.__dict__
         print(customer)
-        try:
-            customer['case_id'] = case_id
-        except:
-            return "Case Creation Failed"
+        customer['case_id'] = case_id
         new_customer = Customer(**customer)
 
         # text = """abcdef"""
@@ -454,7 +442,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         db.refresh(new_customer)
         customer_id = new_customer.id
         email_author = str(new_customer.email_author).lower()
-        email_1 = send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
+        send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
@@ -466,7 +454,7 @@ We look forward to meeting you and are here to assist you every step of the way.
 Warm regards
 
 Genpact Team """)
-        email_2 = send_email("Someshwar.Garud@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f"""
+        send_email("Someshwar.Garud@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Hi, a new case has been created for the following details:
 Name: {new_customer.username}
@@ -474,9 +462,6 @@ Email ID: {new_customer.email_id}
 Mobile: {new_customer.mobile_no}
                    
 Warm regards""")
-        
-        if email_1 == "Appointment Initiation failed" or email_2 == "Appointment Initiation failed":
-            return ResponseModel(message="Appointment Initiation failed", payload={"case_id": case_id})
         
         event1_data = {
             'status': 'New Email Received',
@@ -1822,20 +1807,6 @@ def question_answer_create(data:QuestionAnswerSchema,db: Session = Depends(get_d
     except Exception as e:
         return HTTPException(status_code=400,detail=f"unable to create new record {e}")
     
-@app.post("/questions/Update", status_code=201)
-async def update_questions(Questions: list[str], db: Session = Depends(get_db)):
-    try:
-        if not Questions:
-            return HTTPException(status_code=400, detail="Questions list is empty")
-        for question_text in Questions:
-            db_question = Question(question_text)
-            db.add(db_question)
-        db.commit()
-        return {"message": "Questions saved successfully"}
-    except Exception as e:
-        db.rollback()
-        return HTTPException(status_code=400, detail=str(e))
-    
 
 @app.post("/templates/update", response_model=ResponseModel, tags=["templated"], status_code=201)
 def create_or_update_template(templates: TemplateSchema, db: Session = Depends(get_db)):
@@ -2187,3 +2158,20 @@ Subject: {subject}
         return email
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+
+@app.post("/questions/Update", status_code=201)
+async def update_questions(Questions: list[str], db: Session = Depends(get_db)):
+    try:
+        if not Questions:
+            return HTTPException(status_code=400, detail="Questions list is empty")
+        #this line deletes the existing questions from the db, please double check this
+        db.query(Question).delete()
+        for question_text in Questions:
+            db_question = Question(question_text)
+            db.add(db_question)
+        db.commit()
+        return {"message": "Questions saved successfully"}
+    except Exception as e:
+        db.rollback()
+        return HTTPException(status_code=400, detail=str(e))

@@ -1964,3 +1964,79 @@
 2024-04-24 18:02:15,857 - INFO - Request received: GET http://localhost:8000/attachments?case_id=ee3399a0
 2024-04-24 18:02:16,926 - INFO - Response code: 200
 2024-04-24 18:02:16,926 - INFO - Response code: 200
+2024-04-24 20:47:03,559 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 20:47:03,559 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 20:47:03,562 - INFO - Response code: 200
+2024-04-24 20:47:03,562 - INFO - Response code: 200
+2024-04-24 20:47:03,689 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 20:47:03,689 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 20:47:03,728 - INFO - Response code: 200
+2024-04-24 20:47:03,728 - INFO - Response code: 200
+2024-04-24 20:48:08,345 - INFO - Request received: POST http://localhost:8000/questions/update
+2024-04-24 20:48:08,345 - INFO - Request received: POST http://localhost:8000/questions/update
+2024-04-24 20:48:09,660 - INFO - Response code: 201
+2024-04-24 20:48:09,660 - INFO - Response code: 201
+2024-04-24 20:53:57,462 - INFO - Request received: POST http://localhost:8000/questions/update
+2024-04-24 20:53:57,462 - INFO - Request received: POST http://localhost:8000/questions/update
+2024-04-24 20:53:57,479 - INFO - Response code: 404
+2024-04-24 20:53:57,479 - INFO - Response code: 404
+2024-04-24 20:54:14,349 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 20:54:14,349 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 20:54:14,349 - INFO - Response code: 200
+2024-04-24 20:54:14,349 - INFO - Response code: 200
+2024-04-24 20:54:14,547 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 20:54:14,547 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 20:54:14,604 - INFO - Response code: 200
+2024-04-24 20:54:14,604 - INFO - Response code: 200
+2024-04-24 20:54:18,124 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 20:54:18,124 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 20:54:18,125 - INFO - Response code: 200
+2024-04-24 20:54:18,125 - INFO - Response code: 200
+2024-04-24 20:54:18,433 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 20:54:18,433 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 20:54:18,437 - INFO - Response code: 200
+2024-04-24 20:54:18,437 - INFO - Response code: 200
+2024-04-24 20:55:02,826 - INFO - Request received: PUT http://localhost:8000/update_questions/
+2024-04-24 20:55:02,826 - INFO - Request received: PUT http://localhost:8000/update_questions/
+2024-04-24 20:55:03,914 - INFO - Response code: 400
+2024-04-24 20:55:03,914 - INFO - Response code: 400
+2024-04-24 20:58:18,950 - INFO - Request received: PUT http://localhost:8000/update_questions/
+2024-04-24 20:58:18,950 - INFO - Request received: PUT http://localhost:8000/update_questions/
+2024-04-24 20:58:18,952 - INFO - Response code: 404
+2024-04-24 20:58:18,952 - INFO - Response code: 404
+2024-04-24 20:58:22,041 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 20:58:22,041 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 20:58:22,044 - INFO - Response code: 200
+2024-04-24 20:58:22,044 - INFO - Response code: 200
+2024-04-24 20:58:22,162 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 20:58:22,162 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 20:58:22,222 - INFO - Response code: 200
+2024-04-24 20:58:22,222 - INFO - Response code: 200
+2024-04-24 20:58:24,919 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 20:58:24,919 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 20:58:24,920 - INFO - Response code: 200
+2024-04-24 20:58:24,920 - INFO - Response code: 200
+2024-04-24 20:58:25,056 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 20:58:25,056 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 20:58:25,057 - INFO - Response code: 200
+2024-04-24 20:58:25,057 - INFO - Response code: 200
+2024-04-24 20:58:52,293 - INFO - Request received: POST http://localhost:8000/questions/update
+2024-04-24 20:58:52,293 - INFO - Request received: POST http://localhost:8000/questions/update
+2024-04-24 20:58:53,336 - INFO - Response code: 400
+2024-04-24 20:58:53,336 - INFO - Response code: 400
+2024-04-24 21:00:31,017 - INFO - Request received: POST http://localhost:8000/questions/update
+2024-04-24 21:00:31,017 - INFO - Request received: POST http://localhost:8000/questions/update
+2024-04-24 21:00:32,051 - INFO - Response code: 400
+2024-04-24 21:00:32,051 - INFO - Response code: 400
+2024-04-24 21:03:10,799 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 21:03:10,799 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-24 21:03:10,800 - INFO - Response code: 200
+2024-04-24 21:03:10,800 - INFO - Response code: 200
+2024-04-24 21:03:10,907 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 21:03:10,907 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-24 21:03:10,954 - INFO - Response code: 200
+2024-04-24 21:03:10,954 - INFO - Response code: 200
+2024-04-24 21:03:38,872 - INFO - Request received: POST http://localhost:8000/questions/Update
+2024-04-24 21:03:38,872 - INFO - Request received: POST http://localhost:8000/questions/Update
+2024-04-24 21:03:39,923 - INFO - Response code: 201
+2024-04-24 21:03:39,923 - INFO - Response code: 201
