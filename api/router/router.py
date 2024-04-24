@@ -415,6 +415,7 @@ async def get_products(db: Session = Depends(get_db)):
 @app.post(path="/customer/create", response_model=ResponseModel, tags=["customer"],status_code=201)
 async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db)):
     try:
+        event_data = {}
         try:
             case_id = str(uuid.uuid4())
             case_id = case_id[:8]
