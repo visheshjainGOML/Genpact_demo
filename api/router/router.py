@@ -1,4 +1,8 @@
+import csv
+import io
 import random
+import tempfile
+
 from fastapi import FastAPI, HTTPException, Depends, Header, Query, status, APIRouter
 # from grpc import StatusCode
 from sqlalchemy import Table, create_engine
@@ -24,6 +28,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 
+from starlette.responses import FileResponse, StreamingResponse
 
 load_dotenv()
 
@@ -169,6 +174,10 @@ class Question(Base):
     __table__ = Table('questions', Base.metadata,
                       schema=schema, autoload_with=engine)
 
+class Frequency(Base):
+    __table__ = Table('frequency', Base.metadata,
+                      schema=schema, autoload_with=engine)
+
 
 # ---------- Utilities --------------------
 
@@ -292,6 +301,7 @@ class AgentSchema(BaseModel):
 
 
 
+
 class LoginSchema(BaseModel):
     username: str
     password: str
@@ -380,9 +390,7 @@ class TemplateSchema(BaseModel):
     template_type: str
     content: str
 
-class FrequencySchema(BaseModel):
-    minimum_days: str
-    maximum_days: str
+
 
 # ---------- API endpoints -------------
 app = APIRouter()
@@ -1933,24 +1941,29 @@ https://main.d2el3bzkhp7t3w.amplifyapp.com/agent/appointmentDetails?appointment_
 @app.post("/reminderfrequency/update", response_model=ResponseModel, tags=["frequency"], status_code=201)
 def create_or_update_frequency(frequency: FrequencySchema, db: Session = Depends(get_db)):
     try:
-        db_frequency = db.query(frequency).first()
+
+        if str(len(frequency.email_interval)) != frequency.email_count:
+            print(len(frequency.email_interval),frequency.email_count)
+            raise HTTPException(status_code=400, detail="Number of email intervals does not match the email count")
+
+        db_frequency = db.query(Frequency).first()
         if db_frequency:
             # If the record exists, update it
-            db_frequency.minimum_days = frequency.minimum_days
-            db_frequency.maximum_days = frequency.maximum_days
+            db_frequency.email_count = frequency.email_count
+            db_frequency.email_interval = frequency.email_interval
         else:
             # If the record doesn't exist, create a new one
-            new_frequency = frequency(minimum_days=frequency.minimum_days, maximum_days=frequency.maximum_days)
+            new_frequency = Frequency(email_count=frequency.email_count, email_interval=frequency.email_interval)
             db.add(new_frequency)
 
         db.commit()
 
         return ResponseModel(message="Frequency Updated successfully")
     except Exception as e:
-
         raise HTTPException(status_code=500, detail="Internal server error")
     finally:
         db.close()
+
 
 
 @app.get("/admin/appointments/list", tags=['appointment'])
@@ -2010,3 +2023,75 @@ ORDER BY
     # return result
 
     return appointments_with_schedule
+
+
+@app.post("/appointments/report", tags=['report'])
+def export_appointments_csv(db: Session = Depends(get_db)):
+    try:
+        appointments = db.query(Appointment).all()
+
+        # Create a temporary file to store the CSV
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as temp_file:
+            csv_writer = csv.writer(temp_file)
+            # Write the headers dynamically
+            headers = [column.key for column in Appointment.__table__.columns]
+            csv_writer.writerow(headers)
+            # Write the data rows
+            for appointment in appointments:
+                csv_writer.writerow([getattr(appointment, column.key) for column in Appointment.__table__.columns])
+            temp_file.flush()
+
+        # Return the temporary file as a response
+        # return FileResponse(temp_file.name, media_type="text/csv", filename="appointments.csv")
+        return FileResponse(temp_file.name, filename="appointments.csv")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+@app.post("/agents/report", tags=['report'])
+def export_agents_csv(db: Session = Depends(get_db)):
+    try:
+        agents = db.query(Agent).all()
+
+        # Create a temporary file to store the CSV
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as temp_file:
+            csv_writer = csv.writer(temp_file)
+            # Write the headers dynamically
+            headers = [column.key for column in Agent.__table__.columns]
+            csv_writer.writerow(headers)
+            # Write the data rows
+            for agent in agents:
+                csv_writer.writerow([getattr(agent, column.key) for column in Agent.__table__.columns])
+            temp_file.flush()
+
+        # Return the temporary file as a response
+        # return FileResponse(temp_file.name, media_type="text/csv", filename="appointments.csv")
+        return FileResponse(temp_file.name, filename="agents.csv")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/events/report", tags=['report'])
+def export_events_csv(db: Session = Depends(get_db)):
+    try:
+        events = db.query(Event).all()
+
+        # Create a temporary file to store the CSV
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as temp_file:
+            csv_writer = csv.writer(temp_file)
+            # Write the headers dynamically
+            headers = [column.key for column in Event.__table__.columns]
+            csv_writer.writerow(headers)
+            # Write the data rows
+            for event in events:
+                csv_writer.writerow([getattr(event, column.key) for column in Event.__table__.columns])
+            temp_file.flush()
+
+        # Return the temporary file as a response
+        # return FileResponse(temp_file.name, media_type="text/csv", filename="appointments.csv")
+        return FileResponse(temp_file.name, filename="events.csv")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
