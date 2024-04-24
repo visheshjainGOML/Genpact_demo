@@ -28,6 +28,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from starlette.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse
 
 load_dotenv()
 
