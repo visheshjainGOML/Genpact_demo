@@ -409,6 +409,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         case_id = str(uuid.uuid4())
         case_id = case_id[:8]
         customer = customer.__dict__
+        print("$$$$$$$$$$$$$$$$$$$$$$", customer['email_author'])
         print(customer)
         customer['case_id'] = case_id
         new_customer = Customer(**customer)
@@ -433,6 +434,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         db.refresh(new_customer)
         print(new_customer.id)
         customer_id = new_customer.id
+        print("^^^^^^^^^^^^^^^^^^", new_customer.email_author)
         send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
