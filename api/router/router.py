@@ -445,9 +445,9 @@ We look forward to meeting you and are here to assist you every step of the way.
 Warm regards
 
 Genpact Team """)
-        send_email("Someshwar.Garud@genpact.com", email_author, f"Case ID creation acknowledgement - Case ID: {case_id}", f"""
+        send_email("Someshwar.Garud@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f"""
 Case ID: {new_customer.case_id} 
-Hi, a unique Case ID has been created for the following details:
+Hi, a new case has been created for the following details:
 Name: {new_customer.username}
 Email ID: {new_customer.email_id}
 Mobile: {new_customer.mobile_no}
@@ -578,6 +578,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         customer_data = query.first()
         Customer_email= customer_data.email_id
         case_id = customer_data.case_id
+        email_author = str(customer_data.email_author).lower()
 
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
 Case ID: {case_id}
@@ -606,7 +607,7 @@ Best Regards,
 Genpact Team
 """,start_time_obj,end_time_obj,date_obj)
         
-        send_email("Someshwar.Garud@genpact.com", customer_data.email_author, f"Appointment creation acknowledgment - Case ID: {case_id}", f"""
+        send_email("Someshwar.Garud@genpact.com", email_author, f"Appointment creation acknowledgment - Case ID: {case_id}", f"""
 Case ID: {customer_data.case_id} 
 Hi, a new appointmnet has been created for the following details:
 Customer Name: {customer_data.username}
@@ -836,6 +837,8 @@ async def cancel_appointment_route(appointment_id: int,reason:str, db: Session =
             query = db.query(Agent).filter(Agent.id == agent_id)
             agent_data = query.first()
             agent_email = agent_data.agent_email
+            email_author = str(customer_data.email_author).lower()
+
             send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}", f"""
 Case ID: {case_id}
 We have received your request and successfully cancelled your scheduled appointment. We are sorry to see you go, but understand that circumstances can change.
@@ -852,7 +855,7 @@ Genpact Team
 Case ID: {case_id}
 Hello, your scheduled appointment has been cancelled""")
             
-            send_email("Someshwar.Garud@genpact.com", customer_data.email_author, f"Appointment cancellation acknowledgement - Case ID: {case_id}", f"""
+            send_email("Someshwar.Garud@genpact.com", email_author, f"Appointment cancellation acknowledgement - Case ID: {case_id}", f"""
 Case ID: {case_id}
 Hi, the appointment has been cancelled for the following details:
 Customer Name: {customer_data.username}
