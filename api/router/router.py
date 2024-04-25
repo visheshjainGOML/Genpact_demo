@@ -57,7 +57,7 @@ client = boto3.client(
 def send_sms(phone_number, message):
     client_sms = boto3.client(
         'pinpoint-sms-voice-v2',
-        region_name=os.getenv('AWS_REGION_SMS'),
+        region_name="us-east-1",
         aws_access_key_id=AWS_ACCESS_KEY,
         aws_secret_access_key=AWS_SECRET_KEY
     )
