@@ -500,7 +500,7 @@ Warm regards
 
 Genpact Team """)
             
-            send_sms(str(new_customer.mobile_no), f"Schedule Your Appointment with Us - Case ID: {case_id}. Use the following link: http://54.175.240.135:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}")
+            send_sms(str(new_customer.mobile_no), f"Schedule Your Appointment with Us - Case ID: {case_id}")
 
             send_email("Someshwar.Garud@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f""" 
 Hi, a new case has been created for the following details:
@@ -735,7 +735,7 @@ Warm regards,
 Genpact Team 
 """,start_time_obj,end_time_obj,date_obj)
         
-        send_sms(str(customer_data.mobile_no), f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}. Use the following link for rescheduling or cancel the appointment: http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}")
+        send_sms(str(customer_data.mobile_no), f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}.")
 
         send_email("Someshwar.Garud@genpact.com", agent_email, f"New Appointment Booked - Case ID: {case_id}", f""" 
 Hi {agent_data.full_name}
@@ -944,7 +944,7 @@ Best regards,
 
 Genpact Team
 """)
-            send_sms(str(customer_data.mobile_no),f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}. Your appointment has been confirmed.")
+            send_sms(str(customer_data.mobile_no),f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}.")
             
             send_email("Someshwar.Garud@genpact.com", agent_email, f"appointment Cancelled - Case ID: {case_id}", f"""
 Case ID: {agent_data.full_name}
@@ -1739,7 +1739,7 @@ Best Regards,
 Genpact Team
                    """)
         print(customer.mobile_no)
-        send_sms(str(customer.mobile_no),f"""Appointment Reminder - Case ID: {case_id}. You have an appointment on {appointment_date} at {start_time} - {end_time}""")
+        send_sms(str(customer.mobile_no),f"""Appointment Reminder - Case ID: {case_id}.""")
 
 
         event_data = {
