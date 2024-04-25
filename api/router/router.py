@@ -1669,7 +1669,7 @@ async def get_event_logs(case_id:str, db: Session = Depends(get_db)):
         db.close()
 
 @app.post('/send_reminder', tags=["events"])
-async def send_reminder(case_id: str, db: Session = Depends(get_db)):
+async def send_reminder(case_id: str, reason: str, db: Session = Depends(get_db)):
     try:
         # Fetch customer details
         customer = db.query(Customer).filter(Customer.case_id == case_id).first()
@@ -1710,7 +1710,8 @@ Genpact Team
             'event_name': 'Reminder has been sent to customer',
             'event_details': {
                 "email":"",
-                "details":f"Reminder Sent"
+                "details":f"Reminder Sent",
+                "reminder_reason":reason
             },
             'timestamp': str(datetime.now()),
             'case_id': case_id
