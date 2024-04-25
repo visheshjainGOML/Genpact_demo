@@ -2112,3 +2112,23 @@
 2024-04-25 13:20:38,658 - INFO - Response code: 200
 2024-04-25 13:21:01,494 - INFO - Request received: GET http://localhost:8000/appointments/list/32
 2024-04-25 13:21:01,494 - INFO - Request received: GET http://localhost:8000/appointments/list/32
+2024-04-25 13:22:25,126 - INFO - Request received: GET http://localhost:8000/appointments/list/32
+2024-04-25 13:22:25,126 - INFO - Request received: GET http://localhost:8000/appointments/list/32
+2024-04-25 13:22:26,166 - INFO - Response code: 200
+2024-04-25 13:22:26,166 - INFO - Response code: 200
+2024-04-25 14:29:17,845 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-04-25 14:29:17,845 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-04-25 14:29:18,893 - INFO - Response code: 200
+2024-04-25 14:29:18,893 - INFO - Response code: 200
+2024-04-25 14:34:41,653 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-04-25 14:34:41,653 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-04-25 14:35:04,988 - INFO - Response code: 200
+2024-04-25 14:35:04,988 - INFO - Response code: 200
+2024-04-25 14:35:55,236 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-04-25 14:35:55,236 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-04-25 14:35:57,603 - INFO - Response code: 200
+2024-04-25 14:35:57,603 - INFO - Response code: 200
+2024-04-25 14:40:09,636 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-04-25 14:40:09,636 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-04-25 14:40:12,052 - INFO - Response code: 200
+2024-04-25 14:40:12,052 - INFO - Response code: 200
