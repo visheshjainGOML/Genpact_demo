@@ -507,11 +507,6 @@ Email ID: {new_customer.email_id}
 Mobile: {new_customer.mobile_no}
                    
 Warm regards""")
-            print(new_customer.mobile_no)
-            send_sms(str(new_customer.mobile_no),f"""Appointment scheduled - Case ID: {case_id}.""")
-
-            
-            
         except:
            event_data = {
             'event_status': 'Appointment Initiation Failed',
@@ -523,6 +518,13 @@ Warm regards""")
             'timestamp': str(datetime.now()),
             'case_id': case_id
         }
+        try:
+            print(new_customer.mobile_no)
+            send_sms(str(new_customer.mobile_no),f"""Appointment scheduled - Case ID: {case_id}.""")
+        except:
+            pass
+ 
+        
         event1 = Event(**event_data)
         db.add(event1)
         db.commit()
@@ -735,8 +737,10 @@ We look forward to our conversation and are here to assist you with any question
 Warm regards,
 Genpact Team 
 """,start_time_obj,end_time_obj,date_obj)
-        
-        send_sms(str(customer_data.mobile_no), f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}.")
+        try:
+            send_sms(str(customer_data.mobile_no), f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}.")
+        except:
+            pass
 
         send_email("Someshwar.Garud@genpact.com", agent_email, f"New Appointment Booked - Case ID: {case_id}", f""" 
 Hi {agent_data.full_name}
@@ -945,7 +949,10 @@ Best regards,
 
 Genpact Team
 """)
-            send_sms(str(customer_data.mobile_no),f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}.")
+            try:
+                send_sms(str(customer_data.mobile_no),f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}.")
+            except:
+                pass
             
             send_email("Someshwar.Garud@genpact.com", agent_email, f"appointment Cancelled - Case ID: {case_id}", f"""
 Case ID: {agent_data.full_name}
@@ -1107,7 +1114,10 @@ Best Regards,
 Genpact Team
                    """,start_time_obj,end_time_obj,date_obj)
         
-        send_sms(str(customer_data.mobile_no),f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}")
+        try:
+            send_sms(str(customer_data.mobile_no),f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}")
+        except: 
+            pass
         
         send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Rescheduled - Case ID: {case_id}", f"""
                    Hi {agent_data.full_name}
@@ -1730,6 +1740,11 @@ async def send_reminder(case_id: str, reason: str, db: Session = Depends(get_db)
         
         start_time = slot_query.start_time.strftime('%H:%M')
         end_time = slot_query.end_time.strftime('%H:%M')
+
+        # Call count_event_status function to get the count
+        count_data = await count_event_status(case_id, "Reminder Sent", db)
+        reminder_count = count_data[f"Count for Reminder Sent"] + 1
+        print("REMINDER COUNT:::::::::::::::::::::::", reminder_count)
         
         send_email("Someshwar.Garud@genpact.com", ", ".join({email_id}), f"Appointment Reminder - Case ID: {case_id}", f"""
 Hi {customer_name},
@@ -1739,21 +1754,23 @@ Your appointment is scheduled for {appointment_date} from {start_time} to {end_t
 Best Regards,
 Genpact Team
                    """)
-        print(customer.mobile_no)
-        send_sms(str(customer.mobile_no),f"""Appointment Reminder - Case ID: {case_id}.""")
-
+        try:
+            send_sms(str(customer.mobile_no), f"""Appointment Reminder - Case ID: {case_id}.""")
+        except:
+            pass
 
         event_data = {
             'event_status': 'Reminder Sent',
-            'event_name': 'Reminder has been sent to customer',
+            'event_name': f'Reminder Number : {reminder_count} has been sent',
             'event_details': {
                 "email":"",
-                "details":f"Reminder Sent",
+                "details":f"Reminder Number : {reminder_count}",
                 "reminder_reason":reason
             },
             'timestamp': str(datetime.now()),
             'case_id': case_id
         }
+        
         event1 = Event(**event_data)
         db.add(event1)
         db.commit()
@@ -1770,7 +1787,6 @@ Genpact Team
     finally:
         # Close session
         db.close()
-
 
 @app.post('/appointment/completed', tags=["appoinment"])
 async def mark_appointment_as_completed(case_id: str, status_expected: str, reason: str, db: Session = Depends(get_db)):
@@ -2061,7 +2077,10 @@ Your appointment agent has been changed. The new agent is now responsible for yo
 For further details, please click the following link: 
 http://54.175.240.135:3000/customer/appointmentDetails?appointment_id={new_appointment.id}
 """)
-        send_sms(str(customer_data.mobile_no),f"Appointment Agent Changed - Case ID: {case_id}")
+        try:
+            send_sms(str(customer_data.mobile_no),f"Appointment Agent Changed - Case ID: {case_id}")
+        except:
+            pass
 
         send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Agent Changed - Case ID: {case_id}",
                    f""" 
@@ -2144,7 +2163,7 @@ FROM
             event.event_status AS "event_status",
             event.timestamp AS "last_updated_date",
             event.created_at AS "created_date",
-            ROW_NUMBER() OVER (PARTITION BY cust.case_id ORDER BY event.timestamp DESC) AS row_num
+            ROW_NUMBER() OVER (PARTITION BY cust.case_id ORDER BY event.timestamp DESC,event.id desc) AS row_num
         FROM
             genpact.customer AS cust
        LEFT JOIN
@@ -2157,7 +2176,7 @@ FROM
 WHERE
     main_query.row_num = 1 and main_query."case_id" is not NULL
 ORDER BY
-    main_query."case_id";
+    main_query."last_updated_date";
     """)
     print("Appointment Query")
     # Execute the query
@@ -2476,9 +2495,38 @@ async def update_questions(Questions: list[str], db: Session = Depends(get_db)):
         return HTTPException(status_code=400, detail=str(e))
     
 @app.post("/count/event_status", tags=["events"])
-async def count_status(caseid: str, event_status:str,db: Session = Depends(get_db)):
+async def count_event_status(caseid: str, event_status:str, db: Session = Depends(get_db)):
     try:
         count = db.query(Event).filter(Event.case_id == caseid, Event.event_status == event_status).count()
         return {f"Count for {event_status}": count}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/count/check_reschedule_count", tags=["appointment"])
+async def count_reschedule_status(case_id: str, db: Session = Depends(get_db)):
+    try:
+        frequency_entry = db.query(Frequency).first()
+
+        count = db.query(Event).filter(Event.case_id == case_id, Event.event_status == "Appointment Rescheduled").count()
+
+        if count > int(frequency_entry.reschedule_count):
+            return {"You have exceed maximum number of rescheduling count, please register a new case"}
+
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/count/check_reminder_count", tags=["appointment"])
+async def count_reminder_status(case_id: str, db: Session = Depends(get_db)):
+    try:
+        frequency_entry = db.query(Frequency).first()
+
+        count = db.query(Event).filter(Event.case_id == case_id, Event.event_status == "Reminder Sent").count()
+
+        if count > int(frequency_entry.email_count):
+            return {"You have exceed maximum number of reminder count, please register a new case"}
+
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

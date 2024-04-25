@@ -2244,3 +2244,51 @@
 2024-04-25 19:11:17,734 - INFO - Request received: POST http://localhost:8000/customer/create
 2024-04-25 19:11:35,715 - INFO - Response code: 201
 2024-04-25 19:11:35,715 - INFO - Response code: 201
+2024-04-25 19:13:53,002 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-25 19:13:53,002 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-25 19:14:23,477 - INFO - Response code: 201
+2024-04-25 19:14:23,477 - INFO - Response code: 201
+2024-04-25 19:45:55,076 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-04-25 19:45:55,076 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-04-25 19:46:17,061 - INFO - Response code: 200
+2024-04-25 19:46:17,061 - INFO - Response code: 200
+2024-04-25 19:48:21,629 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-04-25 19:48:21,629 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-04-25 19:48:22,702 - INFO - Response code: 200
+2024-04-25 19:48:22,702 - INFO - Response code: 200
+2024-04-25 19:56:22,392 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-04-25 19:56:22,392 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-04-25 20:00:08,393 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-04-25 20:00:08,393 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-04-25 20:00:09,461 - INFO - Response code: 200
+2024-04-25 20:00:09,461 - INFO - Response code: 200
+2024-04-25 20:01:52,771 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-04-25 20:01:52,771 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-04-25 20:01:57,346 - INFO - Response code: 200
+2024-04-25 20:01:57,346 - INFO - Response code: 200
+2024-04-25 20:12:52,757 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-04-25 20:12:52,757 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-04-25 20:23:59,145 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=ecc83b82&reason=test%20purpose
+2024-04-25 20:23:59,145 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=ecc83b82&reason=test%20purpose
+2024-04-25 20:24:00,719 - INFO - Response code: 400
+2024-04-25 20:24:00,719 - INFO - Response code: 400
+2024-04-25 20:24:25,678 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 20:24:25,678 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 20:24:25,680 - INFO - Response code: 200
+2024-04-25 20:24:25,680 - INFO - Response code: 200
+2024-04-25 20:24:25,797 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 20:24:25,797 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 20:24:25,823 - INFO - Response code: 200
+2024-04-25 20:24:25,823 - INFO - Response code: 200
+2024-04-25 20:27:53,724 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=45ae50bc&reason=hhhh
+2024-04-25 20:27:53,724 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=45ae50bc&reason=hhhh
+2024-04-25 20:28:20,069 - INFO - Response code: 400
+2024-04-25 20:28:20,069 - INFO - Response code: 400
+2024-04-25 20:40:17,769 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=45ae50bc&reason=hhhh
+2024-04-25 20:40:17,769 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=45ae50bc&reason=hhhh
+2024-04-25 20:40:19,337 - INFO - Response code: 400
+2024-04-25 20:40:19,337 - INFO - Response code: 400
+2024-04-25 20:43:01,572 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=45ae50bc&reason=hhhh
+2024-04-25 20:43:01,572 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=45ae50bc&reason=hhhh
+2024-04-25 20:43:16,246 - INFO - Response code: 200
+2024-04-25 20:43:16,246 - INFO - Response code: 200
