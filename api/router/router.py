@@ -1770,6 +1770,7 @@ Reason: {reason}"""
             agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
             agent_schedule_data.status = "Case Submitted"
             agent_schedule_data.reason = reason
+            agent_schedule_data.appointment_id = None
             db.query(Appointment).filter(Appointment.customer_id == id).delete()
             db.commit()
             event1_details = {
@@ -1796,6 +1797,7 @@ Reason: {reason}"""
             agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
             agent_schedule_data.status = "Awaiting Customer Response"
             agent_schedule_data.reason = reason
+            agent_schedule_data.appointment_id = None
             db.query(Appointment).filter(Appointment.customer_id == id).delete()
             db.commit()
             event1_details = {
