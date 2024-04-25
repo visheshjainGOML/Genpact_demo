@@ -1738,14 +1738,22 @@ Genpact Team
 async def mark_appointment_as_completed(case_id: str, status_expected: str, reason: str, db: Session = Depends(get_db)):
     try:
         if status_expected=="Mark Case as Closed":
-            customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
             id = customer_data.id
+            # Update agent_schedule_data
             agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
             agent_schedule_data.status = "Case Closed"
             agent_schedule_data.reason = reason
             agent_schedule_data.appointment_id = None
-            db.query(Appointment).filter(Appointment.customer_id == id).delete()
+
+            # Commit the agent_schedule_data changes
             db.commit()
+
+            # Delete appointment record
+            db.query(Appointment).filter(Appointment.customer_id == id).delete()
+
+            # Commit the changes
+            db.commit()
+
             event1_details = {
                 "event_name": "Case has been successfully closed",
                 "event_details": {
@@ -1765,14 +1773,22 @@ Reason: {reason}"""
             db.commit()
         
         elif status_expected=="Mark Case as Submitted":
-            customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
             id = customer_data.id
+            # Update agent_schedule_data
             agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
             agent_schedule_data.status = "Case Submitted"
             agent_schedule_data.reason = reason
             agent_schedule_data.appointment_id = None
-            db.query(Appointment).filter(Appointment.customer_id == id).delete()
+
+            # Commit the agent_schedule_data changes
             db.commit()
+
+            # Delete appointment record
+            db.query(Appointment).filter(Appointment.customer_id == id).delete()
+
+            # Commit the changes
+            db.commit()
+
             event1_details = {
                 "event_name": "Case has been successfully submitted",
                 "event_details": {
@@ -1794,11 +1810,20 @@ Reason: {reason}"""
         else:
             customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
             id = customer_data.id
+
+            # Update agent_schedule_data
             agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
             agent_schedule_data.status = "Awaiting Customer Response"
             agent_schedule_data.reason = reason
             agent_schedule_data.appointment_id = None
+
+            # Commit the agent_schedule_data changes
+            db.commit()
+
+            # Delete appointment record
             db.query(Appointment).filter(Appointment.customer_id == id).delete()
+
+            # Commit the changes
             db.commit()
             event1_details = {
                 "event_name": "Case has been marked as Awaiting Customer Response",
@@ -2258,23 +2283,6 @@ Subject: {subject}
         return email
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    
-
-@app.post("/questions/Update", status_code=201)
-async def update_questions(Questions: list[str], db: Session = Depends(get_db)):
-    try:
-        if not Questions:
-            return HTTPException(status_code=400, detail="Questions list is empty")
-        #this line deletes the existing questions from the db, please double check this
-        db.query(Question).delete()
-        for question_text in Questions:
-            db_question = Question(question_text)
-            db.add(db_question)
-        db.commit()
-        return {"message": "Questions saved successfully"}
-    except Exception as e:
-        db.rollback()
-        return HTTPException(status_code=400, detail=str(e))
 
 
 
@@ -2350,3 +2358,29 @@ def create_or_update_frequency(frequency: FrequencySchema_update, db: Session = 
         raise HTTPException(status_code=500, detail="Internal server error")
     finally:
         db.close()
+
+@app.post("/questions/Update", status_code=201)
+async def update_questions(Questions: list[str], db: Session = Depends(get_db)):
+    try:
+        if not Questions:
+            return HTTPException(status_code=400, detail="Questions list is empty")
+        
+
+        existed_questions = db.query(Question).all()
+        for q in existed_questions:
+            db.delete(q)
+        print(Questions)
+        for question_text in Questions:
+            print(question_text)
+
+            db_question = Question(question=question_text)
+
+            print(db_question)
+            db.add(db_question)
+           
+        db.commit()
+        return {"message": "Questions saved successfully"}
+
+    except Exception as e:
+        db.rollback()
+        return HTTPException(status_code=400, detail=str(e))
