@@ -2148,3 +2148,7 @@
 2024-04-25 16:29:10,041 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=9c0ceaf4&status_expected=Awaiting%20Customer%20Response&reason=Not%20available
 2024-04-25 16:29:32,440 - INFO - Response code: 400
 2024-04-25 16:29:32,440 - INFO - Response code: 400
+2024-04-25 16:37:11,927 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=9c0ceaf4&status_expected=Awaiting%20Customer%20Response&reason=Not%20available
+2024-04-25 16:37:11,927 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=9c0ceaf4&status_expected=Awaiting%20Customer%20Response&reason=Not%20available
+2024-04-25 16:37:15,613 - INFO - Response code: 200
+2024-04-25 16:37:15,613 - INFO - Response code: 200

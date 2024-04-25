@@ -1738,6 +1738,7 @@ Genpact Team
 async def mark_appointment_as_completed(case_id: str, status_expected: str, reason: str, db: Session = Depends(get_db)):
     try:
         if status_expected=="Mark Case as Closed":
+            customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
             id = customer_data.id
             # Update agent_schedule_data
             agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
@@ -1773,6 +1774,7 @@ Reason: {reason}"""
             db.commit()
         
         elif status_expected=="Mark Case as Submitted":
+            customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
             id = customer_data.id
             # Update agent_schedule_data
             agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
