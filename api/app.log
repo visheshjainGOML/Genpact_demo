@@ -2208,3 +2208,31 @@
 2024-04-25 17:24:37,059 - INFO - Request received: POST http://localhost:8000/appointments/report
 2024-04-25 17:24:38,086 - INFO - Response code: 200
 2024-04-25 17:24:38,086 - INFO - Response code: 200
+2024-04-25 18:03:04,033 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 18:03:04,033 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 18:03:04,035 - INFO - Response code: 200
+2024-04-25 18:03:04,035 - INFO - Response code: 200
+2024-04-25 18:03:04,287 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 18:03:04,287 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 18:03:04,317 - INFO - Response code: 200
+2024-04-25 18:03:04,317 - INFO - Response code: 200
+2024-04-25 18:06:57,933 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=d72ff173&reason=test%20purpose
+2024-04-25 18:06:57,933 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=d72ff173&reason=test%20purpose
+2024-04-25 18:07:23,069 - INFO - Response code: 200
+2024-04-25 18:07:23,069 - INFO - Response code: 200
+2024-04-25 18:09:11,815 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=ecc83b82&reason=test%20purpose
+2024-04-25 18:09:11,815 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=ecc83b82&reason=test%20purpose
+2024-04-25 18:09:26,035 - INFO - Response code: 400
+2024-04-25 18:09:26,035 - INFO - Response code: 400
+2024-04-25 18:14:37,637 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=ecc83b82&reason=test%20purpose
+2024-04-25 18:14:37,637 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=ecc83b82&reason=test%20purpose
+2024-04-25 18:14:51,539 - INFO - Response code: 400
+2024-04-25 18:14:51,539 - INFO - Response code: 400
+2024-04-25 18:18:47,206 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=ecc83b82&reason=test%20purpose
+2024-04-25 18:18:47,206 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=ecc83b82&reason=test%20purpose
+2024-04-25 18:19:13,552 - INFO - Response code: 200
+2024-04-25 18:19:13,552 - INFO - Response code: 200
+2024-04-25 18:22:44,008 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=ecc83b82&reason=test%20purpose
+2024-04-25 18:22:44,008 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=ecc83b82&reason=test%20purpose
+2024-04-25 18:23:11,282 - INFO - Response code: 200
+2024-04-25 18:23:11,282 - INFO - Response code: 200

@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.orm import declarative_base
 from datetime import datetime
 import uuid
+from urllib import response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Literal, Optional
@@ -52,6 +53,27 @@ client = boto3.client(
     aws_access_key_id=AWS_ACCESS_KEY,
     aws_secret_access_key=AWS_SECRET_KEY
 )
+
+def send_sms(phone_number, message):
+    client_sms = boto3.client(
+        'pinpoint-sms-voice-v2',
+        region_name=os.getenv('AWS_REGION_SMS'),
+        aws_access_key_id=AWS_ACCESS_KEY,
+        aws_secret_access_key=AWS_SECRET_KEY
+    )
+    # Initialize the boto3 client for Pinpoint
+
+    # Your Pool ID from the Pinpoint SMS account
+    pool_id = 'pool-a6a3c38142714bea86510ded50156a3d'
+    
+
+    response = client_sms.send_text_message(
+        DestinationPhoneNumber=phone_number,
+        OriginationIdentity=pool_id,
+        MessageBody=message,
+        MessageType="TRANSACTIONAL"
+    )
+    return response['MessageId']
 
 def send_email(sender, recipient, subject, body, start_time=None, end_time=None, date=None):
     # Check if date, start time, and end time are provided
@@ -477,6 +499,9 @@ We look forward to meeting you and are here to assist you every step of the way.
 Warm regards
 
 Genpact Team """)
+            
+            send_sms(str(new_customer.mobile_no), f"Schedule Your Appointment with Us - Case ID: {case_id}. Use the following link: http://54.175.240.135:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}")
+
             send_email("Someshwar.Garud@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f""" 
 Hi, a new case has been created for the following details:
 Name: {new_customer.username}
@@ -484,6 +509,8 @@ Email ID: {new_customer.email_id}
 Mobile: {new_customer.mobile_no}
                    
 Warm regards""")
+            
+            
         except:
            event_data = {
             'event_status': 'Appointment Initiation Failed',
@@ -707,6 +734,8 @@ We look forward to our conversation and are here to assist you with any question
 Warm regards,
 Genpact Team 
 """,start_time_obj,end_time_obj,date_obj)
+        
+        send_sms(str(customer_data.mobile_no), f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}. Use the following link for rescheduling or cancel the appointment: http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}")
 
         send_email("Someshwar.Garud@genpact.com", agent_email, f"New Appointment Booked - Case ID: {case_id}", f""" 
 Hi {agent_data.full_name}
@@ -915,6 +944,8 @@ Best regards,
 
 Genpact Team
 """)
+            send_sms(str(customer_data.mobile_no),f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}. Your appointment has been confirmed.")
+            
             send_email("Someshwar.Garud@genpact.com", agent_email, f"appointment Cancelled - Case ID: {case_id}", f"""
 Case ID: {agent_data.full_name}
 Hello, your scheduled appointment has been cancelled""")
@@ -1074,6 +1105,8 @@ Best Regards,
 
 Genpact Team
                    """,start_time_obj,end_time_obj,date_obj)
+        
+        send_sms(str(customer_data.mobile_no),f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}")
         
         send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Rescheduled - Case ID: {case_id}", f"""
                    Hi {agent_data.full_name}
@@ -1705,6 +1738,10 @@ Your appointment is scheduled for {appointment_date} from {start_time} to {end_t
 Best Regards,
 Genpact Team
                    """)
+        print(customer.mobile_no)
+        send_sms(str(customer.mobile_no),f"""Appointment Reminder - Case ID: {case_id}. You have an appointment on {appointment_date} at {start_time} - {end_time}""")
+
+
         event_data = {
             'event_status': 'Reminder Sent',
             'event_name': 'Reminder has been sent to customer',
@@ -2023,6 +2060,7 @@ Your appointment agent has been changed. The new agent is now responsible for yo
 For further details, please click the following link: 
 http://54.175.240.135:3000/customer/appointmentDetails?appointment_id={new_appointment.id}
 """)
+        send_sms(str(customer_data.mobile_no),f"Appointment Agent Changed - Case ID: {case_id}")
 
         send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Agent Changed - Case ID: {case_id}",
                    f""" 
@@ -2435,3 +2473,11 @@ async def update_questions(Questions: list[str], db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         return HTTPException(status_code=400, detail=str(e))
+    
+@app.post("/count/event_status", tags=["events"])
+async def count_status(caseid: str, event_status:str,db: Session = Depends(get_db)):
+    try:
+        count = db.query(Event).filter(Event.case_id == caseid, Event.event_status == event_status).count()
+        return {f"Count for {event_status}": count}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
