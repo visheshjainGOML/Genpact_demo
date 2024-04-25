@@ -357,7 +357,7 @@ class AppointmentSchema(BaseModel):
     customer_timezone: str
 
 class EventSchema(BaseModel):
-    status: str
+    event_status: str
     event_name: str
     timestamp: str
     event_details: Optional[dict] = {}
@@ -440,7 +440,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
             db.commit()
         except:
             event_data = {
-            'status': 'Case Creation Failed',
+            'event_status': 'Case Creation Failed',
             'event_name': 'There was error creating a Case',
             'event_details': {
                 "email":"",
@@ -458,7 +458,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         email_author = str(new_customer.email_author).lower()
         try:
             send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
-Case ID: {new_customer.case_id} 
+Hi {new_customer.username}
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
@@ -469,8 +469,7 @@ We look forward to meeting you and are here to assist you every step of the way.
 Warm regards
 
 Genpact Team """)
-            send_email("Someshwar.Garud@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f"""
-Case ID: {new_customer.case_id} 
+            send_email("Someshwar.Garud@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f""" 
 Hi, a new case has been created for the following details:
 Name: {new_customer.username}
 Email ID: {new_customer.email_id}
@@ -479,7 +478,7 @@ Mobile: {new_customer.mobile_no}
 Warm regards""")
         except:
            event_data = {
-            'status': 'Appointment Initiation Failed',
+            'event_status': 'Appointment Initiation Failed',
             'event_name': 'The email fetched from mail looks incorrect',
             'event_details': {
                 "email":"",
@@ -493,7 +492,7 @@ Warm regards""")
         db.commit()
     
         event1_data = {
-            'status': 'New Email Received',
+            'event_status': 'New Email Received',
             'event_name': 'A new email has been received',
             'event_details': {"email":f"""
 From: Someshwar.Garud@genpact.com
@@ -510,7 +509,7 @@ Subject: {new_customer.email_subject}
         }
 
         event2_data = {
-            'status': 'Case Created',
+            'event_status': 'Case Created',
             'event_name': 'A new Case has been created',
             'event_details': {
                 "email":"",
@@ -546,7 +545,7 @@ Genpact Team
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
-            "status": "Appointment Notification Sent"
+            "event_status": "Appointment Notification Sent"
         }
 
         event4_data = {
@@ -557,7 +556,7 @@ Genpact Team
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
-            "status": "Awaiting Customer Response"
+            "event_status": "Awaiting Customer Response"
         }
         event1 = Event(**event1_data)
         event2 = Event(**event2_data)
@@ -686,7 +685,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         email_author = str(customer_data.email_author).lower()
 
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
-Case ID: {case_id}
+Hi {customer_data.username}
 We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
 To view the details of your appointment, please click the following link: http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
 Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
@@ -699,7 +698,7 @@ Genpact Team
 """,start_time_obj,end_time_obj,date_obj)
 
         send_email("Someshwar.Garud@genpact.com", agent_email, f"New Appointment Booked - Case ID: {case_id}", f""" 
-Case ID: {case_id}
+Hi {agent_data.full_name}
 We are pleased to inform you that a new appointment has been booked. Please log in to your agent portal to view the details and prepare for the upcoming meeting.
 Quick Reminder:
 Check the Appointment Date and Time: Ensure your schedule is updated.
@@ -713,7 +712,6 @@ Genpact Team
 """,start_time_obj,end_time_obj,date_obj)
         
         send_email("Someshwar.Garud@genpact.com", email_author, f"Appointment creation acknowledgment - Case ID: {case_id}", f"""
-Case ID: {customer_data.case_id} 
 Hi, a new appointmnet has been created for the following details:
 Customer Name: {customer_data.username}
 Customer Email ID: {customer_data.email_id}
@@ -735,7 +733,7 @@ Warm regards""")
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
-            "status": "Appointment Confirmation Received"
+            "event_status": "Appointment Confirmation Received"
         }
 
         event2_details = {
@@ -749,7 +747,7 @@ Warm regards""")
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
-            "status": "Ready For Interview"
+            "event_status": "Ready For Interview"
         }
 
         event1 = Event(**event1_details)
@@ -895,7 +893,7 @@ async def cancel_appointment_route(appointment_id: int,reason:str, db: Session =
             email_author = str(customer_data.email_author).lower()
 
             send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}", f"""
-Case ID: {case_id}
+Hi {customer_data.username}
 We have received your request and successfully cancelled your scheduled appointment. We are sorry to see you go, but understand that circumstances can change.
 
 If you wish to reschedule at a later time or if there is anything else we can assist you with, please do not hesitate to reach out.
@@ -907,11 +905,10 @@ Best regards,
 Genpact Team
 """)
             send_email("Someshwar.Garud@genpact.com", agent_email, f"appointment Cancelled - Case ID: {case_id}", f"""
-Case ID: {case_id}
+Case ID: {agent_data.full_name}
 Hello, your scheduled appointment has been cancelled""")
             
             send_email("Someshwar.Garud@genpact.com", email_author, f"Appointment cancellation acknowledgement - Case ID: {case_id}", f"""
-Case ID: {case_id}
 Hi, the appointment has been cancelled for the following details:
 Customer Name: {customer_data.username}
 Customer Email ID: {customer_data.email_id}
@@ -962,7 +959,7 @@ Genpact Team
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
-            "status": "Appointment Cancelled"
+            "event_status": "Appointment Cancelled"
         }
         
         new_event = Event(**event_details)
@@ -1048,7 +1045,7 @@ Genpact Team
             },
             "timestamp": str(datetime.now()),
             "case_id": case_id,
-            "status": "Appointment Rescheduled"
+            "event_status": "Appointment Rescheduled"
         }
         
         new_event = Event(**event_details)
@@ -1057,7 +1054,7 @@ Genpact Team
         print("111111111111111111111111111111111111")
 
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}", f"""
-Case ID: {case_id}
+Hi {customer_data.username}
 We have successfully updated your appointment details as requested. Thank you for continuing to choose us for your needs!
 
 Please review the updated appointment information to ensure everything is correct. If you need further adjustments or have specific requirements for our meeting, feel free to reach out to us directly through this email.
@@ -1068,11 +1065,10 @@ Genpact Team
                    """,start_time_obj,end_time_obj,date_obj)
         
         send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Rescheduled - Case ID: {case_id}", f"""
-                   Case ID: {case_id}
+                   Hi {agent_data.full_name}
                    The booked appointment has been rescheduled""",start_time_obj,end_time_obj,date_obj)
         
         send_email("Someshwar.Garud@genpact.com", customer_data.email_author, f"Appointment updation acknowledgement - Case ID: {case_id}", f"""
-Case ID: {case_id}
 Hi, the appointment has been rescheduled for the following details:
 
 Customer Name: {customer_data.username}
@@ -1221,6 +1217,7 @@ def get_agent_appointments(agent_id: int, db: Session = Depends(get_db)):
         SELECT
     appointments.*,
     schedule.reason,
+    schedule.status,
     customer.username,
     customer.email_id,
     customer.mobile_no,
@@ -1229,7 +1226,7 @@ def get_agent_appointments(agent_id: int, db: Session = Depends(get_db)):
     schedule.end_time,
     schedule.date,
     schedule.appointment_description,
-    latest_event.status,
+    latest_event.event_status,
     latest_event.timestamp AS "last_updated_date",
     latest_event.created_at
 FROM
@@ -1242,7 +1239,7 @@ JOIN
     (
         SELECT
             e.case_id,
-            e.status,
+            e.event_status,
             e.timestamp,
             e.created_at
         FROM
@@ -1259,7 +1256,8 @@ JOIN
             ) AS latest ON e.case_id = latest.case_id AND e.timestamp = latest.latest_timestamp
     ) AS latest_event ON customer.case_id = latest_event.case_id
 WHERE
-    appointments.agent_id = :agent_id 
+    appointments.agent_id = :agent_id
+    AND schedule.status = 'booked'
 ORDER BY
     schedule.date DESC;
     """)
@@ -1697,7 +1695,7 @@ Best Regards,
 Genpact Team
                    """)
         event_data = {
-            'status': 'Reminder Sent',
+            'event_status': 'Reminder Sent',
             'event_name': 'Reminder has been sent to customer',
             'event_details': {
                 "email":"",
@@ -1725,18 +1723,27 @@ Genpact Team
 
 
 @app.post('/appointment/completed', tags=["appoinment"])
-async def mark_appointment_as_completed(case_id: str, status_expected: str, db: Session = Depends(get_db)):
+async def mark_appointment_as_completed(case_id: str, status_expected: str, reason: str, db: Session = Depends(get_db)):
     try:
         if status_expected=="Mark Case as Closed":
+            customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
+            id = customer_data.id
+            agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
+            agent_schedule_data.status = "Case Closed"
+            agent_schedule_data.reason = reason
+            db.query(Appointment).filter(Appointment.customer_id == id).delete()
+            db.commit()
             event1_details = {
                 "event_name": "Case has been successfully closed",
                 "event_details": {
                     "email": "",
-                    "details": f"The case with Case ID: {case_id} has been successfully closed at {str(datetime.now())}"
+                    "details": f"""
+The case with Case ID: {case_id} has been successfully closed at {str(datetime.now())}.
+Reason: {reason}"""
                 },
                 "timestamp": str(datetime.now()),
                 "case_id": case_id,
-                "status": status_expected
+                "event_status": status_expected
             }
 
             event1 = Event(**event1_details)
@@ -1745,15 +1752,24 @@ async def mark_appointment_as_completed(case_id: str, status_expected: str, db: 
             db.commit()
         
         elif status_expected=="Mark Case as Submitted":
+            customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
+            id = customer_data.id
+            agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
+            agent_schedule_data.status = "Case Submitted"
+            agent_schedule_data.reason = reason
+            db.query(Appointment).filter(Appointment.customer_id == id).delete()
+            db.commit()
             event1_details = {
                 "event_name": "Case has been successfully submitted",
                 "event_details": {
                     "email": "",
-                    "details": f"The case with Case ID: {case_id} has been successfully submitted at {str(datetime.now())}"
+                    "details": f"""
+The case with Case ID: {case_id} has been successfully submitted at {str(datetime.now())}.
+Reason: {reason}"""
                 },
                 "timestamp": str(datetime.now()),
                 "case_id": case_id,
-                "status": status_expected
+                "event_status": status_expected
             }
 
             event1 = Event(**event1_details)
@@ -1762,15 +1778,24 @@ async def mark_appointment_as_completed(case_id: str, status_expected: str, db: 
             db.commit()
 
         else:
+            customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
+            id = customer_data.id
+            agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
+            agent_schedule_data.status = "Awaiting Customer Response"
+            agent_schedule_data.reason = reason
+            db.query(Appointment).filter(Appointment.customer_id == id).delete()
+            db.commit()
             event1_details = {
                 "event_name": "Case has been marked as Awaiting Customer Response",
                 "event_details": {
                     "email": "",
-                    "details": f"The case with Case ID: {case_id} has been marked as Awaiting Customer Response at {str(datetime.now())}"
+                    "details": f"""
+The case with Case ID: {case_id} has been marked as Awaiting Customer Response at {str(datetime.now())}.
+Reason: {reason}"""
                 },
                 "timestamp": str(datetime.now()),
                 "case_id": case_id,
-                "status": status_expected
+                "event_status": status_expected
             }
 
             event1 = Event(**event1_details)
@@ -1951,7 +1976,7 @@ async def change_appointment_agent(appointment_id: int, new_agent_id: int, reaso
         # Sending emails
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Appointment Agent Changed - Case ID: {case_id}",
                    f""" 
-Case ID: {case_id}
+Hi {customer_data.username}
 Your appointment agent has been changed. The new agent is now responsible for your case. 
 For further details, please click the following link: 
 http://54.175.240.135:3000/customer/appointmentDetails?appointment_id={new_appointment.id}
@@ -1959,7 +1984,7 @@ http://54.175.240.135:3000/customer/appointmentDetails?appointment_id={new_appoi
 
         send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Agent Changed - Case ID: {case_id}",
                    f""" 
-Case ID: {case_id}
+Hi {agent_data.full_name}
 You have been assigned as the new agent for the appointment. 
 For further details, please click the following link: 
 http://54.175.240.135:3000/agent/appointmentDetails?appointment_id={new_appointment.id}
@@ -1978,7 +2003,7 @@ http://54.175.240.135:3000/agent/appointmentDetails?appointment_id={new_appointm
                 },
                 "timestamp": str(datetime.now()),
                 "case_id": case_id,
-                "status": "Agent Changed"
+                "event_status": "Agent Changed"
             },
             {
                 "event_name": "Appointment Details Updated",
@@ -1991,7 +2016,7 @@ http://54.175.240.135:3000/agent/appointmentDetails?appointment_id={new_appointm
                 },
                 "timestamp": str(datetime.now()),
                 "case_id": case_id,
-                "status": "Appointment Updated"
+                "event_status": "Appointment Updated"
             }
         ]
 
@@ -2035,7 +2060,7 @@ FROM
             schedule.reason AS "comments",
             cust.product_id AS "products",
             agent.full_name AS "agent_name",
-            event.status AS "status",
+            event.event_status AS "event_status",
             event.timestamp AS "last_updated_date",
             event.created_at AS "created_date",
             ROW_NUMBER() OVER (PARTITION BY cust.case_id ORDER BY event.timestamp DESC) AS row_num
