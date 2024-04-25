@@ -2136,3 +2136,11 @@
 2024-04-25 14:41:49,578 - INFO - Request received: POST http://localhost:8000/appointment/create
 2024-04-25 14:42:08,608 - INFO - Response code: 200
 2024-04-25 14:42:08,608 - INFO - Response code: 200
+2024-04-25 16:14:52,140 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 16:14:52,140 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 16:14:52,140 - INFO - Response code: 200
+2024-04-25 16:14:52,140 - INFO - Response code: 200
+2024-04-25 16:14:52,375 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 16:14:52,375 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 16:14:52,404 - INFO - Response code: 200
+2024-04-25 16:14:52,404 - INFO - Response code: 200

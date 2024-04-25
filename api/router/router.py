@@ -1743,6 +1743,7 @@ async def mark_appointment_as_completed(case_id: str, status_expected: str, reas
             agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
             agent_schedule_data.status = "Case Closed"
             agent_schedule_data.reason = reason
+            agent_schedule_data.appointment_id = None
             db.query(Appointment).filter(Appointment.customer_id == id).delete()
             db.commit()
             event1_details = {
