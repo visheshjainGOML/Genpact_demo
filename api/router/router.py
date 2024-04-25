@@ -2167,21 +2167,30 @@ def create_or_update_frequency(frequency: FrequencySchema, db: Session = Depends
 @app.post("/appointments/report", tags=['report'])
 def export_appointments_csv(db: Session = Depends(get_db)):
     try:
-        appointments = db.query(Appointment).all()
+        # Fetch only the specified columns
+        appointments = db.query(
+            Appointment.id,
+            Appointment.customer_id,
+            Appointment.agent_id,
+            Appointment.created_at,
+            Appointment.scheduled_at
+        ).all()
 
         # Create a temporary file to store the CSV
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as temp_file:
             csv_writer = csv.writer(temp_file)
-            # Write the headers dynamically
-            headers = [column.key for column in Appointment.__table__.columns]
+            
+            # Write the headers
+            headers = ["id", "customer_id", "agent_id", "created_at", "scheduled_at"]
             csv_writer.writerow(headers)
+            
             # Write the data rows
             for appointment in appointments:
-                csv_writer.writerow([getattr(appointment, column.key) for column in Appointment.__table__.columns])
+                csv_writer.writerow(appointment)
+            
             temp_file.flush()
 
         # Return the temporary file as a response
-        # return FileResponse(temp_file.name, media_type="text/csv", filename="appointments.csv")
         return FileResponse(temp_file.name, filename="appointments.csv")
 
     except Exception as e:
@@ -2192,48 +2201,88 @@ def export_appointments_csv(db: Session = Depends(get_db)):
 @app.post("/agents/report", tags=['report'])
 def export_agents_csv(db: Session = Depends(get_db)):
     try:
-        agents = db.query(Agent).all()
+        # Fetch only the specified columns
+        agents = db.query(
+            AgentSchedule.agent_id,
+            AgentSchedule.date,
+            AgentSchedule.start_time,
+            AgentSchedule.end_time,
+            AgentSchedule.status,
+            AgentSchedule.customer_id,
+            AgentSchedule.appointment_id,
+            AgentSchedule.reason,
+            AgentSchedule.customer_timezone,
+            AgentSchedule.appointment_description
+        ).all()
 
         # Create a temporary file to store the CSV
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as temp_file:
             csv_writer = csv.writer(temp_file)
-            # Write the headers dynamically
-            headers = [column.key for column in Agent.__table__.columns]
+            
+            # Write the headers
+            headers = [
+                "agent_id",
+                "date",
+                "start_time",
+                "end_time",
+                "status",
+                "customer_id",
+                "appointment_id",
+                "reason",
+                "customer_timezone",
+                "appointment_description"
+            ]
             csv_writer.writerow(headers)
+            
             # Write the data rows
             for agent in agents:
-                csv_writer.writerow([getattr(agent, column.key) for column in Agent.__table__.columns])
+                csv_writer.writerow(agent)
+            
             temp_file.flush()
 
         # Return the temporary file as a response
-        # return FileResponse(temp_file.name, media_type="text/csv", filename="appointments.csv")
         return FileResponse(temp_file.name, filename="agents.csv")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/events/report", tags=['report'])
 def export_events_csv(db: Session = Depends(get_db)):
     try:
-        events = db.query(Event).all()
+        # Fetch only the specified columns
+        events = db.query(
+            Event.event_status,
+            Event.event_name,
+            Event.timestamp,
+            Event.event_details
+        ).all()
 
         # Create a temporary file to store the CSV
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as temp_file:
             csv_writer = csv.writer(temp_file)
-            # Write the headers dynamically
-            headers = [column.key for column in Event.__table__.columns]
+            
+            # Write the headers
+            headers = [
+                "event_status",
+                "event_name",
+                "timestamp",
+                "event_details"
+            ]
             csv_writer.writerow(headers)
+            
             # Write the data rows
             for event in events:
-                csv_writer.writerow([getattr(event, column.key) for column in Event.__table__.columns])
+                csv_writer.writerow(event)
+            
             temp_file.flush()
 
         # Return the temporary file as a response
-        # return FileResponse(temp_file.name, media_type="text/csv", filename="appointments.csv")
         return FileResponse(temp_file.name, filename="events.csv")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
     
 @app.post("/agent_inactive", tags=['agent'])
 def agent_inactive(input_data: AgentInactiveInput, db: Session = Depends(get_db)):
