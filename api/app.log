@@ -2240,3 +2240,7 @@
 2024-04-25 18:31:05,070 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=ecc83b82&reason=test%20purpose
 2024-04-25 18:31:31,701 - INFO - Response code: 200
 2024-04-25 18:31:31,701 - INFO - Response code: 200
+2024-04-25 19:11:17,734 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-25 19:11:17,734 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-25 19:11:35,715 - INFO - Response code: 201
+2024-04-25 19:11:35,715 - INFO - Response code: 201

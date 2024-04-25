@@ -500,8 +500,6 @@ Warm regards
 
 Genpact Team """)
             
-            send_sms(str(new_customer.mobile_no), f"Schedule Your Appointment with Us - Case ID: {case_id}")
-
             send_email("Someshwar.Garud@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f""" 
 Hi, a new case has been created for the following details:
 Name: {new_customer.username}
@@ -509,6 +507,9 @@ Email ID: {new_customer.email_id}
 Mobile: {new_customer.mobile_no}
                    
 Warm regards""")
+            print(new_customer.mobile_no)
+            send_sms(str(new_customer.mobile_no),f"""Appointment scheduled - Case ID: {case_id}.""")
+
             
             
         except:
