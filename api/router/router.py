@@ -1,3 +1,4 @@
+import json
 import random
 from fastapi import FastAPI, HTTPException, Depends, Header, Query, status, APIRouter
 # from grpc import StatusCode
@@ -306,6 +307,9 @@ class FrequencySchema(BaseModel):
     email_count: str
     email_interval: Optional[dict] = {}
 
+class FrequencySchema_update(BaseModel):
+    reschedule_count: int
+
 class LoginSchema(BaseModel):
     username: str
     password: str
@@ -392,6 +396,10 @@ class TemplateSchema(BaseModel):
     template_name: str
     template_type: str
     content: str
+
+class AgentInactiveInput(BaseModel):
+    agent_id: int
+    reason: str
 
 # ---------- API endpoints -------------
 app = APIRouter()
@@ -2168,19 +2176,29 @@ def export_events_csv(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@app.get("/agent_inactive/{agent_id}", tags=['agent'])
-def agent_inactive(agent_id: int, db: Session = Depends(get_db)):
-    try:
+@app.post("/agent_inactive", tags=['agent'])
+def agent_inactive(input_data: AgentInactiveInput, db: Session = Depends(get_db)):
         # Retrieve the agent with the provided agent_id
-        agent = db.query(Agent).filter(Agent.id == agent_id).first()
+    try:
+
+        new_agent = AgentInactiveInput(**input_data.dict())
+
+        print(new_agent)
+        # Retrieve the agent with the provided agent_id
+        # agent = db.query(Agent).filter(Agent.id == input_data.agent_id).first()
+        agent = db.query(Agent).filter(Agent.id == new_agent.agent_id).first()
 
         if agent:
-            
+
             agent.agent_activity = "inactive"
+            agent.reason = input_data.reason
+
+
+
             db.commit()
-            return {"message": f"Agent with ID {agent_id} has been marked as inactive."}
+            return {"message": f"Agent with ID {input_data.agent_id} has been marked as inactive."}
         else:
-            raise HTTPException(status_code=404, detail=f"Agent with ID {agent_id} not found.")
+            raise HTTPException(status_code=404, detail=f"Agent with ID {input_data.agent_id} not found.")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -2225,3 +2243,78 @@ async def update_questions(Questions: list[str], db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         return HTTPException(status_code=400, detail=str(e))
+
+
+
+# @app.post("/send_reminders/{case_id}", tags=["reminder"])
+# async def send_reminders(case_id: str,db: Session = Depends(get_db)):
+#     try:
+#         # Get the timestamp from the event table where status is 'Appointment Notification Sent'
+#         event = db.query(Event).filter(Event.status == 'Appointment Notification Sent', Event.case_id == case_id).first()
+#         if event:
+#             timestamp = event.timestamp
+#             # Fetch email count and email interval from frequency table
+#             frequency = db.query(Frequency).first()
+#             if frequency:
+#                 email_count = frequency.email_count
+#                 email_interval = frequency.email_interval
+#                 # Iterate through the email intervals and send reminders
+#
+#                 for interval_str in email_interval.values():
+#                     # Extract numeric part of interval
+#                     interval_hours = int(interval_str[:-3])
+#                     print("Interval hours:", interval_hours)
+#                     reminder_time = timestamp + timedelta(hours=interval_hours)
+#                     print("Reminder date:", reminder_time.date())
+#                     print("Reminder time:", reminder_time.time())
+#                     timestamp = reminder_time
+#                     # Send reminder email
+#
+#                     # email_subject = "Genpact Demo: Appointment Reminder"
+#                     # email_body = f"Hi {customer.username},\n\nThis is a reminder for your appointment scheduled at {appointment.from_time} to {appointment.to_time}.\n\nRegards,\nYour Genpact Appointment Booking System"
+#                     #
+#                     # # Replace with customer's email address
+#                     # to_email = customer.email_id
+#                     #
+#                     # # Send email reminder
+#                     # ses_client.send_email(
+#                     #     Source="noreply@demo.com",  # Replace with your verified SES sender email
+#                     #     Destination={'ToAddresses': [to_email]},
+#                     #     Message={
+#                     #         'Subject': {'Data': email_subject},
+#                     #         'Body': {'Text': {'Data': email_body}}
+#                     #     })
+#
+#
+#
+#
+#         else:
+#             raise HTTPException(status_code=404, detail="No event found with status 'Appointment Notification Sent'")
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Error sending reminders: {e}")
+
+    # return {"message": "Reminders sent successfully"}
+
+
+
+@app.post("/reschedulefrequency/update", response_model=ResponseModel, tags=["frequency"], status_code=201)
+def create_or_update_frequency(frequency: FrequencySchema_update, db: Session = Depends(get_db)):
+    try:
+
+
+        db_frequency = db.query(Frequency).first()
+        if db_frequency:
+            # If the record exists, update it
+            db_frequency.reschedule_count = frequency.reschedule_count
+        else:
+            # If the record doesn't exist, create a new one
+            new_frequency = Frequency(reschedule_count=frequency.reschedule_count)
+            db.add(new_frequency)
+
+        db.commit()
+
+        return ResponseModel(message="Frequency Updated successfully")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+    finally:
+        db.close()
