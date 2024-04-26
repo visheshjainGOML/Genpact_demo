@@ -352,6 +352,8 @@ class CustomerSchema(BaseModel):
     email_body: str
     email_subject: str
     email_author: str
+    address: str
+    state: str
 
 class TemplateSchema(BaseModel):
     template_name: str
@@ -1288,6 +1290,8 @@ def get_agent_appointments(agent_id: int, db: Session = Depends(get_db)):
     customer.username,
     customer.email_id,
     customer.mobile_no,
+    customer.address,
+    customer.state,
     customer.case_id,
     schedule.start_time,
     schedule.end_time,
@@ -2166,6 +2170,8 @@ FROM
             cust.username AS "username",
             cust.email_id AS "email_id",
             cust.mobile_no AS "mobile_no",
+            cust.address AS "address",
+            cust.state AS "state",
             schedule.appointment_description AS "appointment_description",
             schedule.agent_id AS "agent_id",
             schedule.appointment_id AS "id",
