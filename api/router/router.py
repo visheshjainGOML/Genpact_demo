@@ -2697,7 +2697,7 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
 
         # slot_query = db.query(AgentSchedule).filter(AgentSchedule.appointment_id == appointment_query.id).first()
 
-
+        reminder_count = 0
         if event:
 
                 timestamp = event.timestamp
@@ -2718,7 +2718,7 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                         print(datetime.now())
 
                         time_difference = (reminder_time - datetime.now()).total_seconds()
-
+                        reminder_count += 1
 
                         while time_difference > 0:
                             current_time = datetime.now()
@@ -2763,20 +2763,21 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                         if not confirm_appt:
                             send_email("Someshwar.Garud@genpact.com", ", ".join({email_id}),
                                        f"Appointment Reminder - Case ID: {case_id}", f"""
-                                                    Hi {customer_name},
-    
-                                                    Can you please confirm your schedule appointment.
-    
-                                                    Best Regards,
-                                                    Genpact Team
-                                                                       """)
+                            Hi {customer_name},
+
+                            This is a friendly reminder to schedule your appointment. 
+                            Your prompt confirmation helps us ensure that we are fully prepared to assist you.
+
+                            Best Regards,
+                            Genpact Team
+                                                                                                   """)
 
                             event_data = {
                                 'event_status': 'Reminder Sent',
-                                'event_name': f'Reminder has been sent',
+                                'event_name': f'Reminder Number : {reminder_count} has been sent',
                                 'event_details': {
                                     "email": "",
-                                    "details": f"Reminder Sent"
+                                    "details": f"Reminder Number : {reminder_count}"
                                 },
                                 'timestamp': str(datetime.now()),
                                 'case_id': case_id
@@ -2792,3 +2793,57 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Error sending reminders: {e}")
 
     return {"message": "Reminders sent successfully"}
+
+# combined agent report
+@app.post("/combined_agent/report", tags=['report'])
+def export_combined_agent_csv(db: Session = Depends(get_db)):
+    try:
+        # Fetch the agents data using the provided SQL query
+        agents_data = text("""
+                        SELECT DISTINCT
+                            ag.id AS "agent_id",
+                            ag.full_name AS "agent_name",
+                            ag.date_of_joining AS "joining_date",
+                            al.leave_from AS "leave_from",
+                            al.leave_to AS "leave_to",
+                            ag.slot_time AS "slot_time",
+                            ag.buffer_time AS "buffer_time",
+                            ag.agent_email AS "email_id",
+                            al.leave_type AS "leave_type",
+                            ag.weekly_off AS "weekly_off",
+                            ag.shift_from AS "shift_from",
+                            ag.shift_to AS "shift_to"
+                        FROM
+                            genpact.agent AS ag
+                        LEFT JOIN
+                            genpact.agent_schedule AS agsch ON ag.id = agsch.agent_id
+                        LEFT JOIN
+                            genpact.agent_shifts AS sh ON ag.id = sh.agent_id
+                        LEFT JOIN
+                            genpact.agent_leave AS al ON ag.id = al.agent_id
+       """)
+        result = db.execute(agents_data)
+        # Create a temporary file to store the CSV
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as temp_file:
+            csv_writer = csv.writer(temp_file)
+
+            # Write the headers
+            headers = [
+                "agent_id", "agent_name", "joining_date", "leave_from", "leave_to",
+                "slot_time", "buffer_time", "email_id", "leave_type", "weekly_off",
+                "shift_from", "shift_to"
+            ]
+            csv_writer.writerow(headers)
+
+            # Write the data rows
+            for agent_data in result:
+                csv_writer.writerow(agent_data)
+
+            temp_file.flush()
+
+        # Return the temporary file as a response
+        return FileResponse(temp_file.name, filename="combine_agents_data.csv")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
