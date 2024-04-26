@@ -866,10 +866,10 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
 Hi {customer_data.username}
 We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
-To view the details of your appointment, please click the following link: http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
+To view the details of your appointment, please click the following link: http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={case_id}
 Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
-Reschedule Your Appointment - http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
-Cancel Your Appointment - http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
+Reschedule Your Appointment - http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={case_id}
+Cancel Your Appointment - http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={case_id}
 If you have any specific requests or questions prior to our meeting, do not hesitate to contact us directly through this email.
 We look forward to our conversation and are here to assist you with any questions you may have prior to our meeting.
 Warm regards,
