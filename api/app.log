@@ -2376,3 +2376,15 @@
 2024-04-26 17:01:53,774 - INFO - Request received: POST http://localhost:8000/customer/create
 2024-04-26 17:02:02,024 - INFO - Response code: 201
 2024-04-26 17:02:02,024 - INFO - Response code: 201
+2024-04-26 17:06:07,976 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-26 17:06:07,976 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-26 17:06:16,087 - INFO - Response code: 201
+2024-04-26 17:06:16,087 - INFO - Response code: 201
+2024-04-26 17:17:00,291 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-26 17:17:00,291 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-26 17:17:01,179 - INFO - Response code: 400
+2024-04-26 17:17:01,179 - INFO - Response code: 400
+2024-04-26 17:21:06,907 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-26 17:21:06,907 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-26 17:21:15,153 - INFO - Response code: 201
+2024-04-26 17:21:15,153 - INFO - Response code: 201

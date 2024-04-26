@@ -1829,7 +1829,7 @@ async def mark_appointment_as_completed(case_id: str, status_expected: str, reas
             id = customer_data.id
             # Update agent_schedule_data
             agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
-            agent_schedule_data.status = "Case Closed"
+            agent_schedule_data.status = "Cancelled"
             agent_schedule_data.reason = reason
             agent_schedule_data.appointment_id = None
 
@@ -1865,7 +1865,7 @@ Reason: {reason}"""
             id = customer_data.id
             # Update agent_schedule_data
             agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
-            agent_schedule_data.status = "Case Submitted"
+            agent_schedule_data.status = "Submitted"
             agent_schedule_data.reason = reason
             agent_schedule_data.appointment_id = None
 
