@@ -165,6 +165,69 @@ def get_db():
     finally:
         db.close()
 
+def check_agent_availability(agent_id, appointment_data, db: Session = Depends(get_db)):
+    try:
+        # Retrieve agent's shift timings
+        print("*******************")
+        agent = db.query(Agent).filter(Agent.id == agent_id).first()
+        print("*******************", agent)
+        agent_shift_from = agent.shift_from
+        print("#####################AGENT_SHIFT FROM", agent_shift_from)
+        agent_shift_to = agent.shift_to
+        print("#####################AGENT_SHIFT to", agent_shift_to)
+
+        # Check if appointment slot falls within agent's shift timings
+        appointment_start_time = datetime.strptime(appointment_data['start_time'], '%H:%M').time()
+        print("#####################appointment_start_time", appointment_start_time)
+        appointment_end_time = datetime.strptime(appointment_data['end_time'], '%H:%M').time()
+        print("#####################appointment_end_time", appointment_end_time)
+        
+
+        if not (agent_shift_from <= appointment_start_time <= agent_shift_to and
+                agent_shift_from <= appointment_end_time <= agent_shift_to):
+            return False
+
+        # Retrieve agent's leave dates
+        agent_leave_dates = db.query(AgentLeave).filter(AgentLeave.agent_id == agent_id).all()
+        agent_leave_from = agent.leave_from
+        print("#####################agent_leave_from", agent_leave_from)
+        agent_leave_to = agent.leave_to
+        print("#####################agent_leave_to", agent_leave_to)
+
+        # Check if appointment slot falls within agent's leave dates
+        appointment_date = datetime.strptime(appointment_data['date'], '%d-%m-%y').date()
+        print("#####################appointment_date", appointment_date)
+
+        for leave in agent_leave_dates:
+            if leave.leave_from <= appointment_date <= leave.leave_to:
+                return False
+
+        if agent_leave_from <= appointment_date <= agent_leave_to:
+            return False
+        
+        agent_leave_dates = db.query(Agent).filter(Agent.id == agent_id).all()
+        agent_leave_from = agent.leave_from
+        print("#####################agent_leave_from", agent_leave_from)
+        agent_leave_to = agent.leave_to
+        print("#####################agent_leave_to", agent_leave_to)
+
+        # Check if appointment slot falls within agent's leave dates
+        appointment_date = datetime.strptime(appointment_data['date'], '%d-%m-%y').date()
+
+        for leave in agent_leave_dates:
+            if leave.leave_from <= appointment_date <= leave.leave_to:
+                return False
+
+        if agent_leave_from <= appointment_date <= agent_leave_to:
+            return False
+
+        return True
+
+    except Exception as e:
+        # Handle any exceptions here
+        return False
+    
+
 # Define SQLAlchemy models
 class Agent(Base):
     __table__ = Table('agent', Base.metadata,
@@ -485,8 +548,8 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
                 # Remove the warning message
                 new_customer.email_body = new_customer.email_body.replace(text, "").strip()
 
-            address_regex = r"Address\s*:\s*(.*?)(?=\s*State:|$)"
-            state_regex = r"State\s*:\s*(.*)"
+            address_regex = r"Customer Address\s*:\s*(.*?)(?=\s*State:|$)"
+            state_regex = r"Customer State\s*:\s*(.*)"
 
             address_match = re.search(address_regex, new_customer.email_body, re.IGNORECASE)
             state_match = re.search(state_regex, new_customer.email_body, re.IGNORECASE)
@@ -712,17 +775,32 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         print("BOOKED AGENTS: ", booked_agents)
 
         query = db.query(Agent.id).filter(Agent.role == 'agent').filter(Agent.agent_activity == 'active').all()
-        all_agents = set(row[0] for row in query)
-        print("ALL_AGENTS: ", all_agents)
+        # all_agents = set(row[0] for row in query)
+        # print("ALL_AGENTS: ", all_agents)
         
+        # available_agents = list(all_agents - booked_agents)
+        # print("availa: ", available_agents)
+
+        # if not available_agents:
+        #     return ResponseModel(message="No agents available for the selected slot. Please choose another time.")
+        all_agents = set(row[0] for row in query)
+        print("#####################", all_agents)
+
         available_agents = list(all_agents - booked_agents)
-        print("availa: ", available_agents)
+        print("#####################", available_agents)
 
         if not available_agents:
             return ResponseModel(message="No agents available for the selected slot. Please choose another time.")
+        final_available_agents = []
+        for agent in available_agents:
+            print("@@@@@@@@@@@@@@@", agent)
+            if check_agent_availability(agent, existing_appointment):
+                final_available_agents.append(agent)
+
+        
 
         # Implement round-robin to select an agent
-        selected_agent_id = available_agents[0]  # This is a simple round-robin. You can modify this to rotate the list for fairness.
+        selected_agent_id = final_available_agents[0]  # This is a simple round-robin. You can modify this to rotate the list for fairness.
 
         # Modify string into proper datatype
         new_appointment = OriginalAppointmentSchema(
