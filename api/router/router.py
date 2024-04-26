@@ -728,7 +728,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
 Hi {customer_data.username}
 We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
-To view the details of your appointment, please click the following link: http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}
+To view the details of your appointment, please click the following link: http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
 Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
 Reschedule Your Appointment - http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
 Cancel Your Appointment - http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id={product_id}&case_id={case_id}
@@ -1038,30 +1038,6 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
     # Create session
     try:
         # Execute SQL query to delete appointment
-        appointment_query = db.query(Appointment).filter(Appointment.id == appointment_id).first()
-        
-        if not appointment_query:
-            return {"message": "No appointment found with the given appointment_id."}
-        
-        cust_id = appointment_query.customer_id
-        agent_id= appointment_query.agent_id
-        query = db.query(Customer).filter(Customer.id == cust_id)
-        customer_data = query.first()
-        case_id = customer_data.case_id
-        Customer_email= customer_data.email_id
-        query = db.query(Agent).filter(Agent.id == agent_id)
-        agent_data = query.first()
-        agent_email = agent_data.agent_email
-        
-        frequency_entry = db.query(Frequency).first()
-        print("################", frequency_entry)
-        count = db.query(Event).filter(Event.case_id == case_id, Event.event_status == "Appointment Rescheduled").count()
-        print("########################", count)
-        print("$$$$$$$$$$$$$$$$$$$$$$$", frequency_entry.reschedule_count)
-        
-        if count > int(frequency_entry.reschedule_count):
-            return {"message": "You have exceed maximum number of rescheduling count, please register a new case"}
-        
         data = data.dict()
         query = text("""UPDATE genpact.agent_schedule SET start_time = :start_time, end_time =:end_time, date = :date, reason=:reason WHERE agent_schedule.appointment_id = :appointment_id""")
         start_time_obj = time.fromisoformat(data['start_time'])
@@ -1081,12 +1057,17 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         db.execute(query, {"appointment_id": appointment_id,
                    "scheduled_at": scheduled_at})
         
-        cust_id= appointment_query.customer_id
-
+        query = db.query(Appointment).filter(Appointment.id == appointment_id)
+        data = query.first()
+        cust_id= data.customer_id
+        agent_id= data.agent_id
         query = db.query(Customer).filter(Customer.id == cust_id)
         customer_data = query.first()
         case_id = customer_data.case_id
-        
+        Customer_email= customer_data.email_id
+        query = db.query(Agent).filter(Agent.id == agent_id)
+        agent_data = query.first()
+        agent_email = agent_data.agent_email
         print("111111111111111111111111111111111111")
          # Commit transaction
         event_details = {
