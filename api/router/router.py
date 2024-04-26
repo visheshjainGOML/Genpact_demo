@@ -168,7 +168,8 @@ def get_db():
 def check_agent_availability(agent_id, appointment_data, db: Session = Depends(get_db)):
     try:
         # Retrieve agent's shift timings
-        print("*******************")
+        print("*******************", agent_id)
+        print("^^^^^^^^^^^^", appointment_data)
         agent = db.query(Agent).filter(Agent.id == agent_id).first()
         print("*******************", agent)
         agent_shift_from = agent.shift_from
@@ -548,8 +549,8 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
                 # Remove the warning message
                 new_customer.email_body = new_customer.email_body.replace(text, "").strip()
 
-            address_regex = r"Customer Address\s*:\s*(.*?)(?=\s*State:|$)"
-            state_regex = r"Customer State\s*:\s*(.*)"
+            address_regex = r"Address\s*:\s*(.*?)(?=\s*State:|$)"
+            state_regex = r"State\s*:\s*(.*)"
 
             address_match = re.search(address_regex, new_customer.email_body, re.IGNORECASE)
             state_match = re.search(state_regex, new_customer.email_body, re.IGNORECASE)
@@ -772,35 +773,50 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
             "end_time": existing_appointment['end_time']
         })
         booked_agents = set(row[0] for row in data.fetchall())
-        print("BOOKED AGENTS: ", booked_agents)
 
-        query = db.query(Agent.id).filter(Agent.role == 'agent').filter(Agent.agent_activity == 'active').all()
-        # all_agents = set(row[0] for row in query)
-        # print("ALL_AGENTS: ", all_agents)
-        
-        # available_agents = list(all_agents - booked_agents)
-        # print("availa: ", available_agents)
-
-        # if not available_agents:
-        #     return ResponseModel(message="No agents available for the selected slot. Please choose another time.")
+        # Get all active agents
+        query = db.query(Agent.id).filter(Agent.role == 'agent', Agent.agent_activity == 'active').all()
         all_agents = set(row[0] for row in query)
-        print("#####################", all_agents)
 
+        # Filter available agents by removing booked agents
         available_agents = list(all_agents - booked_agents)
-        print("#####################", available_agents)
 
         if not available_agents:
             return ResponseModel(message="No agents available for the selected slot. Please choose another time.")
+
         final_available_agents = []
-        for agent in available_agents:
-            print("@@@@@@@@@@@@@@@", agent)
-            if check_agent_availability(agent, existing_appointment):
-                final_available_agents.append(agent)
 
-        
+        # Check shift and leave dates for each available agent
+        for agent_id in available_agents:
+            agent_data = db.query(Agent).filter(Agent.id == agent_id).first()
 
-        # Implement round-robin to select an agent
-        selected_agent_id = final_available_agents[0]  # This is a simple round-robin. You can modify this to rotate the list for fairness.
+            agent_shift_from = agent_data.shift_from
+            agent_shift_to = agent_data.shift_to
+            appointment_start_time = time.fromisoformat(existing_appointment['start_time'])
+            appointment_end_time = time.fromisoformat(existing_appointment['end_time'])
+
+            # Check if the appointment is within agent's shift
+            if not (agent_shift_from <= appointment_start_time <= agent_shift_to and agent_shift_from <= appointment_end_time <= agent_shift_to):
+                continue
+
+            # Check if the agent has any leave on the appointment date
+            agent_leave_dates = db.query(AgentLeave).filter(AgentLeave.agent_id == agent_id).all()
+            appointment_date = datetime.strptime(existing_appointment['date'], '%d-%m-%y').date()
+
+            for leave_info in agent_leave_dates:
+                leave_from = leave_info.leave_from.date()
+                leave_to = leave_info.leave_to.date()
+
+                if leave_from <= appointment_date <= leave_to:
+                    break  # Agent has leave on this date, skip to next agent
+            else:
+                final_available_agents.append(agent_id)
+
+        if not final_available_agents:
+            return ResponseModel(message="No agents available for the selected slot. Please choose another time.")
+
+        # Implement round-robin to select an agent (simple round-robin, you can modify for fairness)
+        selected_agent_id = final_available_agents[0]
 
         # Modify string into proper datatype
         new_appointment = OriginalAppointmentSchema(
@@ -925,7 +941,6 @@ Warm regards""")
         db.commit()
         return ResponseModel(message=success_message, payload={"appointment_id": new_appointment.id, "case_id":case_id})
     except Exception as e:
-        # raise e
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
