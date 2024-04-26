@@ -2292,3 +2292,31 @@
 2024-04-25 20:43:01,572 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=45ae50bc&reason=hhhh
 2024-04-25 20:43:16,246 - INFO - Response code: 200
 2024-04-25 20:43:16,246 - INFO - Response code: 200
+2024-04-25 21:07:51,826 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 21:07:51,826 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 21:07:51,829 - INFO - Response code: 200
+2024-04-25 21:07:51,829 - INFO - Response code: 200
+2024-04-25 21:07:51,962 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 21:07:51,962 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 21:07:51,998 - INFO - Response code: 200
+2024-04-25 21:07:51,998 - INFO - Response code: 200
+2024-04-25 21:07:53,858 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 21:07:53,858 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 21:07:53,860 - INFO - Response code: 200
+2024-04-25 21:07:53,860 - INFO - Response code: 200
+2024-04-25 21:07:54,165 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 21:07:54,165 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 21:07:54,168 - INFO - Response code: 200
+2024-04-25 21:07:54,168 - INFO - Response code: 200
+2024-04-25 21:11:23,638 - INFO - Request received: POST http://localhost:8000/update_appointment/166
+2024-04-25 21:11:23,638 - INFO - Request received: POST http://localhost:8000/update_appointment/166
+2024-04-25 21:12:25,451 - INFO - Response code: 200
+2024-04-25 21:12:25,451 - INFO - Response code: 200
+2024-04-25 22:00:10,018 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 22:00:10,018 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-25 22:00:10,019 - INFO - Response code: 200
+2024-04-25 22:00:10,019 - INFO - Response code: 200
+2024-04-25 22:00:10,124 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 22:00:10,124 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-25 22:00:10,156 - INFO - Response code: 200
+2024-04-25 22:00:10,156 - INFO - Response code: 200
