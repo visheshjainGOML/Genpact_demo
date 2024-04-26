@@ -466,8 +466,25 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
             if text in new_customer.email_body:
                 # Remove the warning message
                 new_customer.email_body = new_customer.email_body.replace(text, "").strip()
-            # new_customer['address'] = re.search(r"Address:\s*(.+)", new_customer.email_body).group(1).strip() if re.search(r"Address:\s*(.+)", new_customer.email_body) else None
-            # new_customer['state'] = re.search(r"State:\s*(.+)", new_customer.email_body).group(1).strip() if re.search(r"State:\s*(.+)", new_customer.email_body) else None
+
+            address_regex = r"Address\s*:\s*(.*?)(?=\s*State:|$)"
+            state_regex = r"State\s*:\s*(.*)"
+
+            address_match = re.search(address_regex, new_customer.email_body, re.IGNORECASE)
+            state_match = re.search(state_regex, new_customer.email_body, re.IGNORECASE)
+
+            address = address_match.group(1).strip() if address_match else None
+
+            # If state is found, remove it and any characters that come after it
+            if state_match:
+                address = address.replace(state_match.group(0), '').strip()
+
+            state = state_match.group(1).strip() if state_match else None
+            new_customer.address = address
+            new_customer.state = state
+
+            print("Address:", address)
+            print("State:", state)
             db.add(new_customer)
             db.commit()
         except:
