@@ -466,8 +466,8 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
             if text in new_customer.email_body:
                 # Remove the warning message
                 new_customer.email_body = new_customer.email_body.replace(text, "").strip()
-            new_customer['address'] = re.search(r"Address:\s*(.+)", new_customer.email_body).group(1).strip() if re.search(r"Address:\s*(.+)", new_customer.email_body) else None
-            new_customer['state'] = re.search(r"State:\s*(.+)", new_customer.email_body).group(1).strip() if re.search(r"State:\s*(.+)", new_customer.email_body) else None
+            # new_customer['address'] = re.search(r"Address:\s*(.+)", new_customer.email_body).group(1).strip() if re.search(r"Address:\s*(.+)", new_customer.email_body) else None
+            # new_customer['state'] = re.search(r"State:\s*(.+)", new_customer.email_body).group(1).strip() if re.search(r"State:\s*(.+)", new_customer.email_body) else None
             db.add(new_customer)
             db.commit()
         except:
