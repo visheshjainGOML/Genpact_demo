@@ -1,5 +1,8 @@
 import json
 import random
+import asyncio
+from apscheduler.schedulers.background import BackgroundScheduler
+import time
 from fastapi import FastAPI, HTTPException, Depends, Header, Query, status, APIRouter
 # from grpc import StatusCode
 from sqlalchemy import Table, create_engine
@@ -205,6 +208,21 @@ class Frequency(Base):
 
 
 # ---------- Utilities --------------------
+
+def watch_events(case_id):
+    session = sessionmaker(bind=engine)()
+
+    # Query for new events using ORM
+    new_event = session.query(Event).filter(Event.case_id == case_id and Event.event_status == "Appointment Notification Sent").first()
+    print("Threading")
+    if new_event:
+        print(case_id)  # Assuming there's a 'case_id' column in the Event model
+        # Call the send_automatic_reminders function asynchronously (assuming it's asynchronous)
+        print("#########")
+        print(case_id)
+        asyncio.run(send_automatic_reminders(case_id, session))
+
+        session.close()
 
 def convert_timezone(input_time, input_date, output_timezone):
     # input_time = HH:MM:SS
@@ -625,6 +643,13 @@ Genpact Team
         db.add(event4)
         db.commit()
         db.refresh(new_customer)
+        start_time = datetime.now()
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(watch_events,  "date", run_date=start_time, args=[case_id])
+        scheduler.start()
+
+        start_time = datetime.now()
+
 
         # await send_email(email, user_id, product_id)
         return ResponseModel(message=success_message, payload={"customer_id": new_customer.id, "case_id": case_id})
@@ -2565,3 +2590,112 @@ async def count_reminder_status(case_id: str, db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+@app.post("/send_automatic_reminders/{case_id}", tags=["reminder"])
+async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
+    try:
+        # Get the timestamp from the event table where status is 'Appointment Notification Sent'
+        event = db.query(Event).filter(Event.event_status == 'Appointment Notification Sent', Event.case_id == case_id).first()
+
+        customer = db.query(Customer).filter(Customer.case_id == case_id).first()
+
+        # appointment_query = db.query(Appointment).filter(Appointment.customer_id == customer.id).first()
+
+        # slot_query = db.query(AgentSchedule).filter(AgentSchedule.appointment_id == appointment_query.id).first()
+
+
+        if event:
+
+                timestamp = event.timestamp
+                # Fetch email count and email interval from frequency table
+                frequency = db.query(Frequency).first()
+                if frequency:
+                    email_count = frequency.email_count
+                    email_interval = frequency.email_interval
+                    # Iterate through the email intervals and send reminders
+
+                    for interval_str in email_interval.values():
+                        # Extract numeric part of interval
+                        interval_hours = int(interval_str[:-3])
+                        print("Interval hours:", interval_hours)
+                        reminder_time = timestamp + timedelta(minutes=interval_hours)
+                        print("Reminder date:", reminder_time.date())
+                        print("Reminder time:", reminder_time.time())
+                        print(datetime.now())
+
+                        time_difference = (reminder_time - datetime.now()).total_seconds()
+
+
+                        while time_difference > 0:
+                            current_time = datetime.now()
+                            time_difference = (reminder_time - current_time).total_seconds()
+
+
+
+
+
+                        email_id = customer.email_id
+                        customer_name = customer.username
+
+                        # start_time = slot_query.start_time.strftime('%H:%M')
+                        # end_time = slot_query.end_time.strftime('%H:%M')
+
+                        # appointment_date = appointment_query.scheduled_at.strftime('%Y-%m-%d')
+
+                        print("email_id:", email_id)
+
+                        print("customer_name:", customer_name)
+
+                        # print("start_time:", start_time)
+                        #
+                        # print("end_time:", end_time)
+
+                        # print("appointment_date:", appointment_date)
+
+
+                        # send_email("Someshwar.Garud@genpact.com", ", ".join({email_id}),
+                        #            f"Appointment Reminder - Case ID: {case_id}", f"""
+                        # Hi {customer_name},
+                        #
+                        # Your appointment is scheduled for {appointment_date} from {start_time} to {end_time}. Please make sure to attend your appointment on time.
+                        #
+                        # Best Regards,
+                        # Genpact Team
+                        #                    """)
+
+                        confirm_appt = db.query(Event).filter(Event.event_status == 'Appointment Confirmation Received',
+                                                       Event.case_id == case_id).first()
+                        print(confirm_appt)
+                        if not confirm_appt:
+                            send_email("Someshwar.Garud@genpact.com", ", ".join({email_id}),
+                                       f"Appointment Reminder - Case ID: {case_id}", f"""
+                                                    Hi {customer_name},
+    
+                                                    Can you please confirm your schedule appointment.
+    
+                                                    Best Regards,
+                                                    Genpact Team
+                                                                       """)
+
+                            event_data = {
+                                'event_status': 'Reminder Sent',
+                                'event_name': f'Reminder has been sent',
+                                'event_details': {
+                                    "email": "",
+                                    "details": f"Reminder Sent"
+                                },
+                                'timestamp': str(datetime.now()),
+                                'case_id': case_id
+                            }
+
+                            event1 = Event(**event_data)
+                            db.add(event1)
+                            db.commit()
+
+        else:
+            raise HTTPException(status_code=404, detail="No event found with status 'Appointment Notification Sent'")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error sending reminders: {e}")
+
+    return {"message": "Reminders sent successfully"}
