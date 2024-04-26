@@ -316,7 +316,7 @@ class AgentSchema(BaseModel):
     leave_to: Optional[datetime] = None
     slot_time: int
     buffer_time: int
-    product_id: int
+    product_id: list[int]
     agent_email: str
     shift_from: time
     shift_to: time
@@ -782,7 +782,7 @@ Warm regards""")
         }
 
         event2_details = {
-            "event_name": "The appointment is ready for interview",
+            "event_name": "The case is ready for interview",
             "event_details": {
                 "email": "",
                 "details": f"The appointment with Case ID: {case_id} is ready for interview at {str(datetime.now())}",
@@ -1070,7 +1070,7 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         agent_email = agent_data.agent_email
         print("111111111111111111111111111111111111")
          # Commit transaction
-        event_details = {
+        event1_details = {
             "event_name": "Appointment has been rescheduled",
             "event_details": {
                 "email": f"""
@@ -1097,9 +1097,21 @@ Genpact Team
             "case_id": case_id,
             "event_status": "Appointment Rescheduled"
         }
+        event2_details = {
+            "event_name": "The case is ready for interview",
+            "event_details": {
+                "email": "",
+                "details": f"The appointment with Case ID: {case_id} is ready for interview at {str(datetime.now())}",
+            },
+            "timestamp": str(datetime.now()),
+            "case_id": case_id,
+            "event_status": "Ready For Interview"
+        }
         
-        new_event = Event(**event_details)
-        db.add(new_event)
+        new_event1 = Event(**event1_details)
+        new_event2 = Event(**event2_details)
+        db.add(new_event1)
+        db.add(new_event2)
         db.commit()
         print("111111111111111111111111111111111111")
 
@@ -1283,7 +1295,7 @@ def get_agent_appointments(agent_id: int, db: Session = Depends(get_db)):
     schedule.appointment_description,
     latest_event.event_status,
     latest_event.timestamp AS "last_updated_date",
-    latest_event.created_at
+    customer.created_at
 FROM
     genpact.appointment AS appointments
 JOIN
@@ -1791,7 +1803,7 @@ Genpact Team
 @app.post('/appointment/completed', tags=["appoinment"])
 async def mark_appointment_as_completed(case_id: str, status_expected: str, reason: str, db: Session = Depends(get_db)):
     try:
-        if status_expected=="Mark Case as Closed":
+        if status_expected=="Cancelled":
             customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
             id = customer_data.id
             # Update agent_schedule_data
@@ -1827,7 +1839,7 @@ Reason: {reason}"""
             db.add(event1)
             db.commit()
         
-        elif status_expected=="Mark Case as Submitted":
+        elif status_expected=="Submitted":
             customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
             id = customer_data.id
             # Update agent_schedule_data
@@ -1900,7 +1912,7 @@ Reason: {reason}"""
 
             db.commit()
 
-        return ResponseModel(message="Appointment marked completed.")
+        return ResponseModel(message="Appointment marked completed")
     
     except Exception as e:
         # Rollback transaction in case of error
@@ -2162,7 +2174,7 @@ FROM
             agent.full_name AS "agent_name",
             event.event_status AS "event_status",
             event.timestamp AS "last_updated_date",
-            event.created_at AS "created_date",
+            cust.created_at AS "created_date",
             ROW_NUMBER() OVER (PARTITION BY cust.case_id ORDER BY event.timestamp DESC,event.id desc) AS row_num
         FROM
             genpact.customer AS cust
