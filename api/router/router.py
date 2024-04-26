@@ -6,6 +6,7 @@ from sqlalchemy import Table, create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.orm import declarative_base
 from datetime import datetime
+import re
 import uuid
 from urllib import response
 from fastapi.middleware.cors import CORSMiddleware
@@ -352,8 +353,6 @@ class CustomerSchema(BaseModel):
     email_body: str
     email_subject: str
     email_author: str
-    address: str
-    state: str
 
 class TemplateSchema(BaseModel):
     template_name: str
@@ -467,6 +466,8 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
             if text in new_customer.email_body:
                 # Remove the warning message
                 new_customer.email_body = new_customer.email_body.replace(text, "").strip()
+                new_customer['address'] = re.search(r"Address:\s*(.+)", new_customer.email_body).group(1).strip() if re.search(r"Address:\s*(.+)", new_customer.email_body) else None
+                new_customer['state'] = re.search(r"State:\s*(.+)", new_customer.email_body).group(1).strip() if re.search(r"State:\s*(.+)", new_customer.email_body) else None
 
             db.add(new_customer)
             db.commit()
