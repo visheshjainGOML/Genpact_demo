@@ -2532,3 +2532,39 @@
 2024-04-26 21:23:41,313 - INFO - Request received: POST http://localhost:8000/appointment/create
 2024-04-26 21:24:04,459 - INFO - Response code: 200
 2024-04-26 21:24:04,459 - INFO - Response code: 200
+2024-04-29 11:18:57,787 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-29 11:18:57,787 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-29 11:18:57,787 - INFO - Response code: 200
+2024-04-29 11:18:57,787 - INFO - Response code: 200
+2024-04-29 11:18:58,065 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-29 11:18:58,065 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-29 11:18:58,114 - INFO - Response code: 200
+2024-04-29 11:18:58,114 - INFO - Response code: 200
+2024-04-29 11:18:59,858 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-29 11:18:59,858 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-29 11:18:59,860 - INFO - Response code: 200
+2024-04-29 11:18:59,860 - INFO - Response code: 200
+2024-04-29 11:19:00,173 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-29 11:19:00,173 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-29 11:19:00,175 - INFO - Response code: 200
+2024-04-29 11:19:00,175 - INFO - Response code: 200
+2024-04-29 11:21:46,869 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-29 11:21:46,869 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-29 11:22:18,597 - INFO - Response code: 201
+2024-04-29 11:22:18,597 - INFO - Response code: 201
+2024-04-29 11:25:09,267 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-29 11:25:09,267 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-29 11:25:40,614 - INFO - Response code: 201
+2024-04-29 11:25:40,614 - INFO - Response code: 201
+2024-04-29 11:28:04,807 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-29 11:28:04,807 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-29 11:28:36,387 - INFO - Response code: 201
+2024-04-29 11:28:36,387 - INFO - Response code: 201
+2024-04-29 11:32:46,775 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-29 11:32:46,775 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-29 11:33:18,044 - INFO - Response code: 201
+2024-04-29 11:33:18,044 - INFO - Response code: 201
+2024-04-29 11:38:39,338 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-29 11:38:39,338 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-29 11:39:10,819 - INFO - Response code: 201
+2024-04-29 11:39:10,819 - INFO - Response code: 201

@@ -35,6 +35,31 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from starlette.responses import FileResponse, StreamingResponse
 from fastapi.responses import FileResponse
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import hashes as asym_hashes
+from cryptography.hazmat.primitives.asymmetric import utils
+from cryptography.hazmat.primitives import constant_time
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric.utils import (
+   decode_dss_signature,
+   encode_dss_signature,
+)
+from cryptography.hazmat.primitives.serialization import (
+   load_pem_private_key,
+   load_pem_public_key,
+)
+from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
+from cryptography.hazmat.primitives import padding as sym_padding
+from base64 import b64encode, b64decode
+from os import urandom
 
 load_dotenv()
 
@@ -57,6 +82,36 @@ client = boto3.client(
     aws_access_key_id=AWS_ACCESS_KEY,
     aws_secret_access_key=AWS_SECRET_KEY
 )
+
+
+def generate_key():
+   # Generate a random secret key
+   return urandom(32)
+
+def encrypt_data(data, key):
+   # Encrypt the data
+   iv = urandom(16)  # AES block size in CBC mode
+   cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+   encryptor = cipher.encryptor()
+   padder = sym_padding.PKCS7(128).padder()
+   padded_data = padder.update(data.encode()) + padder.finalize()
+   encrypted = encryptor.update(padded_data) + encryptor.finalize()
+   return b64encode(iv + encrypted).decode()
+
+def decrypt_data(encrypted_data, key):
+   # Decrypt the data
+   encrypted_data = b64decode(encrypted_data)
+   iv = encrypted_data[:16]
+   cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+   decryptor = cipher.decryptor()
+   unpadder = sym_padding.PKCS7(128).unpadder()
+   decrypted_padded = decryptor.update(encrypted_data[16:]) + decryptor.finalize()
+   decrypted = unpadder.update(decrypted_padded) + unpadder.finalize()
+   return decrypted.decode()
+# Example usage
+
+secret_key = generate_key()
+
 
 def send_sms(phone_number, message):
     client_sms = boto3.client(
@@ -587,13 +642,14 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         db.refresh(new_customer)
         customer_id = new_customer.id
         email_author = str(new_customer.email_author).lower()
+        encrypted_case_id = encrypt_data(case_id, secret_key)
         try:
             send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Hi {new_customer.username}
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-http://54.175.240.135:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}
+http://54.175.240.135:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
@@ -672,7 +728,7 @@ Case ID: {new_customer.case_id}
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-http://54.175.240.135:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={case_id}
+http://54.175.240.135:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
@@ -751,6 +807,7 @@ async def create_agent(agent: AgentSchema, db: Session = Depends(get_db)):
 @app.post(path="/appointment/create", response_model=ResponseModel, tags=["appointment"])
 async def create_appointment(appointment: AppointmentSchema, db: Session = Depends(get_db)):
     try:
+        print("INSIDE CREATE APPOINTMENT: ")
         existing_appointment = appointment.dict()
 
         # Check if the user has a pending appointment
@@ -817,7 +874,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
 
         # Implement round-robin to select an agent (simple round-robin, you can modify for fairness)
         selected_agent_id = final_available_agents[0]
-
+        print("INSIDE CREATE APPOINTMENT: ")
         # Modify string into proper datatype
         new_appointment = OriginalAppointmentSchema(
             customer_id=existing_appointment['customer_id'],
@@ -836,6 +893,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         db.add(new_appointment)
         db.commit()
         db.refresh(new_appointment)
+        print("INSIDE CREATE APPOINTMENT: ")
 
         # Update agent_schedule status to "booked" for the corresponding appointment
         query = text("""
@@ -860,16 +918,19 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         query = db.query(Customer).filter(Customer.id == existing_appointment['customer_id'] )
         customer_data = query.first()
         Customer_email= customer_data.email_id
+        print("INSIDE CREATE APPOINTMENT: ")
         case_id = customer_data.case_id
         email_author = str(customer_data.email_author).lower()
+        encrypted_case_id =  encrypt_data(case_id, secret_key)
+        print("INSIDE CREATE APPOINTMENT: ", encrypted_case_id)
 
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
 Hi {customer_data.username}
 We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
-To view the details of your appointment, please click the following link: http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={case_id}
+To view the details of your appointment, please click the following link: http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
 Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
-Reschedule Your Appointment - http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={case_id}
-Cancel Your Appointment - http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={case_id}
+Reschedule Your Appointment - http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
+Cancel Your Appointment - http://54.175.240.135:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
 If you have any specific requests or questions prior to our meeting, do not hesitate to contact us directly through this email.
 We look forward to our conversation and are here to assist you with any questions you may have prior to our meeting.
 Warm regards,
@@ -1845,6 +1906,7 @@ async def agent_login(agent_info:dict, db: Session = Depends(get_db)):
 @app.post('/get_logs', tags=["events"])
 async def get_event_logs(case_id:str, db: Session = Depends(get_db)):
     try:
+        case_id = decrypt_data(case_id, secret_key)
         results = db.query(Event).filter(Event.case_id == case_id)
         results = format_db_response(results)
         print(results)
@@ -1866,6 +1928,7 @@ async def get_event_logs(case_id:str, db: Session = Depends(get_db)):
 @app.post('/send_reminder', tags=["events"])
 async def send_reminder(case_id: str, reason: str, db: Session = Depends(get_db)):
     try:
+        case_id = decrypt_data(case_id, secret_key)
         # Fetch customer details
         customer = db.query(Customer).filter(Customer.case_id == case_id).first()
         
@@ -1942,6 +2005,7 @@ Genpact Team
 @app.post('/appointment/completed', tags=["appoinment"])
 async def mark_appointment_as_completed(case_id: str, status_expected: str, reason: str, db: Session = Depends(get_db)):
     try:
+        case_id = decrypt_data(case_id, secret_key)
         if status_expected=="Cancelled":
             customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
             id = customer_data.id
@@ -2525,6 +2589,7 @@ def agent_inactive(input_data: AgentInactiveInput, db: Session = Depends(get_db)
 @app.get("/attachments", tags=["customer"])
 async def get_email_details(case_id: str, db: Session = Depends(get_db)):
     try:
+        case_id = decrypt_data(case_id, secret_key)
         customer_record = db.query(Customer).filter(Customer.case_id == case_id).first()
         if not customer_record:
             raise HTTPException(status_code=404, detail="Customer record not found")
@@ -2658,6 +2723,8 @@ async def count_event_status(caseid: str, event_status:str, db: Session = Depend
 @app.post("/count/check_reschedule_count", tags=["appointment"])
 async def count_reschedule_status(case_id: str, db: Session = Depends(get_db)):
     try:
+        case_id = decrypt_data(case_id, secret_key)
+        print(case_id)
         frequency_entry = db.query(Frequency).first()
 
         count = db.query(Event).filter(Event.case_id == case_id, Event.event_status == "Appointment Rescheduled").count()
@@ -2673,6 +2740,8 @@ async def count_reschedule_status(case_id: str, db: Session = Depends(get_db)):
 @app.post("/count/check_reminder_count", tags=["appointment"])
 async def count_reminder_status(case_id: str, db: Session = Depends(get_db)):
     try:
+        case_id = decrypt_data(case_id, secret_key)
+        print(case_id)
         frequency_entry = db.query(Frequency).first()
 
         count = db.query(Event).filter(Event.case_id == case_id, Event.event_status == "Reminder Sent").count()
