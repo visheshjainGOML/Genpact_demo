@@ -2568,3 +2568,7 @@
 2024-04-29 11:38:39,338 - INFO - Request received: POST http://localhost:8000/customer/create
 2024-04-29 11:39:10,819 - INFO - Response code: 201
 2024-04-29 11:39:10,819 - INFO - Response code: 201
+2024-04-29 12:07:31,411 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-29 12:07:31,411 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-04-29 12:08:23,182 - INFO - Response code: 201
+2024-04-29 12:08:23,182 - INFO - Response code: 201

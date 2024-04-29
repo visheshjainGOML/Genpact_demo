@@ -2916,3 +2916,32 @@ def export_combined_agent_csv(db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+@app.post(path="/agent/customer/create", response_model=ResponseModel, tags=["customer"],status_code=201)
+async def create_customer(name: str, mobile_num: str, email_id: str, db: Session = Depends(get_db)):
+    try:
+        query = db.query(Customer).filter(Customer.username == name).filter(Customer.mobile_no == mobile_num).filter(Customer.email_id == email_id).first()
+        email_id = query.email_id
+        case_id = query.case_id
+        username = query.username
+        customer_id = query.id
+        product_id = query.product_id
+        encrypted_case_id = encrypt_data(case_id, secret_key)
+        send_email("Someshwar.Garud@genpact.com", email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
+Hi {username}
+Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
+                
+To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
+http://54.175.240.135:3000/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}
+
+We look forward to meeting you and are here to assist you every step of the way.
+
+Warm regards
+
+Genpact Team """)
+        
+        return ResponseModel(message="Email sent successfully to the user")
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
