@@ -561,6 +561,11 @@ class AgentInactiveInput(BaseModel):
     agent_id: int
     reason: str
 
+class AgentAppointmentGenerator(BaseModel):
+    username: str
+    mobile_no: str
+    email_id: str
+
 # ---------- API endpoints -------------
 app = APIRouter()
 
@@ -2919,12 +2924,15 @@ def export_combined_agent_csv(db: Session = Depends(get_db)):
     
 
 @app.post(path="/agent/customer/create", response_model=ResponseModel, tags=["customer"],status_code=201)
-async def create_customer(name: str, mobile_num: str, email_id: str, db: Session = Depends(get_db)):
+async def create_customer(customer: AgentAppointmentGenerator, db: Session = Depends(get_db)):
     try:
+        customer_data = customer.dict()
+        new_customer = Customer(**customer_data)
+        name = new_customer.username
+        mobile_num = new_customer.mobile_no
+        email_id = new_customer.email_id
         query = db.query(Customer).filter(Customer.username == name).filter(Customer.mobile_no == mobile_num).filter(Customer.email_id == email_id).first()
-        email_id = query.email_id
         case_id = query.case_id
-        username = query.username
         customer_id = query.id
         product_id = query.product_id
         encrypted_case_id = encrypt_data(case_id, secret_key)

@@ -2604,3 +2604,31 @@
 2024-04-30 11:37:20,009 - INFO - Request received: POST http://localhost:8000/agent/customer/create?name=Vishesh%20Jain&mobile_num=%2B919146368601&email_id=vishesh.jain%40goml.io
 2024-04-30 11:37:21,630 - INFO - Response code: 201
 2024-04-30 11:37:21,630 - INFO - Response code: 201
+2024-04-30 11:38:45,026 - INFO - Request received: POST http://localhost:8000/agent/customer/create?name=Vishesh%20Jain&mobile_num=%2B919146368601&email_id=vishesh.jain%40goml.io
+2024-04-30 11:38:45,026 - INFO - Request received: POST http://localhost:8000/agent/customer/create?name=Vishesh%20Jain&mobile_num=%2B919146368601&email_id=vishesh.jain%40goml.io
+2024-04-30 11:38:46,663 - INFO - Response code: 201
+2024-04-30 11:38:46,663 - INFO - Response code: 201
+2024-04-30 12:05:10,801 - INFO - Request received: POST http://localhost:8000/agent/customer/create?name=Vishesh%20Jain&mobile_num=%2B919146368601&email_id=vishesh.jain%40goml.io
+2024-04-30 12:05:10,801 - INFO - Request received: POST http://localhost:8000/agent/customer/create?name=Vishesh%20Jain&mobile_num=%2B919146368601&email_id=vishesh.jain%40goml.io
+2024-04-30 12:05:10,843 - INFO - Response code: 422
+2024-04-30 12:05:10,843 - INFO - Response code: 422
+2024-04-30 12:05:17,391 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-30 12:05:17,391 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-30 12:05:17,395 - INFO - Response code: 200
+2024-04-30 12:05:17,395 - INFO - Response code: 200
+2024-04-30 12:05:18,037 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-30 12:05:18,037 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-30 12:05:18,107 - INFO - Response code: 200
+2024-04-30 12:05:18,107 - INFO - Response code: 200
+2024-04-30 12:06:40,295 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-30 12:06:40,295 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-30 12:06:40,296 - INFO - Response code: 200
+2024-04-30 12:06:40,296 - INFO - Response code: 200
+2024-04-30 12:06:40,428 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-30 12:06:40,428 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-30 12:06:40,476 - INFO - Response code: 200
+2024-04-30 12:06:40,476 - INFO - Response code: 200
+2024-04-30 12:07:05,915 - INFO - Request received: POST http://localhost:8000/agent/customer/create
+2024-04-30 12:07:05,915 - INFO - Request received: POST http://localhost:8000/agent/customer/create
+2024-04-30 12:07:05,919 - INFO - Response code: 400
+2024-04-30 12:07:05,919 - INFO - Response code: 400
