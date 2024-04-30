@@ -2644,3 +2644,19 @@
 2024-04-30 12:10:56,000 - INFO - Request received: POST http://localhost:8000/agent/customer/create
 2024-04-30 12:10:57,374 - INFO - Response code: 201
 2024-04-30 12:10:57,374 - INFO - Response code: 201
+2024-04-30 14:16:25,516 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-30 14:16:25,516 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-30 14:16:25,530 - INFO - Response code: 200
+2024-04-30 14:16:25,530 - INFO - Response code: 200
+2024-04-30 14:16:26,137 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-30 14:16:26,137 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-30 14:16:26,401 - INFO - Response code: 200
+2024-04-30 14:16:26,401 - INFO - Response code: 200
+2024-04-30 14:17:06,391 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-30 14:17:06,391 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-30 14:17:06,397 - INFO - Response code: 200
+2024-04-30 14:17:06,397 - INFO - Response code: 200
+2024-04-30 14:17:07,293 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-30 14:17:07,293 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-30 14:17:07,296 - INFO - Response code: 200
+2024-04-30 14:17:07,296 - INFO - Response code: 200
