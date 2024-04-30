@@ -2763,9 +2763,12 @@ async def count_reminder_status(case_id: str, db: Session = Depends(get_db)):
 async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
     try:
         # Get the timestamp from the event table where status is 'Appointment Notification Sent'
+        encrypted_case_id = encrypt_data(case_id, secret_key)
         event = db.query(Event).filter(Event.event_status == 'Appointment Notification Sent', Event.case_id == case_id).first()
 
         customer = db.query(Customer).filter(Customer.case_id == case_id).first()
+        customer_id = customer.id
+        product_id = customer.product_id
 
         # appointment_query = db.query(Appointment).filter(Appointment.customer_id == customer.id).first()
 
@@ -2786,7 +2789,7 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                         # Extract numeric part of interval
                         interval_hours = int(interval_str[:-3])
                         print("Interval hours:", interval_hours)
-                        reminder_time = timestamp + timedelta(minutes=interval_hours)
+                        reminder_time = timestamp + timedelta(hours=interval_hours)
                         print("Reminder date:", reminder_time.date())
                         print("Reminder time:", reminder_time.time())
                         print(datetime.now())
@@ -2837,14 +2840,16 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                         if not confirm_appt:
                             send_email("Someshwar.Garud@genpact.com", ", ".join({email_id}),
                                        f"Appointment Reminder - Case ID: {case_id}", f"""
-                            Hi {customer_name},
+Hi {customer_name},
 
-                            This is a friendly reminder to schedule your appointment. 
-                            Your prompt confirmation helps us ensure that we are fully prepared to assist you.
+This is a friendly reminder to schedule your appointment. 
+Your prompt confirmation helps us ensure that we are fully prepared to assist you.
 
-                            Best Regards,
-                            Genpact Team
-                                                                                                   """)
+Please use the below link for scheduling the appointment:
+http://54.175.240.135:3000/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}
+Best Regards,
+Genpact Team
+""")
 
                             event_data = {
                                 'event_status': 'Reminder Sent',
