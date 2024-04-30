@@ -2928,20 +2928,21 @@ async def create_customer(name: str, mobile_num: str, email_id: str, db: Session
         customer_id = query.id
         product_id = query.product_id
         encrypted_case_id = encrypt_data(case_id, secret_key)
-        send_email("Someshwar.Garud@genpact.com", email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
-Hi {username}
-Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
-                
-To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-http://54.175.240.135:3000/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}
-
-We look forward to meeting you and are here to assist you every step of the way.
-
-Warm regards
-
-Genpact Team """)
+        event_data = {
+            'event_status': 'Agent Triggered Generate Appointment Scheduling Link',
+            'event_name': 'An appointment scheduling link has been triggered by the agent',
+            'event_details': {
+                "email":"",
+                "details":f"Agent Triggered Generate Appointment Scheduling Link to {email_id} at {str(datetime.now())}"
+            },
+            'timestamp': str(datetime.now()),
+            'case_id': case_id
+        }
+        event1 = Event(**event_data)
+        db.add(event1)
+        db.commit()
         
-        return ResponseModel(message="Email sent successfully to the user")
+        return ResponseModel(message="Appointment link generated succesfully", payload={"link": f"http://54.175.240.135:3000/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}"})
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

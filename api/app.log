@@ -2572,3 +2572,35 @@
 2024-04-29 12:07:31,411 - INFO - Request received: POST http://localhost:8000/customer/create
 2024-04-29 12:08:23,182 - INFO - Response code: 201
 2024-04-29 12:08:23,182 - INFO - Response code: 201
+2024-04-29 22:44:25,886 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-29 22:44:25,886 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-29 22:44:25,932 - INFO - Response code: 200
+2024-04-29 22:44:25,932 - INFO - Response code: 200
+2024-04-29 22:44:39,184 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-29 22:44:39,184 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-29 22:44:39,185 - INFO - Response code: 200
+2024-04-29 22:44:39,185 - INFO - Response code: 200
+2024-04-29 22:44:39,313 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-29 22:44:39,313 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-29 22:44:39,315 - INFO - Response code: 200
+2024-04-29 22:44:39,315 - INFO - Response code: 200
+2024-04-29 22:46:03,322 - INFO - Request received: POST http://localhost:8000/agent/customer/create?name=Atharva%20P.%20Patil&mobile_num=%2B919146368601&email_id=atharva.patil%40goml.io
+2024-04-29 22:46:03,322 - INFO - Request received: POST http://localhost:8000/agent/customer/create?name=Atharva%20P.%20Patil&mobile_num=%2B919146368601&email_id=atharva.patil%40goml.io
+2024-04-29 22:46:17,166 - INFO - Response code: 201
+2024-04-29 22:46:17,166 - INFO - Response code: 201
+2024-04-30 11:29:19,222 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-30 11:29:19,222 - INFO - Request received: GET http://localhost:8000/docs
+2024-04-30 11:29:19,228 - INFO - Response code: 200
+2024-04-30 11:29:19,228 - INFO - Response code: 200
+2024-04-30 11:29:19,344 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-30 11:29:19,344 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-04-30 11:29:19,385 - INFO - Response code: 200
+2024-04-30 11:29:19,385 - INFO - Response code: 200
+2024-04-30 11:29:40,365 - INFO - Request received: POST http://localhost:8000/agent/customer/create?name=Vishesh%20Jain&mobile_num=%2B919146368601&email_id=vishesh.jain%40goml.io
+2024-04-30 11:29:40,365 - INFO - Request received: POST http://localhost:8000/agent/customer/create?name=Vishesh%20Jain&mobile_num=%2B919146368601&email_id=vishesh.jain%40goml.io
+2024-04-30 11:29:54,335 - INFO - Response code: 201
+2024-04-30 11:29:54,335 - INFO - Response code: 201
+2024-04-30 11:37:20,009 - INFO - Request received: POST http://localhost:8000/agent/customer/create?name=Vishesh%20Jain&mobile_num=%2B919146368601&email_id=vishesh.jain%40goml.io
+2024-04-30 11:37:20,009 - INFO - Request received: POST http://localhost:8000/agent/customer/create?name=Vishesh%20Jain&mobile_num=%2B919146368601&email_id=vishesh.jain%40goml.io
+2024-04-30 11:37:21,630 - INFO - Response code: 201
+2024-04-30 11:37:21,630 - INFO - Response code: 201
