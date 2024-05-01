@@ -1911,7 +1911,6 @@ async def agent_login(agent_info:dict, db: Session = Depends(get_db)):
 @app.post('/get_logs', tags=["events"])
 async def get_event_logs(case_id:str, db: Session = Depends(get_db)):
     try:
-        case_id = decrypt_data(case_id, secret_key)
         results = db.query(Event).filter(Event.case_id == case_id)
         results = format_db_response(results)
         print(results)
