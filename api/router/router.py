@@ -2591,7 +2591,6 @@ def agent_inactive(input_data: AgentInactiveInput, db: Session = Depends(get_db)
 @app.get("/attachments", tags=["customer"])
 async def get_email_details(case_id: str, db: Session = Depends(get_db)):
     try:
-        case_id = decrypt_data(case_id, secret_key)
         customer_record = db.query(Customer).filter(Customer.case_id == case_id).first()
         if not customer_record:
             raise HTTPException(status_code=404, detail="Customer record not found")
