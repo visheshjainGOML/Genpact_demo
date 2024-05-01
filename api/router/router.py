@@ -2008,7 +2008,6 @@ Genpact Team
 @app.post('/appointment/completed', tags=["appoinment"])
 async def mark_appointment_as_completed(case_id: str, status_expected: str, reason: str, db: Session = Depends(get_db)):
     try:
-        case_id = decrypt_data(case_id, secret_key)
         if status_expected=="Cancelled":
             customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
             id = customer_data.id
