@@ -1932,7 +1932,6 @@ async def get_event_logs(case_id:str, db: Session = Depends(get_db)):
 @app.post('/send_reminder', tags=["events"])
 async def send_reminder(case_id: str, reason: str, db: Session = Depends(get_db)):
     try:
-        case_id = decrypt_data(case_id, secret_key)
         # Fetch customer details
         customer = db.query(Customer).filter(Customer.case_id == case_id).first()
         
