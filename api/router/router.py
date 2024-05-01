@@ -2012,7 +2012,7 @@ async def mark_appointment_as_completed(case_id: str, status_expected: str, reas
             customer_data = db.query(Customer).filter(Customer.case_id == case_id).first()
             id = customer_data.id
             # Update agent_schedule_data
-            agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id).first()
+            agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id, AgentSchedule.appointment_id.is_not(None)).first()
             agent_schedule_data.status = "Cancelled"
             agent_schedule_data.reason = reason
             agent_schedule_data.appointment_id = None
