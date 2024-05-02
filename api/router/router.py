@@ -2153,7 +2153,7 @@ async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(ge
             db.add(new_customer)
             db.commit()
             db.refresh(new_customer)
-            
+
         db.execute(
             update(Agent)
             .where(Agent.id == agent_id)
@@ -2955,3 +2955,26 @@ async def create_customer(customer: AgentAppointmentGenerator, db: Session = Dep
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.post(path="/submit/question/", response_model=ResponseModel, tags=["customer"], status_code=201)
+def check_values_in_dictionary(unique_case_id:str, db: Session = Depends(get_db)):
+    try:
+        query_result = db.query(QuestionAnswer).filter(
+            QuestionAnswer.case_id == unique_case_id
+        ).first()
+
+        if query_result:
+            question_answer_pair = query_result.question_answer_pair
+            for value in question_answer_pair.values():
+                if value is not None:
+                    return {"result": True, "message": "True"}
+
+            return {"result": False, "message": "False"}
+
+        else:
+            return {"result": False, "message": "False"}
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return {"result": False, "message": "An error occurred"}  # Include the 'message' field

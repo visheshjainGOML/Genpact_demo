@@ -2736,3 +2736,23 @@
 2024-05-02 23:55:41,251 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/37
 2024-05-02 23:55:43,696 - INFO - Response code: 400
 2024-05-02 23:55:43,696 - INFO - Response code: 400
+2024-05-02 23:59:37,871 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/37
+2024-05-02 23:59:37,871 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/37
+2024-05-02 23:59:40,143 - INFO - Response code: 200
+2024-05-02 23:59:40,143 - INFO - Response code: 200
+2024-05-03 00:01:55,827 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/37
+2024-05-03 00:01:55,827 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/37
+2024-05-03 00:01:58,117 - INFO - Response code: 200
+2024-05-03 00:01:58,117 - INFO - Response code: 200
+2024-05-03 00:02:20,128 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/32
+2024-05-03 00:02:20,128 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/32
+2024-05-03 00:02:22,399 - INFO - Response code: 200
+2024-05-03 00:02:22,399 - INFO - Response code: 200
+2024-05-03 00:03:41,882 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-03 00:03:41,882 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-03 00:04:13,121 - INFO - Response code: 201
+2024-05-03 00:04:13,121 - INFO - Response code: 201
+2024-05-03 00:05:22,525 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-05-03 00:05:22,525 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-05-03 00:05:57,274 - INFO - Response code: 200
+2024-05-03 00:05:57,274 - INFO - Response code: 200
