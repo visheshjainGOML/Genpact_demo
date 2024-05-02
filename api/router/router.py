@@ -2954,7 +2954,7 @@ async def create_customer(customer: AgentAppointmentGenerator, db: Session = Dep
         db.add(event1)
         db.commit()
         
-        return ResponseModel(message="Appointment link generated succesfully", payload={"link": f"https://d2dwd3ks06zig3.cloudfront.net/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}"})
+        return ResponseModel(message="Appointment link generated succesfully", payload={"link": f"https://d2dwd3ks06zig3.cloudfront.net/customer/bookAppointment?customer_id={customer_id}&product_id=1&case_id={encrypted_case_id}"})
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
