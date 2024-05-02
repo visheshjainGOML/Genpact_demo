@@ -2660,3 +2660,31 @@
 2024-04-30 14:17:07,293 - INFO - Request received: GET http://localhost:8000/openapi.json
 2024-04-30 14:17:07,296 - INFO - Response code: 200
 2024-04-30 14:17:07,296 - INFO - Response code: 200
+2024-05-01 12:03:06,395 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-01 12:03:06,395 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-01 12:03:06,403 - INFO - Response code: 200
+2024-05-01 12:03:06,403 - INFO - Response code: 200
+2024-05-01 12:03:06,509 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-01 12:03:06,509 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-01 12:03:06,590 - INFO - Response code: 200
+2024-05-01 12:03:06,590 - INFO - Response code: 200
+2024-05-02 13:40:52,783 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-02 13:40:52,783 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-02 13:40:52,786 - INFO - Response code: 200
+2024-05-02 13:40:52,786 - INFO - Response code: 200
+2024-05-02 13:40:52,958 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-02 13:40:52,958 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-02 13:40:53,099 - INFO - Response code: 200
+2024-05-02 13:40:53,099 - INFO - Response code: 200
+2024-05-02 13:40:55,223 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-02 13:40:55,223 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-02 13:40:55,225 - INFO - Response code: 200
+2024-05-02 13:40:55,225 - INFO - Response code: 200
+2024-05-02 13:40:55,669 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-02 13:40:55,669 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-02 13:40:55,671 - INFO - Response code: 200
+2024-05-02 13:40:55,671 - INFO - Response code: 200
+2024-05-02 14:19:27,062 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-02 14:19:27,062 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-02 14:19:30,784 - INFO - Response code: 400
+2024-05-02 14:19:30,784 - INFO - Response code: 400

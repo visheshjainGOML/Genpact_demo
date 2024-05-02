@@ -454,7 +454,7 @@ class AgentSchema(BaseModel):
     leave_to: Optional[datetime] = None
     slot_time: int
     buffer_time: int
-    product_id: list[int]
+    product_id: int
     agent_email: str
     shift_from: time
     shift_to: time
@@ -648,10 +648,13 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         customer_id = new_customer.id
         email_author = str(new_customer.email_author).lower()
         encrypted_case_id = encrypt_data(case_id, secret_key)
+
+        template_data = db.query(Template).filter(Template.template_name == "Scheduling", Template.template_type == "Email").first()
+        content = template_data.content
         try:
             send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Hi {new_customer.username}
-Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
+{content}
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
 http://54.147.152.155:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}
@@ -928,10 +931,12 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         email_author = str(customer_data.email_author).lower()
         encrypted_case_id =  encrypt_data(case_id, secret_key)
         print("INSIDE CREATE APPOINTMENT: ", encrypted_case_id)
+        template_data = db.query(Template).filter(Template.template_name == "Confirmation", Template.template_type == "Email").first()
+        content = template_data.content
 
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
 Hi {customer_data.username}
-We are pleased to confirm that your appointment has been successfully scheduled. Thank you for choosing our services!
+{content}
 To view the details of your appointment, please click the following link: http://54.147.152.155:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
 Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
 Reschedule Your Appointment - http://54.147.152.155:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
@@ -1139,18 +1144,12 @@ async def cancel_appointment_route(appointment_id: int,reason:str, db: Session =
             agent_data = query.first()
             agent_email = agent_data.agent_email
             email_author = str(customer_data.email_author).lower()
+            template_data = db.query(Template).filter(Template.template_name == "Cancellation", Template.template_type == "Email").first()
+            content = template_data.content
 
             send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}", f"""
 Hi {customer_data.username}
-We have received your request and successfully cancelled your scheduled appointment. We are sorry to see you go, but understand that circumstances can change.
-
-If you wish to reschedule at a later time or if there is anything else we can assist you with, please do not hesitate to reach out.
-
-Thank you for your interest in our services. We hope to have the opportunity to assist you in the future.
-
-Best regards,
-
-Genpact Team
+{content}
 """)
             try:
                 send_sms(str(customer_data.mobile_no),f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}.")
@@ -1317,16 +1316,12 @@ Genpact Team
         db.add(new_event2)
         db.commit()
         print("111111111111111111111111111111111111")
+        template_data = db.query(Template).filter(Template.template_name == "Rescheduling", Template.template_type == "Email").first()
+        content = template_data.content
 
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}", f"""
 Hi {customer_data.username}
-We have successfully updated your appointment details as requested. Thank you for continuing to choose us for your needs!
-
-Please review the updated appointment information to ensure everything is correct. If you need further adjustments or have specific requirements for our meeting, feel free to reach out to us directly through this email.
-
-Best Regards,
-
-Genpact Team
+{content}
                    """,start_time_obj,end_time_obj,date_obj)
         
         try:
@@ -1934,6 +1929,8 @@ async def send_reminder(case_id: str, reason: str, db: Session = Depends(get_db)
     try:
         # Fetch customer details
         customer = db.query(Customer).filter(Customer.case_id == case_id).first()
+        customer_id = customer.id
+        product_id = customer.product_id
         
         if not customer:
             return ResponseModel(message="No customer found.", payload={"data": []})
@@ -1957,16 +1954,21 @@ async def send_reminder(case_id: str, reason: str, db: Session = Depends(get_db)
         
         start_time = slot_query.start_time.strftime('%H:%M')
         end_time = slot_query.end_time.strftime('%H:%M')
+        encrypted_case_id = encrypt_data(case_id, secret_key)
 
         # Call count_event_status function to get the count
         count_data = await count_event_status(case_id, "Reminder Sent", db)
         reminder_count = count_data[f"Count for Reminder Sent"] + 1
         print("REMINDER COUNT:::::::::::::::::::::::", reminder_count)
+        template_data = db.query(Template).filter(Template.template_name == "Reminder", Template.template_type == "Email").first()
+        content = template_data.content
         
         send_email("Someshwar.Garud@genpact.com", ", ".join({email_id}), f"Appointment Reminder - Case ID: {case_id}", f"""
 Hi {customer_name},
-
+{content}
 Your appointment is scheduled for {appointment_date} from {start_time} to {end_time}. Please make sure to attend your appointment on time.
+Please use the below link for scheduling the appointment:
+http://54.147.152.155:3000/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}
 
 Best Regards,
 Genpact Team
@@ -2138,7 +2140,7 @@ Reason: {reason}"""
 async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(get_db)):
     
     try:
-        date_format = "%d-%m-%y"
+        date_format = "%d-%m-%Y"
        
         for value in source_data["leaveDetails"]:
             leave_data = {}
@@ -2829,7 +2831,8 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                         # Best Regards,
                         # Genpact Team
                         #                    """)
-
+                        template_data = db.query(Template).filter(Template.template_name == "Reminder", Template.template_type == "Email").first()
+                        content = template_data.content
                         confirm_appt = db.query(Event).filter(Event.event_status == 'Appointment Confirmation Received',
                                                        Event.case_id == case_id).first()
                         print(confirm_appt)
@@ -2838,8 +2841,7 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                                        f"Appointment Reminder - Case ID: {case_id}", f"""
 Hi {customer_name},
 
-This is a friendly reminder to schedule your appointment. 
-Your prompt confirmation helps us ensure that we are fully prepared to assist you.
+{content}
 
 Please use the below link for scheduling the appointment:
 http://54.147.152.155:3000/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}
