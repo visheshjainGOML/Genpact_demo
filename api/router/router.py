@@ -657,7 +657,7 @@ Hi {new_customer.username}
 {content}
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-http://54.147.152.155:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}
+http://18.212.18.109:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
@@ -736,7 +736,7 @@ Case ID: {new_customer.case_id}
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-http://54.147.152.155:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}
+http://18.212.18.109:3000/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
@@ -937,10 +937,10 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
 Hi {customer_data.username}
 {content}
-To view the details of your appointment, please click the following link: http://54.147.152.155:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
+To view the details of your appointment, please click the following link: http://18.212.18.109:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
 Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
-Reschedule Your Appointment - http://54.147.152.155:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
-Cancel Your Appointment - http://54.147.152.155:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
+Reschedule Your Appointment - http://18.212.18.109:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
+Cancel Your Appointment - http://18.212.18.109:3000/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
 If you have any specific requests or questions prior to our meeting, do not hesitate to contact us directly through this email.
 We look forward to our conversation and are here to assist you with any questions you may have prior to our meeting.
 Warm regards,
@@ -958,7 +958,7 @@ Quick Reminder:
 Check the Appointment Date and Time: Ensure your schedule is updated.
                    
 Review Customer Details: Familiarize yourself with the customer's requirements and previous interactions to provide a tailored experience.
-Access your portal here: http://54.147.152.155:3000/  
+Access your portal here: http://18.212.18.109:3000/  
 Thank you for your dedication and hard work. Let's continue providing exceptional service to our clients!
 Best Regards,
                    
@@ -1968,7 +1968,7 @@ Hi {customer_name},
 {content}
 Your appointment is scheduled for {appointment_date} from {start_time} to {end_time}. Please make sure to attend your appointment on time.
 Please use the below link for scheduling the appointment:
-http://54.147.152.155:3000/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}
+http://18.212.18.109:3000/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}
 
 Best Regards,
 Genpact Team
@@ -2294,7 +2294,7 @@ async def change_appointment_agent(appointment_id: int, new_agent_id: int, reaso
 Hi {customer_data.username}
 Your appointment agent has been changed. The new agent is now responsible for your case. 
 For further details, please click the following link: 
-http://54.147.152.155:3000/customer/appointmentDetails?appointment_id={new_appointment.id}
+http://18.212.18.109:3000/customer/appointmentDetails?appointment_id={new_appointment.id}
 """)
         try:
             send_sms(str(customer_data.mobile_no),f"Appointment Agent Changed - Case ID: {case_id}")
@@ -2306,7 +2306,7 @@ http://54.147.152.155:3000/customer/appointmentDetails?appointment_id={new_appoi
 Hi {agent_data.full_name}
 You have been assigned as the new agent for the appointment. 
 For further details, please click the following link: 
-http://54.147.152.155:3000/agent/appointmentDetails?appointment_id={new_appointment.id}
+http://18.212.18.109:3000/agent/appointmentDetails?appointment_id={new_appointment.id}
 """)
         start_time_str = new_appointment.scheduled_at.strftime('%H:%M')
         end_time_str = (new_appointment.scheduled_at + timedelta(hours=1)).strftime('%H:%M')
@@ -2844,7 +2844,7 @@ Hi {customer_name},
 {content}
 
 Please use the below link for scheduling the appointment:
-http://54.147.152.155:3000/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}
+http://18.212.18.109:3000/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}
 Best Regards,
 Genpact Team
 """)
@@ -2953,7 +2953,7 @@ async def create_customer(customer: AgentAppointmentGenerator, db: Session = Dep
         db.add(event1)
         db.commit()
         
-        return ResponseModel(message="Appointment link generated succesfully", payload={"link": f"http://54.147.152.155:3000/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}"})
+        return ResponseModel(message="Appointment link generated succesfully", payload={"link": f"http://18.212.18.109:3000/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}"})
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
