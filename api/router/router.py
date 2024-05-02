@@ -5,7 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import time
 from fastapi import FastAPI, HTTPException, Depends, Header, Query, status, APIRouter
 # from grpc import StatusCode
-from sqlalchemy import Table, create_engine
+from sqlalchemy import Table, create_engine, desc
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.orm import declarative_base
 from datetime import datetime
@@ -649,7 +649,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         email_author = str(new_customer.email_author).lower()
         encrypted_case_id = encrypt_data(case_id, secret_key)
 
-        template_data = db.query(Template).filter(Template.template_name == "Scheduling", Template.template_type == "Email").first()
+        template_data = db.query(Template).filter(Template.template_name == "Scheduling", Template.template_type == "Email").order_by(desc(Template.id)).first()
         content = template_data.content
         try:
             send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
@@ -853,10 +853,10 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
 
         # Check shift and leave dates for each available agent
         for agent_id in available_agents:
-            agent_data = db.query(Agent).filter(Agent.id == agent_id).first()
+            agent_data = db.query(AgentShift).filter(Agent.id == agent_id).first()
 
-            agent_shift_from = agent_data.shift_from
-            agent_shift_to = agent_data.shift_to
+            agent_shift_from = agent_data.shift_date_from
+            agent_shift_to = agent_data.shift_date_to
             appointment_start_time = time.fromisoformat(existing_appointment['start_time'])
             appointment_end_time = time.fromisoformat(existing_appointment['end_time'])
 
@@ -931,7 +931,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         email_author = str(customer_data.email_author).lower()
         encrypted_case_id =  encrypt_data(case_id, secret_key)
         print("INSIDE CREATE APPOINTMENT: ", encrypted_case_id)
-        template_data = db.query(Template).filter(Template.template_name == "Confirmation", Template.template_type == "Email").first()
+        template_data = db.query(Template).filter(Template.template_name == "Confirmation", Template.template_type == "Email").order_by(desc(Template.id)).first()
         content = template_data.content
 
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
@@ -1144,7 +1144,7 @@ async def cancel_appointment_route(appointment_id: int,reason:str, db: Session =
             agent_data = query.first()
             agent_email = agent_data.agent_email
             email_author = str(customer_data.email_author).lower()
-            template_data = db.query(Template).filter(Template.template_name == "Cancellation", Template.template_type == "Email").first()
+            template_data = db.query(Template).filter(Template.template_name == "Cancellation", Template.template_type == "Email").order_by(desc(Template.id)).first()
             content = template_data.content
 
             send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}", f"""
@@ -1316,7 +1316,7 @@ Genpact Team
         db.add(new_event2)
         db.commit()
         print("111111111111111111111111111111111111")
-        template_data = db.query(Template).filter(Template.template_name == "Rescheduling", Template.template_type == "Email").first()
+        template_data = db.query(Template).filter(Template.template_name == "Rescheduling", Template.template_type == "Email").order_by(desc(Template.id)).first()
         content = template_data.content
 
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}", f"""
@@ -1960,7 +1960,7 @@ async def send_reminder(case_id: str, reason: str, db: Session = Depends(get_db)
         count_data = await count_event_status(case_id, "Reminder Sent", db)
         reminder_count = count_data[f"Count for Reminder Sent"] + 1
         print("REMINDER COUNT:::::::::::::::::::::::", reminder_count)
-        template_data = db.query(Template).filter(Template.template_name == "Reminder", Template.template_type == "Email").first()
+        template_data = db.query(Template).filter(Template.template_name == "Reminder", Template.template_type == "Email").order_by(desc(Template.id)).first()
         content = template_data.content
         
         send_email("Someshwar.Garud@genpact.com", ", ".join({email_id}), f"Appointment Reminder - Case ID: {case_id}", f"""
@@ -2831,7 +2831,7 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                         # Best Regards,
                         # Genpact Team
                         #                    """)
-                        template_data = db.query(Template).filter(Template.template_name == "Reminder", Template.template_type == "Email").first()
+                        template_data = db.query(Template).filter(Template.template_name == "Reminder", Template.template_type == "Email").order_by(desc(Template.id)).first()
                         content = template_data.content
                         confirm_appt = db.query(Event).filter(Event.event_status == 'Appointment Confirmation Received',
                                                        Event.case_id == case_id).first()
