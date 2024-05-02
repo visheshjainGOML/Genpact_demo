@@ -1265,7 +1265,9 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
         agent_id= data.agent_id
         query = db.query(Customer).filter(Customer.id == cust_id)
         customer_data = query.first()
+        customer_id = customer_data.id
         case_id = customer_data.case_id
+        encrypted_case_id = encrypt_data(case_id, secret_key)
         Customer_email= customer_data.email_id
         query = db.query(Agent).filter(Agent.id == agent_id)
         agent_data = query.first()
@@ -1321,6 +1323,7 @@ Genpact Team
 
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}", f"""
 Hi {customer_data.username}
+Please click the following link: https://d2dwd3ks06zig3.cloudfront.net/customer/bookedAppointment?customer_id={customer_id}&product_id=1&case_id={encrypted_case_id}
 {content}
                    """,start_time_obj,end_time_obj,date_obj)
         
