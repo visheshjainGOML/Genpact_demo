@@ -2153,15 +2153,13 @@ async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(ge
             db.add(new_customer)
             db.commit()
             db.refresh(new_customer)
-
-        shift_data= {}
-        shift_data["agent_id"]=agent_id
-        shift_data["shift_date_from"] = datetime.strptime( source_data["shift_start_date"], date_format)
-        shift_data["shift_date_to"]=datetime.strptime( source_data["shift_to_date"], date_format)
-        new_customer = AgentShift(**shift_data)
-        db.add(new_customer)
+            
+        db.execute(
+            update(Agent)
+            .where(Agent.id == agent_id)
+            .values(shift_from=source_data['shift_from'], shift_to=source_data['shift_to'])
+        )
         db.commit()
-        db.refresh(new_customer)
         return ResponseModel(message="successfully updated")
     except Exception as e:
         # Rollback transaction in case of error
