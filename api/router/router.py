@@ -2226,6 +2226,7 @@ async def change_appointment_agent(appointment_id: int, new_agent_id: int, reaso
     try:
         # Fetch the appointment details
         appointment_record = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+        customer_id = appointment_record.customer_id
         
         if not appointment_record:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found")
@@ -2288,6 +2289,7 @@ async def change_appointment_agent(appointment_id: int, new_agent_id: int, reaso
         customer_data = db.query(Customer).filter(Customer.id == appointment_record.customer_id).first()
         Customer_email = customer_data.email_id
         case_id = customer_data.case_id
+        encrypted_case_id = encrypt_data(case_id, secret_key)
 
         # Sending emails
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Appointment Agent Changed - Case ID: {case_id}",
@@ -2295,7 +2297,7 @@ async def change_appointment_agent(appointment_id: int, new_agent_id: int, reaso
 Hi {customer_data.username}
 Your appointment agent has been changed. The new agent is now responsible for your case. 
 For further details, please click the following link: 
-https://d2dwd3ks06zig3.cloudfront.net/customer/appointmentDetails?appointment_id={new_appointment.id}
+https://d2dwd3ks06zig3.cloudfront.net/customer/bookedAppointment?customer_id={customer_id}&product_id=1&case_id={encrypted_case_id}
 """)
         try:
             send_sms(str(customer_data.mobile_no),f"Appointment Agent Changed - Case ID: {case_id}")
