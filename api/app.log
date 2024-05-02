@@ -2708,3 +2708,7 @@
 2024-05-02 21:32:15,487 - INFO - Request received: POST http://localhost:8000/appointment/create
 2024-05-02 21:32:18,312 - INFO - Response code: 400
 2024-05-02 21:32:18,312 - INFO - Response code: 400
+2024-05-02 21:35:31,398 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-05-02 21:35:31,398 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-05-02 21:36:08,216 - INFO - Response code: 200
+2024-05-02 21:36:08,216 - INFO - Response code: 200
