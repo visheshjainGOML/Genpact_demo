@@ -657,7 +657,7 @@ Hi {new_customer.username}
 {content}
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-httpss://d2dwd3ks06zig3.cloudfront.net/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}
+https://d2dwd3ks06zig3.cloudfront.net/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
@@ -736,7 +736,7 @@ Case ID: {new_customer.case_id}
 Thank you for connecting with us! We are excited to discuss how we can assist you further and explore potential solutions together.
                    
 To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-httpss://d2dwd3ks06zig3.cloudfront.net/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}
+https://d2dwd3ks06zig3.cloudfront.net/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}
  
 We look forward to meeting you and are here to assist you every step of the way.
 
@@ -937,7 +937,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
 Hi {customer_data.username}
 {content}
-To view the details of your appointment, please click the following link: httpss://d2dwd3ks06zig3.cloudfront.net/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
+To view the details of your appointment, please click the following link: https://d2dwd3ks06zig3.cloudfront.net/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
 Should you need to reschedule or cancel your appointment, please use the links below at your convenience:
 Reschedule Your Appointment - https://d2dwd3ks06zig3.cloudfront.net/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
 Cancel Your Appointment - https://d2dwd3ks06zig3.cloudfront.net/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
