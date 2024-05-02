@@ -853,10 +853,10 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
 
         # Check shift and leave dates for each available agent
         for agent_id in available_agents:
-            agent_data = db.query(AgentShift).filter(Agent.id == agent_id).first()
+            agent_data = db.query(Agent).filter(Agent.id == agent_id).first()
 
-            agent_shift_from = agent_data.shift_date_from
-            agent_shift_to = agent_data.shift_date_to
+            agent_shift_from = agent_data.shift_from
+            agent_shift_to = agent_data.shift_to
             appointment_start_time = time.fromisoformat(existing_appointment['start_time'])
             appointment_end_time = time.fromisoformat(existing_appointment['end_time'])
 

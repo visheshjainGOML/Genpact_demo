@@ -2692,3 +2692,19 @@
 2024-05-02 14:21:04,575 - INFO - Request received: POST http://localhost:8000/customer/create
 2024-05-02 14:21:36,429 - INFO - Response code: 201
 2024-05-02 14:21:36,429 - INFO - Response code: 201
+2024-05-02 21:31:17,322 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-02 21:31:17,322 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-02 21:31:17,524 - INFO - Response code: 200
+2024-05-02 21:31:17,524 - INFO - Response code: 200
+2024-05-02 21:31:20,908 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-02 21:31:20,908 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-02 21:31:20,913 - INFO - Response code: 200
+2024-05-02 21:31:20,913 - INFO - Response code: 200
+2024-05-02 21:31:21,197 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-02 21:31:21,197 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-02 21:31:21,201 - INFO - Response code: 200
+2024-05-02 21:31:21,201 - INFO - Response code: 200
+2024-05-02 21:32:15,487 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-05-02 21:32:15,487 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-05-02 21:32:18,312 - INFO - Response code: 400
+2024-05-02 21:32:18,312 - INFO - Response code: 400
