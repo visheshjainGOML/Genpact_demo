@@ -2756,3 +2756,21 @@
 2024-05-03 00:05:22,525 - INFO - Request received: POST http://localhost:8000/appointment/create
 2024-05-03 00:05:57,274 - INFO - Response code: 200
 2024-05-03 00:05:57,274 - INFO - Response code: 200
+2024-05-03 02:21:19,297 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-03 02:21:19,297 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-03 02:21:19,304 - INFO - Response code: 200
+2024-05-03 02:21:19,304 - INFO - Response code: 200
+2024-05-03 02:21:20,468 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-03 02:21:20,468 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-03 02:21:20,677 - INFO - Response code: 200
+2024-05-03 02:21:20,677 - INFO - Response code: 200
+2024-05-03 02:21:27,883 - INFO - Request received: GET http://localhost:8000/products/
+2024-05-03 02:21:27,883 - INFO - Request received: GET http://localhost:8000/products/
+2024-05-03 02:23:26,432 - INFO - Request received: GET http://localhost:8000/products/
+2024-05-03 02:23:26,432 - INFO - Request received: GET http://localhost:8000/products/
+2024-05-03 02:23:27,682 - INFO - Response code: 200
+2024-05-03 02:23:27,682 - INFO - Response code: 200
+2024-05-03 02:24:54,422 - INFO - Request received: GET http://localhost:8000/agents
+2024-05-03 02:24:54,422 - INFO - Request received: GET http://localhost:8000/agents
+2024-05-03 02:24:55,586 - INFO - Response code: 200
+2024-05-03 02:24:55,586 - INFO - Response code: 200

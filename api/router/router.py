@@ -1444,8 +1444,8 @@ def get_appointments(customer_id: int, db: Session = Depends(get_db)):
             start_time = appointment_info['start_time']
             end_time = appointment_info['end_time']
             date = appointment_info['date']
-            start_time, date = convert_timezone(start_time, date, timezone)
-            end_time, _ = convert_timezone(end_time, date, timezone)
+            # start_time, date = convert_timezone(start_time, date, timezone)
+            # end_time, _ = convert_timezone(end_time, date, timezone)
 
             appointment_info['start_time'] = start_time
             appointment_info['end_time'] = end_time
