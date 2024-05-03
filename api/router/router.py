@@ -1908,7 +1908,7 @@ async def agent_login(agent_info:dict, db: Session = Depends(get_db)):
 @app.post('/get_logs', tags=["events"])
 async def get_event_logs(case_id:str, db: Session = Depends(get_db)):
     try:
-        results = db.query(Event).filter(Event.case_id == case_id).order_by(desc(Event.timestamp))
+        results = db.query(Event).filter(Event.case_id == case_id).order_by(Event.timestamp)
         results = format_db_response(results)
         print(results)
             
