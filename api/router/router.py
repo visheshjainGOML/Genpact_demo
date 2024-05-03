@@ -13,7 +13,7 @@ import re
 import uuid
 from urllib import response
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Literal, Optional
 from sqlalchemy import text
 from datetime import datetime, timedelta
@@ -481,7 +481,7 @@ class FeedbackSchema(BaseModel):
 
 class CustomerSchema(BaseModel):
     username: str
-    created_at: Optional[datetime] = str(datetime.now())  # type: ignore
+    created_at: str = Field(default_factory=lambda: datetime.now(datetime.UTC()).isoformat())
     email_id: str
     mobile_no: str
     product_id: int
@@ -511,7 +511,7 @@ class AppointmentSchema(BaseModel):
     customer_id: int
     call_status: str = None
     call_rating: int = None
-    created_at: Optional[datetime] = None
+    created_at: str = Field(default_factory=lambda: datetime.now(datetime.UTC()).isoformat())
     is_booked: bool = None
     appointment_description: str
     # scheduled_at: Optional[datetime]
@@ -624,6 +624,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
             state = state_match.group(1).strip() if state_match else None
             new_customer.address = address
             new_customer.state = state
+            new_customer.created_at=datetime.now()
 
             print("Address:", address)
             print("State:", state)
@@ -887,7 +888,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         new_appointment = OriginalAppointmentSchema(
             customer_id=existing_appointment['customer_id'],
             agent_id=selected_agent_id,
-            created_at=existing_appointment['created_at'],
+            created_at=datetime.now(),
             scheduled_at=datetime.strptime(
                 existing_appointment['date'] + ' ' + existing_appointment['start_time'], '%d-%m-%y %H:%M')
         )

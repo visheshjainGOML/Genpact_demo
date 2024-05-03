@@ -2756,3 +2756,19 @@
 2024-05-03 00:05:22,525 - INFO - Request received: POST http://localhost:8000/appointment/create
 2024-05-03 00:05:57,274 - INFO - Response code: 200
 2024-05-03 00:05:57,274 - INFO - Response code: 200
+2024-05-03 12:55:04,949 - INFO - Request received: POST http://127.0.0.1:8000/customer/create
+2024-05-03 12:55:04,949 - INFO - Request received: POST http://127.0.0.1:8000/customer/create
+2024-05-03 12:55:13,168 - INFO - Response code: 201
+2024-05-03 12:55:13,168 - INFO - Response code: 201
+2024-05-03 12:56:56,448 - INFO - Request received: POST http://127.0.0.1:8000/appointment/create
+2024-05-03 12:56:56,448 - INFO - Request received: POST http://127.0.0.1:8000/appointment/create
+2024-05-03 12:56:57,550 - INFO - Response code: 200
+2024-05-03 12:56:57,550 - INFO - Response code: 200
+2024-05-03 12:57:08,421 - INFO - Request received: POST http://127.0.0.1:8000/appointment/create
+2024-05-03 12:57:08,421 - INFO - Request received: POST http://127.0.0.1:8000/appointment/create
+2024-05-03 12:57:19,252 - INFO - Response code: 200
+2024-05-03 12:57:19,252 - INFO - Response code: 200
+2024-05-03 12:57:59,616 - INFO - Request received: POST http://127.0.0.1:8000/customer/create
+2024-05-03 12:57:59,616 - INFO - Request received: POST http://127.0.0.1:8000/customer/create
+2024-05-03 12:58:08,782 - INFO - Response code: 201
+2024-05-03 12:58:08,782 - INFO - Response code: 201
