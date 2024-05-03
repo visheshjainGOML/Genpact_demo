@@ -481,7 +481,6 @@ class FeedbackSchema(BaseModel):
 
 class CustomerSchema(BaseModel):
     username: str
-    created_at: str
     email_id: str
     mobile_no: str
     product_id: int
@@ -511,7 +510,6 @@ class AppointmentSchema(BaseModel):
     customer_id: int
     call_status: str = None
     call_rating: int = None
-    created_at: str
     is_booked: bool = None
     appointment_description: str
     # scheduled_at: Optional[datetime]
