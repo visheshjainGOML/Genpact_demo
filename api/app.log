@@ -2774,3 +2774,19 @@
 2024-05-03 02:24:54,422 - INFO - Request received: GET http://localhost:8000/agents
 2024-05-03 02:24:55,586 - INFO - Response code: 200
 2024-05-03 02:24:55,586 - INFO - Response code: 200
+2024-05-03 13:52:40,860 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-03 13:52:40,860 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-03 13:52:40,864 - INFO - Response code: 200
+2024-05-03 13:52:40,864 - INFO - Response code: 200
+2024-05-03 13:52:41,496 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-03 13:52:41,496 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-03 13:52:41,634 - INFO - Response code: 200
+2024-05-03 13:52:41,634 - INFO - Response code: 200
+2024-05-03 13:52:57,921 - INFO - Request received: GET http://localhost:8000/appointments/list/32
+2024-05-03 13:52:57,921 - INFO - Request received: GET http://localhost:8000/appointments/list/32
+2024-05-03 13:53:20,337 - INFO - Response code: 200
+2024-05-03 13:53:20,337 - INFO - Response code: 200
+2024-05-03 15:29:23,854 - INFO - Request received: POST http://localhost:8000/get_logs?case_id=2768d37a
+2024-05-03 15:29:23,854 - INFO - Request received: POST http://localhost:8000/get_logs?case_id=2768d37a
+2024-05-03 15:29:27,072 - INFO - Response code: 200
+2024-05-03 15:29:27,072 - INFO - Response code: 200
