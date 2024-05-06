@@ -1567,6 +1567,7 @@ FROM (
         appointments.*,
         schedule.reason,
         schedule.status,
+        schedule.customer_timezone,
         customer.username,
         customer.email_id,
         customer.mobile_no,
