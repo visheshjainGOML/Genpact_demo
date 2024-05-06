@@ -343,7 +343,24 @@ def watch_events(case_id):
 
         session.close()
 
-def convert_timezone(input_time, input_date, output_timezone):
+def get_ist_time():
+    # Get UTC time
+    utc_now = datetime.utcnow()
+    
+    # Define UTC timezone
+    utc_timezone = pytz.timezone('UTC')
+    
+    # Localize UTC time
+    utc_now = utc_timezone.localize(utc_now)
+    
+    # Convert to IST timezone
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    ist_now = utc_now.astimezone(ist_timezone)
+    ist_now_time = ist_now.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    
+    return ist_now_time
+
+def convert_from_ist_timezone(input_time, input_date, output_timezone):
     # input_time = HH:MM:SS
     # input_date = DD/MM/YYYY
     # output_timezone = +/-HH:MM (UTC)
@@ -367,6 +384,7 @@ def convert_timezone(input_time, input_date, output_timezone):
 
     # Step 2: Convert to output time zone
     output_offset_sign = output_timezone[0]
+    print("INSIDE CONVERT FROM IST: ", output_timezone)
     output_offset_hours = int(output_timezone[1:3])  # Corrected indexing
     output_offset_minutes = int(output_timezone[4:])
     
@@ -380,9 +398,45 @@ def convert_timezone(input_time, input_date, output_timezone):
     output_date_format = output_time.strftime(date_format)
     output_utc_offset = output_time.strftime("%z")
     
-    # output_time_str = f"{output_time_format} {output_date_format} {output_utc_offset}"
+    output_time_str = f"{output_time_format} {output_date_format}"
     
-    return output_time_format, output_date_format
+    return output_time_str
+
+def convert_to_ist_timezone(input_time, input_date, input_timezone):
+    # input_time = HH:MM:SS
+    # input_date = DD/MM/YYYY
+    # input_timezone = +/-HH:MM (UTC)
+    
+    # Convert input time and date to datetime object in input timezone
+    time_format = "%H:%M"
+    date_format = "%d-%m-%y"
+
+    input_datetime_str = f"{input_date} {input_time}"
+    input_datetime = datetime.strptime(input_datetime_str, f"{date_format} {time_format}")
+    
+    # Step 1: Convert input time to UTC
+    input_offset_sign = input_timezone[0]
+    input_offset_hours = int(input_timezone[1:3])
+    input_offset_minutes = int(input_timezone[4:])
+
+    if input_offset_sign == '-':
+        input_time = input_datetime + timedelta(hours=input_offset_hours, minutes=input_offset_minutes)
+    elif input_offset_sign == '+':
+        input_time = input_datetime - timedelta(hours=input_offset_hours, minutes=input_offset_minutes)
+    
+    # Step 2: Convert UTC time to IST
+    ist_offset_hours = 5
+    ist_offset_minutes = 30
+    ist_time = input_time + timedelta(hours=ist_offset_hours, minutes=ist_offset_minutes)
+    
+    # Format output time and date
+    output_time_format = ist_time.strftime(time_format)
+    output_date_format = ist_time.strftime(date_format)
+    output_ist_offset = "+05:30"  # IST offset
+
+    output_time_str = f"{output_time_format} {output_date_format}"
+    
+    return output_time_str
 
 
 async def row2dict(row):
@@ -622,7 +676,9 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
             state = state_match.group(1).strip() if state_match else None
             new_customer.address = address
             new_customer.state = state
-            new_customer.created_at=datetime.now()
+            time = get_ist_time()
+            print("$%$%$%$%$%$%$%$%$%$%$%$%$%$%$", time)
+            new_customer.created_at=get_ist_time()
 
             print("Address:", address)
             print("State:", state)
@@ -816,6 +872,14 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
     try:
         print("INSIDE CREATE APPOINTMENT: ")
         existing_appointment = appointment.dict()
+        existing_appointment['start_time'] = convert_to_ist_timezone(existing_appointment['start_time'], existing_appointment['date'], existing_appointment['customer_timezone'])
+        print("start-time", existing_appointment['start_time'])
+        existing_appointment['end_time'] = convert_to_ist_timezone(existing_appointment['end_time'], existing_appointment['date'], existing_appointment['customer_timezone'])
+        existing_appointment['start_time'] = existing_appointment['start_time'].split(' ')
+        existing_appointment['date'] = existing_appointment['start_time'][1]
+        existing_appointment['start_time'] = existing_appointment['start_time'][0]
+        existing_appointment['end_time'] = existing_appointment['end_time'].split(' ')[0]
+        print("EXISTING APPOINTMENT:*****************", existing_appointment)
 
         # Check if the user has a pending appointment
         query = text("""SELECT COUNT(*) AS num_columns FROM genpact.agent_schedule WHERE status = 'booked' AND customer_id = :customer_id""")
@@ -1239,7 +1303,17 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
     # Create session
     try:
         # Execute SQL query to delete appointment
+        apt_data = db.query(AgentSchedule).filter(AgentSchedule.appointment_id == appointment_id).first()
+        customer_timezone = apt_data.customer_timezone
+        print("CUSTOMER TIMEZONE IN UPDATE APPOINTMENT API: ", customer_timezone)
         data = data.dict()
+        data['start_time'] = convert_to_ist_timezone(data['start_time'], data['date'], customer_timezone)
+        print("start-time", data['start_time'])
+        data['end_time'] = convert_to_ist_timezone(data['end_time'], data['date'], customer_timezone)
+        data['start_time'] = data['start_time'].split(' ')
+        data['date'] = data['start_time'][1]
+        data['start_time'] = data['start_time'][0]
+        data['end_time'] = data['end_time'].split(' ')[0]
         query = text("""UPDATE genpact.agent_schedule SET start_time = :start_time, end_time =:end_time, date = :date, reason=:reason WHERE agent_schedule.appointment_id = :appointment_id""")
         start_time_obj = time.fromisoformat(data['start_time'])
         end_time_obj = time.fromisoformat(data['end_time'])
@@ -1443,8 +1517,14 @@ def get_appointments(customer_id: int, db: Session = Depends(get_db)):
             start_time = appointment_info['start_time']
             end_time = appointment_info['end_time']
             date = appointment_info['date']
-            # start_time, date = convert_timezone(start_time, date, timezone)
-            # end_time, _ = convert_timezone(end_time, date, timezone)
+            start_time = convert_from_ist_timezone(start_time, date, timezone)
+            print("START_TIME:", start_time)
+            end_time = convert_from_ist_timezone(end_time, date, timezone)
+            print("END_TIME:", end_time)
+            start_time = start_time.split(' ')
+            date = start_time[1]
+            start_time = start_time[0]
+            end_time = end_time.split(' ')[0]
 
             appointment_info['start_time'] = start_time
             appointment_info['end_time'] = end_time
@@ -1494,6 +1574,7 @@ def get_agent_appointments(agent_id: int, db: Session = Depends(get_db)):
     schedule.start_time,
     schedule.end_time,
     schedule.date,
+    schedule.customer_timezone,
     schedule.appointment_description,
     latest_event.event_status,
     latest_event.timestamp AS "last_updated_date",
@@ -1533,11 +1614,18 @@ ORDER BY
 
     # Execute the query
     result = db.execute(query, {"agent_id": agent_id})
-    columns = result.keys()
+    appointments_with_schedule = []
 
-    # Convert each row into a dictionary with column names as keys
-    appointments_with_schedule = [
-        {col: val for col, val in zip(columns, row)} for row in result.fetchall()]
+    columns = result.keys()
+    rows = result.fetchall()
+    for row in rows:
+        appointment = {col: val for col, val in zip(columns, row)}
+        print("APPOINTMENT:", appointment)
+        appointment['start_time'] = convert_from_ist_timezone(appointment['start_time'], appointment['date'], appointment['customer_timezone'])
+        appointment['end_time'] = convert_from_ist_timezone(appointment['end_time'], appointment['date'],  appointment['customer_timezone'])
+        appointment['start_time'] = appointment['start_time'].split(' ')[0]
+        appointment['end_time'] = appointment['end_time'].split(' ')[0]
+        appointments_with_schedule.append(appointment)
 
     print(appointments_with_schedule, type(appointments_with_schedule))
     # Close the connection
@@ -1953,9 +2041,18 @@ async def send_reminder(case_id: str, reason: str, db: Session = Depends(get_db)
         
         if not slot_query:
             return ResponseModel(message="No slot found.", payload={"data": []})
-        
-        start_time = slot_query.start_time.strftime('%H:%M')
-        end_time = slot_query.end_time.strftime('%H:%M')
+        start_time = slot_query.start_time
+        date = slot_query.date
+        customer_timezone = slot_query.customer_timezone
+        start_time = convert_from_ist_timezone(start_time, date, customer_timezone)
+        end_time = slot_query.end_time
+        end_time = convert_from_ist_timezone(end_time, date, customer_timezone)
+        print("START_TIME in send reminder: ", start_time)
+        print("END_TIME in send reminder: ", end_time)
+        start_time = start_time.split(' ')
+        date = start_time[1]
+        start_time = start_time[0]
+        end_time = end_time.split(' ')[0]
         encrypted_case_id = encrypt_data(case_id, secret_key)
 
         # Call count_event_status function to get the count
@@ -2371,6 +2468,7 @@ FROM
             cust.case_id AS "case_id",
             schedule.date AS "appointment_date",
             schedule.start_time AS "start_time",
+            schedule.customer_timezone AS "customer_timezone",
             schedule.end_time AS "end_time",
             cust.username AS "username",
             cust.email_id AS "email_id",
@@ -2404,11 +2502,19 @@ ORDER BY
     print("Appointment Query")
     # Execute the query
     result = db.execute(query)
-    columns = result.keys()
+    appointments_with_schedule = []
 
-    # Convert each row into a dictionary with column names as keys
-    appointments_with_schedule = [
-        {col: val for col, val in zip(columns, row)} for row in result.fetchall()]
+    columns = result.keys()
+    rows = result.fetchall()
+    for row in rows:
+        appointment = {col: val for col, val in zip(columns, row)}
+        print("APPOINTMENT:", appointment)
+        if appointment['start_time'] and appointment['end_time'] and appointment['appointment_date'] and appointment['customer_timezone']:
+            appointment['start_time'] = convert_from_ist_timezone(appointment['start_time'], appointment['appointment_date'], appointment['customer_timezone'])
+            appointment['end_time'] = convert_from_ist_timezone(appointment['end_time'], appointment['appointment_date'],  appointment['customer_timezone'])
+            appointment['start_time'] = appointment['start_time'].split(' ')[0]
+            appointment['end_time'] = appointment['end_time'].split(' ')[0]
+            appointments_with_schedule.append(appointment)
 
     print(appointments_with_schedule, type(appointments_with_schedule))
     # Close the connection
@@ -2483,7 +2589,7 @@ def export_appointments_csv(db: Session = Depends(get_db)):
 def export_agents_csv(db: Session = Depends(get_db)):
     try:
         # Fetch only the specified columns
-        agents = db.query(
+        result = db.query(
             AgentSchedule.agent_id,
             AgentSchedule.date,
             AgentSchedule.start_time,
@@ -2496,28 +2602,52 @@ def export_agents_csv(db: Session = Depends(get_db)):
             AgentSchedule.appointment_description
         ).all()
 
+        appointments_with_schedule = []
+
+        # Manually specify the column names
+        headers = [
+            "agent_id",
+            "date",
+            "start_time",
+            "end_time",
+            "status",
+            "customer_id",
+            "appointment_id",
+            "reason",
+            "customer_timezone",
+            "appointment_description"
+        ]
+        for row in result:
+            appointment = {col: val for col, val in zip(headers, row)}  # Use headers instead of result.keys()
+            appointment['start_time'] = convert_from_ist_timezone(appointment['start_time'], appointment['date'], appointment['customer_timezone'])
+            appointment['end_time'] = convert_from_ist_timezone(appointment['end_time'], appointment['date'],  appointment['customer_timezone'])
+            appointment['start_time'] = appointment['start_time'].split(' ')[0]
+            appointment['end_time'] = appointment['end_time'].split(' ')[0]
+            appointments_with_schedule.append(appointment)
+
         # Create a temporary file to store the CSV
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as temp_file:
             csv_writer = csv.writer(temp_file)
             
             # Write the headers
-            headers = [
-                "agent_id",
-                "date",
-                "start_time",
-                "end_time",
-                "status",
-                "customer_id",
-                "appointment_id",
-                "reason",
-                "customer_timezone",
-                "appointment_description"
-            ]
             csv_writer.writerow(headers)
             
             # Write the data rows
-            for agent in agents:
-                csv_writer.writerow(agent)
+            for agent in appointments_with_schedule:
+                # Create a list of values for each row using the specified order of columns
+                row_data = [
+                    agent["agent_id"],
+                    agent["date"],
+                    agent["start_time"],
+                    agent["end_time"],
+                    agent["status"],
+                    agent["customer_id"],
+                    agent["appointment_id"],
+                    agent["reason"],
+                    agent["customer_timezone"],
+                    agent["appointment_description"]
+                ]
+                csv_writer.writerow(row_data)
             
             temp_file.flush()
 
@@ -2526,6 +2656,7 @@ def export_agents_csv(db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 @app.post("/events/report", tags=['report'])
