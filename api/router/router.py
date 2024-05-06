@@ -692,7 +692,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
                 "email":"",
                 "details":f"Case Creation Failed"
             },
-            'timestamp': str(datetime.now()),
+            'timestamp': str(get_ist_time()),
             'case_id': case_id
         }
         event1 = Event(**event_data)
@@ -735,7 +735,7 @@ Warm regards""")
                 "email":"",
                 "details":f"Appointment Initiation Failed"
             },
-            'timestamp': str(datetime.now()),
+            'timestamp': str(get_ist_time()),
             'case_id': case_id
         }
         try:
@@ -762,7 +762,7 @@ Subject: {new_customer.email_subject}
 """,
 "details": f"New Email has been received from {new_customer.email_id} at {str(datetime.now())}"
             },
-            'timestamp': str(datetime.now()),
+            'timestamp': str(get_ist_time()),
             'case_id': case_id
         }
 
@@ -773,7 +773,7 @@ Subject: {new_customer.email_subject}
                 "email":"",
                 "details":f"A new Case has been created"
             },
-            'timestamp': str(datetime.now()),
+            'timestamp': str(get_ist_time()),
             'case_id': case_id
         }
 
@@ -801,7 +801,7 @@ Genpact Team
                 """,
                 "details": f"Appointment notification successfully sent to {new_customer.email_id} at {str(datetime.now())}"
             },
-            "timestamp": str(datetime.now()),
+            "timestamp": str(get_ist_time()),
             "case_id": case_id,
             "event_status": "Appointment Notification Sent"
         }
@@ -812,7 +812,7 @@ Genpact Team
                 "email": "",
                 "details": f"Awaiting customer response for Case ID: {case_id} at {str(datetime.now())}"
             },
-            "timestamp": str(datetime.now()),
+            "timestamp": str(get_ist_time()),
             "case_id": case_id,
             "event_status": "Awaiting Customer Response"
         }
@@ -826,12 +826,12 @@ Genpact Team
         db.add(event4)
         db.commit()
         db.refresh(new_customer)
-        start_time = datetime.now()
+        start_time = get_ist_time()
         scheduler = BackgroundScheduler()
         scheduler.add_job(watch_events,  "date", run_date=start_time, args=[case_id])
         scheduler.start()
 
-        start_time = datetime.now()
+        start_time = get_ist_time()
 
 
         # await send_email(email, user_id, product_id)
@@ -1048,7 +1048,7 @@ Warm regards""")
                 "end_time":existing_appointment['end_time'],
                 'date':existing_appointment['date']
             },
-            "timestamp": str(datetime.now()),
+            "timestamp": str(get_ist_time()),
             "case_id": case_id,
             "event_status": "Appointment Confirmation Received"
         }
@@ -1062,7 +1062,7 @@ Warm regards""")
                 "end_time":existing_appointment['end_time'],
                 'date':existing_appointment['date']
             },
-            "timestamp": str(datetime.now()),
+            "timestamp": str(get_ist_time()),
             "case_id": case_id,
             "event_status": "Ready For Interview"
         }
@@ -1272,7 +1272,7 @@ Genpact Team
 """,
                 "details": f"Appointment for Case ID {case_id} cancelled due to {reason}"
             },
-            "timestamp": str(datetime.now()),
+            "timestamp": str(get_ist_time()),
             "case_id": case_id,
             "event_status": "Appointment Cancelled"
         }
@@ -1370,7 +1370,7 @@ Genpact Team
                 # "end_time":data['end_time'],
                 # 'date':data['date']
             },
-            "timestamp": str(datetime.now()),
+            "timestamp": str(get_ist_time()),
             "case_id": case_id,
             "event_status": "Appointment Rescheduled"
         }
@@ -1380,7 +1380,7 @@ Genpact Team
                 "email": "",
                 "details": f"The appointment with Case ID: {case_id} is ready for interview at {str(datetime.now())}",
             },
-            "timestamp": str(datetime.now()),
+            "timestamp": str(get_ist_time()),
             "case_id": case_id,
             "event_status": "Ready For Interview"
         }
@@ -2085,7 +2085,7 @@ Genpact Team
                 "details":f"Reminder Number : {reminder_count}",
                 "reminder_reason":reason
             },
-            'timestamp': str(datetime.now()),
+            'timestamp': str(get_ist_time()),
             'case_id': case_id
         }
         
@@ -2135,7 +2135,7 @@ async def mark_appointment_as_completed(case_id: str, status_expected: str, reas
 The case with Case ID: {case_id} has been successfully closed at {str(datetime.now())}.
 Reason: {reason}"""
                 },
-                "timestamp": str(datetime.now()),
+                "timestamp": str(get_ist_time()),
                 "case_id": case_id,
                 "event_status": status_expected
             }
@@ -2171,7 +2171,7 @@ Reason: {reason}"""
 The case with Case ID: {case_id} has been successfully submitted at {str(datetime.now())}.
 Reason: {reason}"""
                 },
-                "timestamp": str(datetime.now()),
+                "timestamp": str(get_ist_time()),
                 "case_id": case_id,
                 "event_status": status_expected
             }
@@ -2207,7 +2207,7 @@ Reason: {reason}"""
 The case with Case ID: {case_id} has been marked as Awaiting Customer Response at {str(datetime.now())}.
 Reason: {reason}"""
                 },
-                "timestamp": str(datetime.now()),
+                "timestamp": str(get_ist_time()),
                 "case_id": case_id,
                 "event_status": status_expected
             }
@@ -2419,7 +2419,7 @@ https://d2dwd3ks06zig3.cloudfront.net/agent/appointmentDetails?appointment_id={n
                     "end_time": end_time_str,
                     'date': str(appointment_record.scheduled_at.date())
                 },
-                "timestamp": str(datetime.now()),
+                "timestamp": str(get_ist_time()),
                 "case_id": case_id,
                 "event_status": "Agent Changed"
             },
@@ -2432,7 +2432,7 @@ https://d2dwd3ks06zig3.cloudfront.net/agent/appointmentDetails?appointment_id={n
                     "end_time": end_time_str,
                     'date': str(new_appointment.scheduled_at.date())
                 },
-                "timestamp": str(datetime.now()),
+                "timestamp": str(get_ist_time()),
                 "case_id": case_id,
                 "event_status": "Appointment Updated"
             }
@@ -2925,11 +2925,11 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                         print("Reminder time:", reminder_time.time())
                         print(datetime.now())
 
-                        time_difference = (reminder_time - datetime.now()).total_seconds()
+                        time_difference = (reminder_time - get_ist_time()).total_seconds()
                         reminder_count += 1
 
                         while time_difference > 0:
-                            current_time = datetime.now()
+                            current_time = get_ist_time()
                             time_difference = (reminder_time - current_time).total_seconds()
 
 
@@ -2989,7 +2989,7 @@ Genpact Team
                                     "email": "",
                                     "details": f"Reminder Number : {reminder_count}"
                                 },
-                                'timestamp': str(datetime.now()),
+                                'timestamp': str(get_ist_time()),
                                 'case_id': case_id
                             }
 
@@ -3079,7 +3079,7 @@ async def create_customer(customer: AgentAppointmentGenerator, db: Session = Dep
                 "email":"",
                 "details":f"Agent Triggered Generate Appointment Scheduling Link to {email_id} at {str(datetime.now())}"
             },
-            'timestamp': str(datetime.now()),
+            'timestamp': str(get_ist_time()),
             'case_id': case_id
         }
         event1 = Event(**event_data)
