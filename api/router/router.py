@@ -707,7 +707,7 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
         template_data = db.query(Template).filter(Template.template_name == "Scheduling", Template.template_type == "Email").order_by(desc(Template.id)).first()
         content = template_data.content
         try:
-            send_email("Someshwar.Garud@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
+            send_email("prashant.kambi@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Hi {new_customer.username}
 {content}
                    
@@ -720,7 +720,7 @@ Warm regards
 
 Genpact Team """)
             
-            send_email("Someshwar.Garud@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f""" 
+            send_email("prashant.kambi@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f""" 
 Hi, a new case has been created for the following details:
 Name: {new_customer.username}
 Email ID: {new_customer.email_id}
@@ -753,7 +753,7 @@ Warm regards""")
             'event_status': 'New Email Received',
             'event_name': 'A new email has been received',
             'event_details': {"email":f"""
-From: Someshwar.Garud@genpact.com
+From: prashant.kambi@genpact.com
 To: {new_customer.email_id}
 
 Subject: {new_customer.email_subject}
@@ -781,7 +781,7 @@ Subject: {new_customer.email_subject}
             "event_name": "Appointment notification is sent",
             "event_details": {
                 "email": f"""
-From: Someshwar.Garud@genpact.com
+From: prashant.kambi@genpact.com
 To: {new_customer.email_id}
 
 Subject: Schedule Your Appointment with Us - Case ID: {case_id}
@@ -997,7 +997,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         template_data = db.query(Template).filter(Template.template_name == "Confirmation", Template.template_type == "Email").order_by(desc(Template.id)).first()
         content = template_data.content
 
-        send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
+        send_email("prashant.kambi@genpact.com", Customer_email, f"Confirmation of Your Scheduled Appointment - Case ID: {case_id}",f"""
 Hi {customer_data.username}
 {content}
 To view the details of your appointment, please click the following link: https://d2dwd3ks06zig3.cloudfront.net/customer/bookedAppointment?customer_id={existing_appointment['customer_id']}&product_id=1&case_id={encrypted_case_id}
@@ -1014,7 +1014,7 @@ Genpact Team
         except:
             pass
 
-        send_email("Someshwar.Garud@genpact.com", agent_email, f"New Appointment Booked - Case ID: {case_id}", f""" 
+        send_email("prashant.kambi@genpact.com", agent_email, f"New Appointment Booked - Case ID: {case_id}", f""" 
 Hi {agent_data.full_name}
 We are pleased to inform you that a new appointment has been booked. Please log in to your agent portal to view the details and prepare for the upcoming meeting.
 Quick Reminder:
@@ -1028,7 +1028,7 @@ Best Regards,
 Genpact Team
 """,start_time_obj,end_time_obj,date_obj)
         
-        send_email("Someshwar.Garud@genpact.com", email_author, f"Appointment creation acknowledgment - Case ID: {case_id}", f"""
+        send_email("prashant.kambi@genpact.com", email_author, f"Appointment creation acknowledgment - Case ID: {case_id}", f"""
 Hi, a new appointmnet has been created for the following details:
 Customer Name: {customer_data.username}
 Customer Email ID: {customer_data.email_id}
@@ -1210,7 +1210,7 @@ async def cancel_appointment_route(appointment_id: int,reason:str, db: Session =
             template_data = db.query(Template).filter(Template.template_name == "Cancellation", Template.template_type == "Email").order_by(desc(Template.id)).first()
             content = template_data.content
 
-            send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}", f"""
+            send_email("prashant.kambi@genpact.com", Customer_email, f"Confirmation of Your Appointment Cancellation - Case ID: {case_id}", f"""
 Hi {customer_data.username}
 {content}
 """)
@@ -1219,11 +1219,11 @@ Hi {customer_data.username}
             except:
                 pass
             
-            send_email("Someshwar.Garud@genpact.com", agent_email, f"appointment Cancelled - Case ID: {case_id}", f"""
+            send_email("prashant.kambi@genpact.com", agent_email, f"appointment Cancelled - Case ID: {case_id}", f"""
 Case ID: {agent_data.full_name}
 Hello, your scheduled appointment has been cancelled""")
             
-            send_email("Someshwar.Garud@genpact.com", email_author, f"Appointment cancellation acknowledgement - Case ID: {case_id}", f"""
+            send_email("prashant.kambi@genpact.com", email_author, f"Appointment cancellation acknowledgement - Case ID: {case_id}", f"""
 Hi, the appointment has been cancelled for the following details:
 Customer Name: {customer_data.username}
 Customer Email ID: {customer_data.email_id}
@@ -1255,7 +1255,7 @@ WHERE genpact.appointment.id = :appointment_id;""")
             "event_name": "Appointment has been cancelled",
             "event_details": {
                 "email": f"""
-From: Someshwar.Garud@genpact.com
+From: prashant.kambi@genpact.com
 To: {Customer_email}
 
 Subject: Confirmation of Your Appointment Cancellation - Case ID: {case_id}
@@ -1351,7 +1351,7 @@ async def cancel_appointment_route(appointment_id: int, data: UpdateAppointment,
             "event_name": "Appointment has been rescheduled",
             "event_details": {
                 "email": f"""
-From: Someshwar.Garud@genpact.com
+From: prashant.kambi@genpact.com
 To: {Customer_email}
 
 Subject: Confirmation of Your Rescheduled Appointment - Case ID: {case_id}
@@ -1394,7 +1394,7 @@ Genpact Team
         template_data = db.query(Template).filter(Template.template_name == "Rescheduling", Template.template_type == "Email").order_by(desc(Template.id)).first()
         content = template_data.content
 
-        send_email("Someshwar.Garud@genpact.com", Customer_email, f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}", f"""
+        send_email("prashant.kambi@genpact.com", Customer_email, f"Confirmation of Your Rescheduled Appointment - Case ID: {case_id}", f"""
 Hi {customer_data.username}
 Please click the following link: https://d2dwd3ks06zig3.cloudfront.net/customer/bookedAppointment?customer_id={customer_id}&product_id=1&case_id={encrypted_case_id}
 {content}
@@ -1405,11 +1405,11 @@ Please click the following link: https://d2dwd3ks06zig3.cloudfront.net/customer/
         except: 
             pass
         
-        send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Rescheduled - Case ID: {case_id}", f"""
+        send_email("prashant.kambi@genpact.com", agent_email, f"Appointment Rescheduled - Case ID: {case_id}", f"""
                    Hi {agent_data.full_name}
                    The booked appointment has been rescheduled""",start_time_obj,end_time_obj,date_obj)
         
-        send_email("Someshwar.Garud@genpact.com", customer_data.email_author, f"Appointment updation acknowledgement - Case ID: {case_id}", f"""
+        send_email("prashant.kambi@genpact.com", customer_data.email_author, f"Appointment updation acknowledgement - Case ID: {case_id}", f"""
 Hi, the appointment has been rescheduled for the following details:
 
 Customer Name: {customer_data.username}
@@ -2062,7 +2062,7 @@ async def send_reminder(case_id: str, reason: str, db: Session = Depends(get_db)
         template_data = db.query(Template).filter(Template.template_name == "Reminder", Template.template_type == "Email").order_by(desc(Template.id)).first()
         content = template_data.content
         
-        send_email("Someshwar.Garud@genpact.com", ", ".join({email_id}), f"Appointment Reminder - Case ID: {case_id}", f"""
+        send_email("prashant.kambi@genpact.com", ", ".join({email_id}), f"Appointment Reminder - Case ID: {case_id}", f"""
 Hi {customer_name},
 {content}
 Your appointment is scheduled for {appointment_date} from {start_time} to {end_time}. Please make sure to attend your appointment on time.
@@ -2388,7 +2388,7 @@ async def change_appointment_agent(appointment_id: int, new_agent_id: int, reaso
         encrypted_case_id = encrypt_data(case_id, secret_key)
 
         # Sending emails
-        send_email("Someshwar.Garud@genpact.com", Customer_email, f"Appointment Agent Changed - Case ID: {case_id}",
+        send_email("prashant.kambi@genpact.com", Customer_email, f"Appointment Agent Changed - Case ID: {case_id}",
                    f""" 
 Hi {customer_data.username}
 Your appointment agent has been changed. The new agent is now responsible for your case. 
@@ -2400,7 +2400,7 @@ https://d2dwd3ks06zig3.cloudfront.net/customer/bookedAppointment?customer_id={cu
         except:
             pass
 
-        send_email("Someshwar.Garud@genpact.com", agent_email, f"Appointment Agent Changed - Case ID: {case_id}",
+        send_email("prashant.kambi@genpact.com", agent_email, f"Appointment Agent Changed - Case ID: {case_id}",
                    f""" 
 Hi {agent_data.full_name}
 You have been assigned as the new agent for the appointment. 
@@ -2955,7 +2955,7 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                         # print("appointment_date:", appointment_date)
 
 
-                        # send_email("Someshwar.Garud@genpact.com", ", ".join({email_id}),
+                        # send_email("prashant.kambi@genpact.com", ", ".join({email_id}),
                         #            f"Appointment Reminder - Case ID: {case_id}", f"""
                         # Hi {customer_name},
                         #
@@ -2970,7 +2970,7 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                                                        Event.case_id == case_id).first()
                         print(confirm_appt)
                         if not confirm_appt:
-                            send_email("Someshwar.Garud@genpact.com", ", ".join({email_id}),
+                            send_email("prashant.kambi@genpact.com", ", ".join({email_id}),
                                        f"Appointment Reminder - Case ID: {case_id}", f"""
 Hi {customer_name},
 
