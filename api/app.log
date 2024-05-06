@@ -2992,3 +2992,7 @@
 2024-05-06 17:09:11,871 - INFO - Request received: POST http://localhost:8000/agents/report
 2024-05-06 17:09:13,754 - INFO - Response code: 200
 2024-05-06 17:09:13,754 - INFO - Response code: 200
+2024-05-06 18:22:15,769 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-06 18:22:15,769 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-06 18:22:48,025 - INFO - Response code: 201
+2024-05-06 18:22:48,025 - INFO - Response code: 201

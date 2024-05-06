@@ -826,12 +826,12 @@ Genpact Team
         db.add(event4)
         db.commit()
         db.refresh(new_customer)
-        start_time = get_ist_time()
+        start_time = datetime.now()
         scheduler = BackgroundScheduler()
         scheduler.add_job(watch_events,  "date", run_date=start_time, args=[case_id])
         scheduler.start()
 
-        start_time = get_ist_time()
+        start_time = datetime.now()
 
 
         # await send_email(email, user_id, product_id)
@@ -2925,11 +2925,11 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                         print("Reminder time:", reminder_time.time())
                         print(datetime.now())
 
-                        time_difference = (reminder_time - get_ist_time()).total_seconds()
+                        time_difference = (reminder_time - datetime.now()).total_seconds()
                         reminder_count += 1
 
                         while time_difference > 0:
-                            current_time = get_ist_time()
+                            current_time = datetime.now()
                             time_difference = (reminder_time - current_time).total_seconds()
 
 
