@@ -1561,55 +1561,56 @@ def get_agent_appointments(agent_id: int, db: Session = Depends(get_db)):
 
     # Execute raw SQL query
     query = text("""
-        SELECT
-    appointments.*,
-    schedule.reason,
-    schedule.status,
-    customer.username,
-    customer.email_id,
-    customer.mobile_no,
-    customer.address,
-    customer.state,
-    customer.case_id,
-    schedule.start_time,
-    schedule.end_time,
-    schedule.date,
-    schedule.customer_timezone,
-    schedule.appointment_description,
-    latest_event.event_status,
-    latest_event.timestamp AS "last_updated_date",
-    customer.created_at
-FROM
-    genpact.appointment AS appointments
-JOIN
-    genpact.customer ON appointments.customer_id = customer.id
-JOIN
-    genpact.agent_schedule AS schedule ON appointments.id = schedule.appointment_id
-JOIN 
-    (
-        SELECT
-            e.case_id,
-            e.event_status,
-            e.timestamp,
-            e.created_at
-        FROM
-            genpact.event AS e
-        JOIN
-            (
-                SELECT
-                    case_id,
-                    MAX(timestamp) AS latest_timestamp
-                FROM
-                    genpact.event
-                GROUP BY
-                    case_id
-            ) AS latest ON e.case_id = latest.case_id AND e.timestamp = latest.latest_timestamp
-    ) AS latest_event ON customer.case_id = latest_event.case_id
-WHERE
-    appointments.agent_id = :agent_id
-    AND schedule.status = 'booked'
-ORDER BY
-    schedule.date DESC;
+        SELECT *
+FROM (
+    SELECT
+        appointments.*,
+        schedule.reason,
+        schedule.status,
+        customer.username,
+        customer.email_id,
+        customer.mobile_no,
+        customer.address,
+        customer.state,
+        customer.case_id,
+        schedule.start_time,
+        schedule.end_time,
+        schedule.date,
+        schedule.appointment_description,
+        latest_event.event_status,
+        latest_event.last_updated_date,
+        customer.created_at,
+        ROW_NUMBER() OVER (PARTITION BY customer.case_id ORDER BY latest_event.last_updated_date DESC) AS row_num
+    FROM
+        genpact.appointment AS appointments
+    JOIN
+        genpact.customer ON appointments.customer_id = customer.id
+    JOIN
+        genpact.agent_schedule AS schedule ON appointments.id = schedule.appointment_id
+    JOIN 
+        (
+            SELECT
+                e.case_id,
+                e.event_status,
+                e.timestamp AS last_updated_date
+            FROM
+                genpact.event AS e
+            JOIN
+                (
+                    SELECT
+                        case_id,
+                        MAX(timestamp) AS latest_timestamp
+                    FROM
+                        genpact.event
+                    GROUP BY
+                        case_id
+                ) AS latest ON e.case_id = latest.case_id AND e.timestamp = latest.latest_timestamp
+        ) AS latest_event ON customer.case_id = latest_event.case_id
+    WHERE
+        appointments.agent_id = :agent_id
+        AND schedule.status = 'booked'
+) AS subquery
+WHERE row_num = 1;
     """)
 
     # Execute the query
