@@ -3115,3 +3115,16 @@ def check_values_in_dictionary(unique_case_id:str, db: Session = Depends(get_db)
     except Exception as e:
         print(f"An error occurred: {e}")
         return {"result": False, "message": "An error occurred"}  # Include the 'message' field
+    
+
+@app.post('/check_submitted/question_answer', status_code=201)
+def question_answer_create(case_id: str, db: Session = Depends(get_db)):
+    try:
+        # Check if the case_id exists in the QuestionAnswer table
+        query = db.query(QuestionAnswer).filter(QuestionAnswer.case_id == case_id).first()
+        if query:
+            return True
+        else:
+            return False
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Unable to check case_id: {e}")

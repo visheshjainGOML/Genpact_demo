@@ -3036,3 +3036,15 @@
 2024-05-07 12:09:25,221 - INFO - Request received: POST http://localhost:8000/agents/login
 2024-05-07 12:09:28,640 - INFO - Response code: 200
 2024-05-07 12:09:28,640 - INFO - Response code: 200
+2024-05-07 15:44:32,511 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-07 15:44:32,511 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-07 15:44:32,525 - INFO - Response code: 200
+2024-05-07 15:44:32,525 - INFO - Response code: 200
+2024-05-07 15:44:32,776 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-07 15:44:32,776 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-07 15:44:32,855 - INFO - Response code: 200
+2024-05-07 15:44:32,855 - INFO - Response code: 200
+2024-05-07 15:45:38,398 - INFO - Request received: POST http://localhost:8000/check_submitted/question_answer?case_id=acd69e01
+2024-05-07 15:45:38,398 - INFO - Request received: POST http://localhost:8000/check_submitted/question_answer?case_id=acd69e01
+2024-05-07 15:45:39,419 - INFO - Response code: 400
+2024-05-07 15:45:39,419 - INFO - Response code: 400
