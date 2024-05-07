@@ -706,19 +706,15 @@ async def create_customer(customer: CustomerSchema, db: Session = Depends(get_db
 
         template_data = db.query(Template).filter(Template.template_name == "Scheduling", Template.template_type == "Email").order_by(desc(Template.id)).first()
         content = template_data.content
-        try:
+        content = template_data.content
+        content = content.replace("{insert_apt_link}", f"https://d2dwd3ks06zig3.cloudfront.net/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}")
+        
+        try:   
             send_email("prashant.kambi@genpact.com", new_customer.email_id, f"Schedule Your Appointment with Us - Case ID: {case_id}", f"""
 Hi {new_customer.username}
+
 {content}
-                   
-To ensure we can provide you with personalized attention, please use the following link to schedule an appointment at your convenience:
-https://d2dwd3ks06zig3.cloudfront.net/customer/bookAppointment?customer_id={customer_id}&product_id={new_customer.product_id}&case_id={encrypted_case_id}
- 
-We look forward to meeting you and are here to assist you every step of the way.
-
-Warm regards
-
-Genpact Team """)
+""")
             
             send_email("prashant.kambi@genpact.com", email_author, f"New Case Creation Acknowledgement - Case ID: {case_id}", f""" 
 Hi, a new case has been created for the following details:
@@ -2063,17 +2059,20 @@ async def send_reminder(case_id: str, reason: str, db: Session = Depends(get_db)
         print("REMINDER COUNT:::::::::::::::::::::::", reminder_count)
         template_data = db.query(Template).filter(Template.template_name == "Reminder", Template.template_type == "Email").order_by(desc(Template.id)).first()
         content = template_data.content
+        content = content.replace("{insert_apt_link}", f"https://d2dwd3ks06zig3.cloudfront.net/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}")
         
         send_email("prashant.kambi@genpact.com", ", ".join({email_id}), f"Appointment Reminder - Case ID: {case_id}", f"""
-Hi {customer_name},
+Hi {customer_name}
+
 {content}
-Your appointment is scheduled for {appointment_date} from {start_time} to {end_time}. Please make sure to attend your appointment on time.
-Please use the below link for scheduling the appointment:
-https://d2dwd3ks06zig3.cloudfront.net/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}
+
+Details:
+Appointment Date: {appointment_date}
+Slot time: {start_time} to {end_time}
 
 Best Regards,
 Genpact Team
-                   """)
+""")
         try:
             send_sms(str(customer.mobile_no), f"""Appointment Reminder - Case ID: {case_id}.""")
         except:
@@ -2968,6 +2967,7 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                         #                    """)
                         template_data = db.query(Template).filter(Template.template_name == "Reminder", Template.template_type == "Email").order_by(desc(Template.id)).first()
                         content = template_data.content
+                        content = content.replace("{insert_apt_link}", f"https://d2dwd3ks06zig3.cloudfront.net/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}")
                         confirm_appt = db.query(Event).filter(Event.event_status == 'Appointment Confirmation Received',
                                                        Event.case_id == case_id).first()
                         print(confirm_appt)
@@ -2977,11 +2977,6 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
 Hi {customer_name},
 
 {content}
-
-Please use the below link for scheduling the appointment:
-https://d2dwd3ks06zig3.cloudfront.net/customer/bookAppointment?customer_id={customer_id}&product_id={product_id}&case_id={encrypted_case_id}
-Best Regards,
-Genpact Team
 """)
 
                             event_data = {

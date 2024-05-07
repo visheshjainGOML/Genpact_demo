@@ -3048,3 +3048,35 @@
 2024-05-07 15:45:38,398 - INFO - Request received: POST http://localhost:8000/check_submitted/question_answer?case_id=acd69e01
 2024-05-07 15:45:39,419 - INFO - Response code: 400
 2024-05-07 15:45:39,419 - INFO - Response code: 400
+2024-05-07 15:48:40,842 - INFO - Request received: POST http://localhost:8000/check_submitted/question_answer?case_id=acd69e01
+2024-05-07 15:48:40,842 - INFO - Request received: POST http://localhost:8000/check_submitted/question_answer?case_id=acd69e01
+2024-05-07 15:48:41,859 - INFO - Response code: 201
+2024-05-07 15:48:41,859 - INFO - Response code: 201
+2024-05-07 15:48:52,077 - INFO - Request received: POST http://localhost:8000/check_submitted/question_answer?case_id=fisf54
+2024-05-07 15:48:52,077 - INFO - Request received: POST http://localhost:8000/check_submitted/question_answer?case_id=fisf54
+2024-05-07 15:48:53,072 - INFO - Response code: 201
+2024-05-07 15:48:53,072 - INFO - Response code: 201
+2024-05-07 17:43:57,491 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-07 17:43:57,491 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-07 17:43:57,494 - INFO - Response code: 200
+2024-05-07 17:43:57,494 - INFO - Response code: 200
+2024-05-07 17:43:57,612 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-07 17:43:57,612 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-07 17:43:57,699 - INFO - Response code: 200
+2024-05-07 17:43:57,699 - INFO - Response code: 200
+2024-05-07 17:47:05,676 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=e5cbb399&reason=checking%20placeholder
+2024-05-07 17:47:05,676 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=e5cbb399&reason=checking%20placeholder
+2024-05-07 17:47:06,954 - INFO - Response code: 200
+2024-05-07 17:47:06,954 - INFO - Response code: 200
+2024-05-07 17:50:16,456 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=78740dff&reason=checking%20placeholder
+2024-05-07 17:50:16,456 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=78740dff&reason=checking%20placeholder
+2024-05-07 17:50:44,727 - INFO - Response code: 200
+2024-05-07 17:50:44,727 - INFO - Response code: 200
+2024-05-07 18:09:32,864 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=78740dff&reason=checking%20placeholder
+2024-05-07 18:09:32,864 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=78740dff&reason=checking%20placeholder
+2024-05-07 18:10:00,188 - INFO - Response code: 200
+2024-05-07 18:10:00,188 - INFO - Response code: 200
+2024-05-07 18:12:26,072 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=78740dff&reason=checking%20placeholder
+2024-05-07 18:12:26,072 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=78740dff&reason=checking%20placeholder
+2024-05-07 18:12:53,975 - INFO - Response code: 200
+2024-05-07 18:12:53,975 - INFO - Response code: 200
