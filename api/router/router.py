@@ -2241,7 +2241,7 @@ Reason: {reason}"""
 async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(get_db)):
     
     try:
-        date_format = "%d-%m-%Y"
+        date_format = "%d-%m-%y"
        
         for value in source_data["leaveDetails"]:
             leave_data = {}
