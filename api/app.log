@@ -3080,3 +3080,27 @@
 2024-05-07 18:12:26,072 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=78740dff&reason=checking%20placeholder
 2024-05-07 18:12:53,975 - INFO - Response code: 200
 2024-05-07 18:12:53,975 - INFO - Response code: 200
+2024-05-07 18:56:40,022 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-07 18:56:40,022 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-07 18:57:12,171 - INFO - Response code: 201
+2024-05-07 18:57:12,171 - INFO - Response code: 201
+2024-05-07 18:57:33,106 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=78740dff&reason=checking%20placeholder
+2024-05-07 18:57:33,106 - INFO - Request received: POST http://localhost:8000/send_reminder?case_id=78740dff&reason=checking%20placeholder
+2024-05-07 18:58:01,354 - INFO - Response code: 200
+2024-05-07 18:58:01,354 - INFO - Response code: 200
+2024-05-08 11:13:53,667 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-08 11:13:53,667 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-08 11:13:53,669 - INFO - Response code: 200
+2024-05-08 11:13:53,669 - INFO - Response code: 200
+2024-05-08 11:13:53,768 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-08 11:13:53,768 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-08 11:13:53,903 - INFO - Response code: 200
+2024-05-08 11:13:53,903 - INFO - Response code: 200
+2024-05-08 11:14:14,350 - INFO - Request received: GET http://localhost:8000/reminderfrequency/getDetails
+2024-05-08 11:14:14,350 - INFO - Request received: GET http://localhost:8000/reminderfrequency/getDetails
+2024-05-08 11:14:15,392 - INFO - Response code: 201
+2024-05-08 11:14:15,392 - INFO - Response code: 201
+2024-05-08 11:14:26,333 - INFO - Request received: GET http://localhost:8000/reschedulefrequency/getDetails
+2024-05-08 11:14:26,333 - INFO - Request received: GET http://localhost:8000/reschedulefrequency/getDetails
+2024-05-08 11:14:27,341 - INFO - Response code: 201
+2024-05-08 11:14:27,341 - INFO - Response code: 201

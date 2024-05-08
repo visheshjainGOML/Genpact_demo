@@ -2552,6 +2552,26 @@ def create_or_update_frequency(frequency: FrequencySchema, db: Session = Depends
     finally:
         db.close()
 
+@app.get("/reminderfrequency/getDetails", response_model=ResponseModel, tags=["frequency"], status_code=201)
+def create_or_update_frequency(db: Session = Depends(get_db)):
+    try:
+        db_frequency = db.query(Frequency).first()
+        return ResponseModel(message="Frequency details fetched successfully", payload={"email_count": db_frequency.email_count, "email_interval": db_frequency.email_interval})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+    finally:
+        db.close()
+
+@app.get("/reschedulefrequency/getDetails", response_model=ResponseModel, tags=["frequency"], status_code=201)
+def create_or_update_frequency(db: Session = Depends(get_db)):
+    try:
+        db_frequency = db.query(Frequency).first()
+        return ResponseModel(message="Frequency details fetched successfully", payload={"reschedule_count": db_frequency.reschedule_count})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+    finally:
+        db.close()
+
 @app.post("/appointments/report", tags=['report'])
 def export_appointments_csv(db: Session = Depends(get_db)):
     try:
