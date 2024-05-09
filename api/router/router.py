@@ -1579,7 +1579,8 @@ FROM (
         latest_event.event_status,
         latest_event.last_updated_date,
         customer.created_at,
-        ROW_NUMBER() OVER (PARTITION BY customer.case_id ORDER BY latest_event.last_updated_date DESC) AS row_num
+        ROW_NUMBER() OVER (PARTITION BY customer.case_id ORDER BY latest_event.last_updated_date DESC) AS row_num,
+        COUNT(*) OVER (PARTITION BY customer.case_id) AS total_rows
     FROM
         genpact.appointment AS appointments
     JOIN
@@ -1606,10 +1607,10 @@ FROM (
                 ) AS latest ON e.case_id = latest.case_id AND e.timestamp = latest.latest_timestamp
         ) AS latest_event ON customer.case_id = latest_event.case_id
     WHERE
-        appointments.agent_id = :agent_id
+        appointments.agent_id = 57
         AND schedule.status = 'booked'
 ) AS subquery
-WHERE row_num = 1;
+WHERE row_num = total_rows;
     """)
 
     # Execute the query

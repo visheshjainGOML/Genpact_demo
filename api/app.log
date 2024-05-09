@@ -3152,3 +3152,7 @@
 2024-05-09 10:03:33,492 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
 2024-05-09 10:03:58,099 - INFO - Response code: 200
 2024-05-09 10:03:58,099 - INFO - Response code: 200
+2024-05-09 10:10:03,960 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-05-09 10:10:03,960 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-05-09 10:10:05,975 - INFO - Response code: 200
+2024-05-09 10:10:05,975 - INFO - Response code: 200
