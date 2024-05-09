@@ -890,7 +890,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         formatted_date = datetime.strptime(existing_appointment['date'], '%d-%m-%y').strftime('%Y-%m-%d')
 
         # Find available agents using round-robin method
-        query = text("""SELECT agent_id FROM genpact.agent_schedule ags JOIN genpact.agent ag ON ag.id = ags.agent_id WHERE ags.status = 'booked' AND ag.role = 'agent' AND ag.agent_activity = 'active' AND ags.date = :date AND ags.start_time <= :end_time AND ags.end_time >= :start_time""")
+        query = text("""SELECT agent_id FROM genpact.agent_schedule ags JOIN genpact.agent ag ON ag.id = ags.agent_id WHERE ags.status = 'booked' AND ag.role = 'Agent' AND ag.agent_activity = 'active' AND ags.date = :date AND ags.start_time <= :end_time AND ags.end_time >= :start_time""")
         data = db.execute(query, {
             "date": formatted_date,
             "start_time": existing_appointment['start_time'],
@@ -899,7 +899,7 @@ async def create_appointment(appointment: AppointmentSchema, db: Session = Depen
         booked_agents = set(row[0] for row in data.fetchall())
 
         # Get all active agents
-        query = db.query(Agent.id).filter(Agent.role == 'agent', Agent.agent_activity == 'active').all()
+        query = db.query(Agent.id).filter(Agent.role == 'Agent', Agent.agent_activity == 'active').all()
         all_agents = set(row[0] for row in query)
 
         # Filter available agents by removing booked agents
