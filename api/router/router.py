@@ -2239,40 +2239,54 @@ Reason: {reason}"""
         db.close()
 
 
+from sqlalchemy import update
+from datetime import datetime
+
 @app.post('/agents/update/leave-shift/{agent_id}', tags=["agent"])
 async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(get_db)):
     
     try:
         date_format = "%d-%m-%y"
        
+        # Update leave details
         for value in source_data["leaveDetails"]:
             leave_data = {}
-            print(value)
-            leave_data["agent_id"]=agent_id
-            leave_data["leave_type"]=value["leave_type"]
-            leave_data["leave_from"] = datetime.strptime( value["from_date"], date_format)
-            leave_data["leave_to"]=datetime.strptime( value["to_date"], date_format)
-            new_customer = AgentLeave(**leave_data)
-            db.add(new_customer)
+            leave_data["agent_id"] = agent_id
+            leave_data["leave_type"] = value["leave_type"]
+            leave_data["leave_from"] = datetime.strptime(value["from_date"], date_format)
+            leave_data["leave_to"] = datetime.strptime(value["to_date"], date_format)
+            new_leave = AgentLeave(**leave_data)
+            db.add(new_leave)
             db.commit()
-            db.refresh(new_customer)
+            db.refresh(new_leave)
 
+        # Update shift details if agent exists in agent_shift table
+        agent_shift = db.query(AgentShift).filter(AgentShift.agent_id == agent_id).first()
+        if agent_shift:
+            db.execute(
+                update(AgentShift)
+                .where(AgentShift.agent_id == agent_id)
+                .values(shift_date_from=source_data['shift_from'], shift_date_to=source_data['shift_to'])
+            )
+            db.commit()
+
+        # Update shift details for agent
         db.execute(
             update(Agent)
             .where(Agent.id == agent_id)
             .values(shift_from=source_data['shift_from'], shift_to=source_data['shift_to'])
         )
         db.commit()
-        return ResponseModel(message="successfully updated")
+        return ResponseModel(message="Successfully updated")
     except Exception as e:
         # Rollback transaction in case of error
         db.rollback()
-
         # Raise HTTPException with error message
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error updating agent: {e}")
     finally:
         # Close session
         db.close()
+
     
 @app.get("/questions/")
 async def get_questions(db: Session = Depends(get_db)):
