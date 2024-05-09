@@ -2266,7 +2266,7 @@ async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(ge
             db.execute(
                 update(AgentShift)
                 .where(AgentShift.agent_id == agent_id)
-                .values(shift_date_from=source_data['shift_from'], shift_date_to=source_data['shift_to'])
+                .values(shift_date_from=source_data['shift_start_date'], shift_date_to=source_data['shift_to_date'])
             )
             db.commit()
 

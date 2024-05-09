@@ -3168,3 +3168,19 @@
 2024-05-09 14:01:08,548 - INFO - Request received: POST http://localhost:8000/combined_agent/report
 2024-05-09 14:01:09,919 - INFO - Response code: 200
 2024-05-09 14:01:09,919 - INFO - Response code: 200
+2024-05-09 17:09:33,874 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-09 17:09:33,874 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-09 17:09:33,883 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-09 17:09:33,883 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-09 17:09:33,885 - INFO - Response code: 200
+2024-05-09 17:09:33,885 - INFO - Response code: 200
+2024-05-09 17:09:33,885 - INFO - Response code: 200
+2024-05-09 17:09:33,885 - INFO - Response code: 200
+2024-05-09 17:09:34,055 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-09 17:09:34,055 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-09 17:09:34,151 - INFO - Response code: 200
+2024-05-09 17:09:34,151 - INFO - Response code: 200
+2024-05-09 17:12:25,739 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/60
+2024-05-09 17:12:25,739 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/60
+2024-05-09 17:12:25,741 - INFO - Response code: 422
+2024-05-09 17:12:25,741 - INFO - Response code: 422
