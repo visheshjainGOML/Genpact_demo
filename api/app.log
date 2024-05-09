@@ -3184,3 +3184,11 @@
 2024-05-09 17:12:25,739 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/60
 2024-05-09 17:12:25,741 - INFO - Response code: 422
 2024-05-09 17:12:25,741 - INFO - Response code: 422
+2024-05-09 17:30:04,928 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/60
+2024-05-09 17:30:04,928 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/60
+2024-05-09 17:30:07,798 - INFO - Response code: 400
+2024-05-09 17:30:07,798 - INFO - Response code: 400
+2024-05-09 17:36:01,574 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/60
+2024-05-09 17:36:01,574 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/60
+2024-05-09 17:36:04,222 - INFO - Response code: 400
+2024-05-09 17:36:04,222 - INFO - Response code: 400
