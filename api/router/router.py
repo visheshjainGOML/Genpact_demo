@@ -3054,31 +3054,33 @@ def export_combined_agent_csv(db: Session = Depends(get_db)):
     try:
         # Fetch the agents data using the provided SQL query
         agents_data = text("""
-                        SELECT DISTINCT
-                            ag.id AS "agent_id",
-                            ag.full_name AS "agent_name",
-                            ag.date_of_joining AS "joining_date",
-                            al.leave_from AS "leave_from",
-                            al.leave_to AS "leave_to",
-                            ag.slot_time AS "slot_time",
-                            ag.buffer_time AS "buffer_time",
-                            ag.agent_email AS "email_id",
-                            al.leave_type AS "leave_type",
-                            ag.weekly_off AS "weekly_off",
-                            ag.shift_from AS "shift_from",
-                            ag.shift_to AS "shift_to"
-                        FROM
-                            genpact.agent AS ag
-                        LEFT JOIN
-                            genpact.agent_schedule AS agsch ON ag.id = agsch.agent_id
-                        LEFT JOIN
-                            genpact.agent_shifts AS sh ON ag.id = sh.agent_id
-                        LEFT JOIN
-                            genpact.agent_leave AS al ON ag.id = al.agent_id
-       """)
+            SELECT DISTINCT
+                ag.id AS "agent_id",
+                ag.full_name AS "agent_name",
+                ag.date_of_joining AS "joining_date",
+                al.leave_from AS "leave_from",
+                al.leave_to AS "leave_to",
+                ag.slot_time AS "slot_time",
+                ag.buffer_time AS "buffer_time",
+                ag.agent_email AS "email_id",
+                al.leave_type AS "leave_type",
+                ag.weekly_off AS "weekly_off",
+                ag.shift_from AS "shift_from",
+                ag.shift_to AS "shift_to",
+                sh.shift_date_from AS "shift_date_from",
+                sh.shift_date_to AS "shift_date_to"
+            FROM
+                genpact.agent AS ag
+            LEFT JOIN
+                genpact.agent_schedule AS agsch ON ag.id = agsch.agent_id
+            LEFT JOIN
+                genpact.agent_shifts AS sh ON ag.id = sh.agent_id
+            LEFT JOIN
+                genpact.agent_leave AS al ON ag.id = al.agent_id
+        """)
         result = db.execute(agents_data)
+        
         # Create a temporary file to store the CSV
-
         with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".csv") as temp_file:
             csv_writer = csv.writer(temp_file)
 
@@ -3086,7 +3088,7 @@ def export_combined_agent_csv(db: Session = Depends(get_db)):
             headers = [
                 "agent_id", "agent_name", "joining_date", "leave_from", "leave_to",
                 "slot_time", "buffer_time", "email_id", "leave_type", "weekly_off",
-                "shift_from", "shift_to"
+                "shift_from", "shift_to", "shift_date_from", "shift_date_to"
             ]
             csv_writer.writerow(headers)
 
@@ -3100,8 +3102,7 @@ def export_combined_agent_csv(db: Session = Depends(get_db)):
         return FileResponse(temp_file.name, filename="combine_agents_data.csv")
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
+        raise HTTPException(status_code=500, detail=str(e))    
 
 @app.post(path="/agent/customer/create", response_model=ResponseModel, tags=["customer"],status_code=201)
 async def create_customer(customer: AgentAppointmentGenerator, db: Session = Depends(get_db)):
