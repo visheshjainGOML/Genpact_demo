@@ -3104,3 +3104,51 @@
 2024-05-08 11:14:26,333 - INFO - Request received: GET http://localhost:8000/reschedulefrequency/getDetails
 2024-05-08 11:14:27,341 - INFO - Response code: 201
 2024-05-08 11:14:27,341 - INFO - Response code: 201
+2024-05-09 09:14:31,119 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-09 09:14:31,119 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-09 09:14:31,121 - INFO - Response code: 200
+2024-05-09 09:14:31,121 - INFO - Response code: 200
+2024-05-09 09:14:31,277 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-09 09:14:31,277 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-09 09:14:31,408 - INFO - Response code: 200
+2024-05-09 09:14:31,408 - INFO - Response code: 200
+2024-05-09 09:14:38,976 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:14:38,976 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:14:40,982 - INFO - Response code: 500
+2024-05-09 09:14:40,982 - INFO - Response code: 500
+2024-05-09 09:20:29,943 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:20:29,943 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:20:31,094 - INFO - Response code: 500
+2024-05-09 09:20:31,094 - INFO - Response code: 500
+2024-05-09 09:24:52,553 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:24:52,553 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:24:53,583 - INFO - Response code: 500
+2024-05-09 09:24:53,583 - INFO - Response code: 500
+2024-05-09 09:26:47,845 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:26:47,845 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:26:48,873 - INFO - Response code: 500
+2024-05-09 09:26:48,873 - INFO - Response code: 500
+2024-05-09 09:30:09,419 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:30:09,419 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:30:10,466 - INFO - Response code: 500
+2024-05-09 09:30:10,466 - INFO - Response code: 500
+2024-05-09 09:35:37,531 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:35:37,531 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:35:39,541 - INFO - Response code: 200
+2024-05-09 09:35:39,541 - INFO - Response code: 200
+2024-05-09 09:39:15,585 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:39:15,585 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:39:17,561 - INFO - Response code: 200
+2024-05-09 09:39:17,561 - INFO - Response code: 200
+2024-05-09 09:41:17,916 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:41:17,916 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:41:19,680 - INFO - Response code: 500
+2024-05-09 09:41:19,680 - INFO - Response code: 500
+2024-05-09 09:42:59,489 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:42:59,489 - INFO - Request received: POST http://localhost:8000/agents/report
+2024-05-09 09:43:01,493 - INFO - Response code: 200
+2024-05-09 09:43:01,493 - INFO - Response code: 200
+2024-05-09 10:03:33,492 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-05-09 10:03:33,492 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
+2024-05-09 10:03:58,099 - INFO - Response code: 200
+2024-05-09 10:03:58,099 - INFO - Response code: 200

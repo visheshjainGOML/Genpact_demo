@@ -10,6 +10,8 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.orm import declarative_base
 from datetime import datetime
 import re
+from sqlalchemy.orm import joinedload
+from sqlalchemy import and_
 import uuid
 from urllib import response
 from fastapi.middleware.cors import CORSMiddleware
@@ -2515,7 +2517,7 @@ ORDER BY
             appointment['end_time'] = convert_from_ist_timezone(appointment['end_time'], appointment['appointment_date'],  appointment['customer_timezone'])
             appointment['start_time'] = appointment['start_time'].split(' ')[0]
             appointment['end_time'] = appointment['end_time'].split(' ')[0]
-            appointments_with_schedule.append(appointment)
+        appointments_with_schedule.append(appointment)
 
     print(appointments_with_schedule, type(appointments_with_schedule))
     # Close the connection
@@ -2606,10 +2608,12 @@ def export_appointments_csv(db: Session = Depends(get_db)):
 
 
 
+from sqlalchemy.orm import aliased
+
 @app.post("/agents/report", tags=['report'])
 def export_agents_csv(db: Session = Depends(get_db)):
     try:
-        # Fetch only the specified columns
+        # Fetch columns from AgentSchedule table
         result = db.query(
             AgentSchedule.agent_id,
             AgentSchedule.date,
@@ -2622,6 +2626,17 @@ def export_agents_csv(db: Session = Depends(get_db)):
             AgentSchedule.customer_timezone,
             AgentSchedule.appointment_description
         ).all()
+
+        # Fetch columns from AgentShift table
+        agent_shift_alias = aliased(AgentShift)
+        shift_result = db.query(
+            agent_shift_alias.agent_id,
+            agent_shift_alias.shift_date_from,
+            agent_shift_alias.shift_date_to
+        ).all()
+
+        # Convert shift_result to a dictionary for easy access
+        shift_dict = {row.agent_id: (row.shift_date_from, row.shift_date_to) for row in shift_result}
 
         appointments_with_schedule = []
 
@@ -2636,14 +2651,22 @@ def export_agents_csv(db: Session = Depends(get_db)):
             "appointment_id",
             "reason",
             "customer_timezone",
-            "appointment_description"
+            "appointment_description",
+            "shift_date_from",
+            "shift_date_to"
         ]
+
+        # Iterate through result and merge with shift_result
         for row in result:
-            appointment = {col: val for col, val in zip(headers, row)}  # Use headers instead of result.keys()
-            appointment['start_time'] = convert_from_ist_timezone(appointment['start_time'], appointment['date'], appointment['customer_timezone'])
-            appointment['end_time'] = convert_from_ist_timezone(appointment['end_time'], appointment['date'],  appointment['customer_timezone'])
-            appointment['start_time'] = appointment['start_time'].split(' ')[0]
-            appointment['end_time'] = appointment['end_time'].split(' ')[0]
+            agent_id = row.agent_id
+            shift_dates = shift_dict.get(agent_id, (None, None))
+            appointment = {col: val for col, val in zip(headers[:-2], row)}
+            appointment['slot_start_time'] = convert_from_ist_timezone(appointment['start_time'], appointment['date'], appointment['customer_timezone'])
+            appointment['slot_end_time'] = convert_from_ist_timezone(appointment['end_time'], appointment['date'],  appointment['customer_timezone'])
+            appointment['slot_start_time'] = appointment['slot_start_time'].split(' ')[0]
+            appointment['slot_end_time'] = appointment['slot_end_time'].split(' ')[0]
+            appointment['shift_date_from'] = shift_dates[0]
+            appointment['shift_date_to'] = shift_dates[1]
             appointments_with_schedule.append(appointment)
 
         # Create a temporary file to store the CSV
@@ -2659,14 +2682,16 @@ def export_agents_csv(db: Session = Depends(get_db)):
                 row_data = [
                     agent["agent_id"],
                     agent["date"],
-                    agent["start_time"],
-                    agent["end_time"],
+                    agent["slot_start_time"],
+                    agent["slot_end_time"],
                     agent["status"],
                     agent["customer_id"],
                     agent["appointment_id"],
                     agent["reason"],
                     agent["customer_timezone"],
-                    agent["appointment_description"]
+                    agent["appointment_description"],
+                    agent["shift_date_from"],
+                    agent["shift_date_to"]
                 ]
                 csv_writer.writerow(row_data)
             
@@ -2677,6 +2702,7 @@ def export_agents_csv(db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 
