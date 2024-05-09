@@ -2260,14 +2260,18 @@ async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(ge
             db.commit()
             db.refresh(new_leave)
 
-        # Update shift details if agent exists in agent_shift table
+        # Update or create shift details for agent
         agent_shift = db.query(AgentShift).filter(AgentShift.agent_id == agent_id).first()
         if agent_shift:
             db.execute(
                 update(AgentShift)
                 .where(AgentShift.agent_id == agent_id)
-                .values(shift_date_from=source_data['shift_start_date'], shift_date_to=source_data['shift_to_date'])
+                .values(shift_date_from=source_data['shift_from'], shift_date_to=source_data['shift_to'])
             )
+            db.commit()
+        else:
+            new_shift = AgentShift(agent_id=agent_id, shift_date_from=source_data['shift_from'], shift_date_to=source_data['shift_to'])
+            db.add(new_shift)
             db.commit()
 
         # Update shift details for agent
