@@ -1607,7 +1607,7 @@ FROM (
                 ) AS latest ON e.case_id = latest.case_id AND e.timestamp = latest.latest_timestamp
         ) AS latest_event ON customer.case_id = latest_event.case_id
     WHERE
-        appointments.agent_id = 57
+        appointments.agent_id = :agent_id
         AND schedule.status = 'booked'
 ) AS subquery
 WHERE row_num = total_rows;

@@ -3156,3 +3156,15 @@
 2024-05-09 10:10:03,960 - INFO - Request received: GET http://localhost:8000/admin/appointments/list
 2024-05-09 10:10:05,975 - INFO - Response code: 200
 2024-05-09 10:10:05,975 - INFO - Response code: 200
+2024-05-09 14:00:55,374 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-09 14:00:55,374 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-09 14:00:55,374 - INFO - Response code: 200
+2024-05-09 14:00:55,374 - INFO - Response code: 200
+2024-05-09 14:00:55,493 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-09 14:00:55,493 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-09 14:00:55,583 - INFO - Response code: 200
+2024-05-09 14:00:55,583 - INFO - Response code: 200
+2024-05-09 14:01:08,548 - INFO - Request received: POST http://localhost:8000/combined_agent/report
+2024-05-09 14:01:08,548 - INFO - Request received: POST http://localhost:8000/combined_agent/report
+2024-05-09 14:01:09,919 - INFO - Response code: 200
+2024-05-09 14:01:09,919 - INFO - Response code: 200
