@@ -3264,3 +3264,59 @@
 2024-05-10 12:41:20,507 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=1cd4903e&status_expected=Cancelled&reason=testing%20for%20bug
 2024-05-10 12:41:25,032 - INFO - Response code: 200
 2024-05-10 12:41:25,032 - INFO - Response code: 200
+2024-05-10 14:11:16,207 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-10 14:11:16,207 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-10 14:11:16,214 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-10 14:11:16,214 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-10 14:11:16,215 - INFO - Response code: 200
+2024-05-10 14:11:16,215 - INFO - Response code: 200
+2024-05-10 14:11:16,215 - INFO - Response code: 200
+2024-05-10 14:11:16,215 - INFO - Response code: 200
+2024-05-10 14:11:16,622 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-10 14:11:16,622 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-10 14:11:16,787 - INFO - Response code: 200
+2024-05-10 14:11:16,787 - INFO - Response code: 200
+2024-05-10 14:11:31,554 - INFO - Request received: GET http://localhost:8000/appointments/list/61
+2024-05-10 14:11:31,554 - INFO - Request received: GET http://localhost:8000/appointments/list/61
+2024-05-10 14:11:32,819 - INFO - Response code: 200
+2024-05-10 14:11:32,819 - INFO - Response code: 200
+2024-05-10 23:08:32,636 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-10 23:08:32,636 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-10 23:08:32,643 - INFO - Response code: 200
+2024-05-10 23:08:32,643 - INFO - Response code: 200
+2024-05-10 23:08:32,812 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-10 23:08:32,812 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-10 23:08:32,934 - INFO - Response code: 200
+2024-05-10 23:08:32,934 - INFO - Response code: 200
+2024-05-10 23:11:32,836 - INFO - Request received: POST http://localhost:8000/send_automatic_reminders/304
+2024-05-10 23:11:32,836 - INFO - Request received: POST http://localhost:8000/send_automatic_reminders/304
+2024-05-10 23:11:34,547 - INFO - Response code: 500
+2024-05-10 23:11:34,547 - INFO - Response code: 500
+2024-05-10 23:19:02,491 - INFO - Request received: POST http://localhost:8000/send_automatic_reminders/e5b9d50d
+2024-05-10 23:19:02,491 - INFO - Request received: POST http://localhost:8000/send_automatic_reminders/e5b9d50d
+2024-05-10 23:19:05,468 - INFO - Response code: 200
+2024-05-10 23:19:05,468 - INFO - Response code: 200
+2024-05-10 23:40:56,515 - INFO - Request received: POST http://localhost:8000/send_automatic_reminders/e5b9d50d
+2024-05-10 23:40:56,515 - INFO - Request received: POST http://localhost:8000/send_automatic_reminders/e5b9d50d
+2024-05-10 23:41:03,316 - INFO - Response code: 200
+2024-05-10 23:41:03,316 - INFO - Response code: 200
+2024-05-10 23:46:23,505 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 23:46:23,505 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 23:46:32,616 - INFO - Response code: 201
+2024-05-10 23:46:32,616 - INFO - Response code: 201
+2024-05-10 23:47:22,320 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 23:47:22,320 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 23:47:31,825 - INFO - Response code: 201
+2024-05-10 23:47:31,825 - INFO - Response code: 201
+2024-05-10 23:56:18,541 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 23:56:18,541 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 23:56:26,926 - INFO - Response code: 201
+2024-05-10 23:56:26,926 - INFO - Response code: 201
+2024-05-10 23:59:16,309 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 23:59:16,309 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 23:59:25,207 - INFO - Response code: 201
+2024-05-10 23:59:25,207 - INFO - Response code: 201
+2024-05-11 00:07:44,648 - INFO - Request received: POST http://localhost:8000/appointment/change_agent?appointment_id=284&new_agent_id=61&reason=testing
+2024-05-11 00:07:44,648 - INFO - Request received: POST http://localhost:8000/appointment/change_agent?appointment_id=284&new_agent_id=61&reason=testing
+2024-05-11 00:07:53,592 - INFO - Response code: 200
+2024-05-11 00:07:53,592 - INFO - Response code: 200

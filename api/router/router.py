@@ -2348,6 +2348,12 @@ async def change_appointment_agent(appointment_id: int, new_agent_id: int, reaso
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Appointment not found")
 
         old_agent_id = appointment_record.agent_id
+        old_agent_name = db.query(Agent).filter(Agent.id == old_agent_id).first()
+        old_agent_name = old_agent_name.full_name
+        print("OLD AGENT NAME: ", old_agent_name)
+        new_agent_name = db.query(Agent).filter(Agent.id == new_agent_id).first()
+        new_agent_name = new_agent_name.full_name
+        print("NEW AGENT NAME: ", new_agent_name)
         
         # Fetch customer_timezone from agent_schedule
         agent_schedule_record = db.query(AgentSchedule).filter(AgentSchedule.appointment_id == appointment_id).first()
@@ -2434,7 +2440,7 @@ https://d2dwd3ks06zig3.cloudfront.net/agent/appointmentDetails?appointment_id={n
                 "event_name": "Appointment Agent Changed",
                 "event_details": {
                     "email": "",
-                    "details": f"Agent changed from {old_agent_id} to {new_agent_id} for Case ID: {case_id} at {str(datetime.now())}",
+                    "details": f"Agent changed from {old_agent_name} to {new_agent_name} for Case ID: {case_id} at {str(datetime.now())}",
                     "start_time": start_time_str,
                     "end_time": end_time_str,
                     'date': str(appointment_record.scheduled_at.date())
@@ -2977,7 +2983,7 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
         reminder_count = 0
         if event:
 
-                timestamp = event.timestamp
+                reminder_time = event.timestamp
                 # Fetch email count and email interval from frequency table
                 frequency = db.query(Frequency).first()
                 if frequency:
@@ -2988,8 +2994,9 @@ async def send_automatic_reminders(case_id: str, db: Session = Depends(get_db)):
                     for interval_str in email_interval.values():
                         # Extract numeric part of interval
                         interval_hours = int(interval_str[:-3])
+                        print("INTERVAL HOURS: ", interval_hours)
                         print("Interval hours:", interval_hours)
-                        reminder_time = timestamp + timedelta(hours=interval_hours)
+                        reminder_time = reminder_time + timedelta(hours=interval_hours)
                         print("Reminder date:", reminder_time.date())
                         print("Reminder time:", reminder_time.time())
                         print(datetime.now())
