@@ -2483,7 +2483,8 @@ def get_all_agent_appointments(db: Session = Depends(get_db)):
     # Execute raw SQL query
     query = text("""
         SELECT
-    main_query.*
+    main_query.*,
+    agent_name.full_name AS "agent_name"
 FROM
     (
         SELECT
@@ -2498,11 +2499,10 @@ FROM
             cust.address AS "address",
             cust.state AS "state",
             schedule.appointment_description AS "appointment_description",
-            schedule.agent_id AS "agent_id",
+            apt.agent_id AS "agent_id",
             schedule.appointment_id AS "id",
             schedule.reason AS "comments",
             cust.product_id AS "products",
-            agent.full_name AS "agent_name",
             event.event_status AS "event_status",
             event.timestamp AS "last_updated_date",
             cust.created_at AS "created_date",
@@ -2515,9 +2515,14 @@ FROM
             genpact.event AS event ON cust.case_id = event.case_id
        LEFT JOIN
             genpact.agent AS agent ON schedule.agent_id = agent.id
+	   LEFT JOIN
+			genpact.appointment AS apt ON apt.customer_id = cust.id
     ) AS main_query
+LEFT JOIN
+    genpact.agent AS agent_name ON main_query.agent_id = agent_name.id
 WHERE
-    main_query.row_num = 1 and main_query."case_id" is not NULL
+    main_query.row_num = 1
+    AND main_query."case_id" IS NOT NULL
 ORDER BY
     main_query."last_updated_date";
     """)

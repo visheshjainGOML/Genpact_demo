@@ -3192,3 +3192,19 @@
 2024-05-09 17:36:01,574 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/60
 2024-05-09 17:36:04,222 - INFO - Response code: 400
 2024-05-09 17:36:04,222 - INFO - Response code: 400
+2024-05-09 18:12:17,137 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/60
+2024-05-09 18:12:17,137 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/60
+2024-05-09 18:12:21,227 - INFO - Response code: 200
+2024-05-09 18:12:21,227 - INFO - Response code: 200
+2024-05-10 11:24:25,705 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-10 11:24:25,705 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-10 11:24:25,707 - INFO - Response code: 200
+2024-05-10 11:24:25,707 - INFO - Response code: 200
+2024-05-10 11:24:25,832 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-10 11:24:25,832 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-10 11:24:25,965 - INFO - Response code: 200
+2024-05-10 11:24:25,965 - INFO - Response code: 200
+2024-05-10 11:25:20,179 - INFO - Request received: POST http://localhost:8000/appointment/change_agent?appointment_id=271&new_agent_id=39&reason=changing%20for%20test
+2024-05-10 11:25:20,179 - INFO - Request received: POST http://localhost:8000/appointment/change_agent?appointment_id=271&new_agent_id=39&reason=changing%20for%20test
+2024-05-10 11:26:19,230 - INFO - Response code: 200
+2024-05-10 11:26:19,230 - INFO - Response code: 200
