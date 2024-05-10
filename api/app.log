@@ -3232,3 +3232,35 @@
 2024-05-10 12:26:01,236 - INFO - Request received: POST http://localhost:8000/customer/create
 2024-05-10 12:26:38,563 - INFO - Response code: 201
 2024-05-10 12:26:38,563 - INFO - Response code: 201
+2024-05-10 12:33:46,959 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=310&status_expected=Cancelled&reason=testing%20for%20bug
+2024-05-10 12:33:46,959 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=310&status_expected=Cancelled&reason=testing%20for%20bug
+2024-05-10 12:33:48,567 - INFO - Response code: 400
+2024-05-10 12:33:48,567 - INFO - Response code: 400
+2024-05-10 12:34:29,374 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=9e7fd29e&status_expected=Cancelled&reason=testing%20for%20bug
+2024-05-10 12:34:29,374 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=9e7fd29e&status_expected=Cancelled&reason=testing%20for%20bug
+2024-05-10 12:34:33,002 - INFO - Response code: 200
+2024-05-10 12:34:33,002 - INFO - Response code: 200
+2024-05-10 12:36:03,042 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 12:36:03,042 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 12:36:38,286 - INFO - Response code: 201
+2024-05-10 12:36:38,286 - INFO - Response code: 201
+2024-05-10 12:37:27,438 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-05-10 12:37:27,438 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-05-10 12:38:09,099 - INFO - Response code: 200
+2024-05-10 12:38:09,099 - INFO - Response code: 200
+2024-05-10 12:38:45,493 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=c7af8360&status_expected=Submitted&reason=testing%20for%20bug
+2024-05-10 12:38:45,493 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=c7af8360&status_expected=Submitted&reason=testing%20for%20bug
+2024-05-10 12:38:49,907 - INFO - Response code: 200
+2024-05-10 12:38:49,907 - INFO - Response code: 200
+2024-05-10 12:39:37,088 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 12:39:37,088 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 12:40:11,384 - INFO - Response code: 201
+2024-05-10 12:40:11,384 - INFO - Response code: 201
+2024-05-10 12:40:29,019 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-05-10 12:40:29,019 - INFO - Request received: POST http://localhost:8000/appointment/create
+2024-05-10 12:41:09,655 - INFO - Response code: 200
+2024-05-10 12:41:09,655 - INFO - Response code: 200
+2024-05-10 12:41:20,507 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=1cd4903e&status_expected=Cancelled&reason=testing%20for%20bug
+2024-05-10 12:41:20,507 - INFO - Request received: POST http://localhost:8000/appointment/completed?case_id=1cd4903e&status_expected=Cancelled&reason=testing%20for%20bug
+2024-05-10 12:41:25,032 - INFO - Response code: 200
+2024-05-10 12:41:25,032 - INFO - Response code: 200

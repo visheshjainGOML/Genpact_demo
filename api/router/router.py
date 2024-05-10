@@ -2193,19 +2193,16 @@ Reason: {reason}"""
             id = customer_data.id
 
             # Update agent_schedule_data
-            agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id, AgentSchedule.appointment_id.is_not(None)).first()
-            agent_schedule_data.status = "Awaiting Customer Response"
-            agent_schedule_data.reason = reason
-            agent_schedule_data.appointment_id = None
+            if agent_schedule_data:
+                agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id, AgentSchedule.appointment_id.is_not(None)).first()
+                agent_schedule_data.status = "Awaiting Customer Response"
+                agent_schedule_data.reason = reason
 
-            # Commit the agent_schedule_data changes
-            db.commit()
+                # Commit the agent_schedule_data changes
+                db.commit()
 
-            # Delete appointment record
-            db.query(Appointment).filter(Appointment.customer_id == id).delete()
-
-            # Commit the changes
-            db.commit()
+                # Commit the changes
+                db.commit()
             event1_details = {
                 "event_name": "Case has been marked as Awaiting Customer Response",
                 "event_details": {
