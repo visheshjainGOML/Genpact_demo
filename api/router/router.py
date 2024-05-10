@@ -2118,19 +2118,22 @@ async def mark_appointment_as_completed(case_id: str, status_expected: str, reas
             id = customer_data.id
             # Update agent_schedule_data
             agent_schedule_data = db.query(AgentSchedule).filter(AgentSchedule.customer_id == id, AgentSchedule.appointment_id.is_not(None)).first()
-            agent_schedule_data.status = "Cancelled"
-            agent_schedule_data.reason = reason
-            agent_schedule_data.appointment_id = None
+            print("AGENT SCHEDULE DATA: ", agent_schedule_data)
+            if agent_schedule_data:
+                print("INSIDE AGENT SCHEDULE DATA")
+                agent_schedule_data.status = "Cancelled"
+                agent_schedule_data.reason = reason
+                agent_schedule_data.appointment_id = None
 
-            # Commit the agent_schedule_data changes
-            db.commit()
+                # Commit the agent_schedule_data changes
+                db.commit()
 
-            # Delete appointment record
-            db.query(Appointment).filter(Appointment.customer_id == id).delete()
+                # Delete appointment record
+                db.query(Appointment).filter(Appointment.customer_id == id).delete()
 
-            # Commit the changes
-            db.commit()
-
+                # Commit the changes
+                db.commit()
+            print("UTSIDE")
             event1_details = {
                 "event_name": "Case has been successfully closed",
                 "event_details": {

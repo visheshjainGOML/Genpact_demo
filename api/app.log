@@ -3208,3 +3208,27 @@
 2024-05-10 11:25:20,179 - INFO - Request received: POST http://localhost:8000/appointment/change_agent?appointment_id=271&new_agent_id=39&reason=changing%20for%20test
 2024-05-10 11:26:19,230 - INFO - Response code: 200
 2024-05-10 11:26:19,230 - INFO - Response code: 200
+2024-05-10 12:25:02,038 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-10 12:25:02,038 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-10 12:25:02,048 - INFO - Response code: 200
+2024-05-10 12:25:02,048 - INFO - Response code: 200
+2024-05-10 12:25:03,027 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-10 12:25:03,027 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-10 12:25:03,171 - INFO - Response code: 200
+2024-05-10 12:25:03,171 - INFO - Response code: 200
+2024-05-10 12:25:09,448 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-10 12:25:09,448 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-10 12:25:09,456 - INFO - Response code: 200
+2024-05-10 12:25:09,456 - INFO - Response code: 200
+2024-05-10 12:25:12,810 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-10 12:25:12,810 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-10 12:25:12,813 - INFO - Response code: 200
+2024-05-10 12:25:12,813 - INFO - Response code: 200
+2024-05-10 12:25:13,081 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-10 12:25:13,081 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-10 12:25:13,081 - INFO - Response code: 200
+2024-05-10 12:25:13,081 - INFO - Response code: 200
+2024-05-10 12:26:01,236 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 12:26:01,236 - INFO - Request received: POST http://localhost:8000/customer/create
+2024-05-10 12:26:38,563 - INFO - Response code: 201
+2024-05-10 12:26:38,563 - INFO - Response code: 201
