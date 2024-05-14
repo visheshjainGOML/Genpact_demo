@@ -3320,3 +3320,11 @@
 2024-05-11 00:07:44,648 - INFO - Request received: POST http://localhost:8000/appointment/change_agent?appointment_id=284&new_agent_id=61&reason=testing
 2024-05-11 00:07:53,592 - INFO - Response code: 200
 2024-05-11 00:07:53,592 - INFO - Response code: 200
+2024-05-14 11:01:24,140 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-14 11:01:24,140 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-14 11:01:24,147 - INFO - Response code: 200
+2024-05-14 11:01:24,147 - INFO - Response code: 200
+2024-05-14 11:01:24,332 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-14 11:01:24,332 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-14 11:01:24,422 - INFO - Response code: 200
+2024-05-14 11:01:24,422 - INFO - Response code: 200

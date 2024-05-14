@@ -2248,15 +2248,18 @@ async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(ge
        
         # Update leave details
         for value in source_data["leaveDetails"]:
-            leave_data = {}
-            leave_data["agent_id"] = agent_id
-            leave_data["leave_type"] = value["leave_type"]
-            leave_data["leave_from"] = datetime.strptime(value["from_date"], date_format)
-            leave_data["leave_to"] = datetime.strptime(value["to_date"], date_format)
-            new_leave = AgentLeave(**leave_data)
-            db.add(new_leave)
-            db.commit()
-            db.refresh(new_leave)
+            if value['leave_type'] == '' or value["from_date"] == 'Invalid date' or value["to_date"] == 'Invalid date':
+                pass
+            else:
+                leave_data = {}
+                leave_data["agent_id"] = agent_id
+                leave_data["leave_type"] = value["leave_type"]
+                leave_data["leave_from"] = datetime.strptime(value["from_date"], date_format)
+                leave_data["leave_to"] = datetime.strptime(value["to_date"], date_format)
+                new_leave = AgentLeave(**leave_data)
+                db.add(new_leave)
+                db.commit()
+                db.refresh(new_leave)
 
         # Update or create shift details for agent
         agent_shift = db.query(AgentShift).filter(AgentShift.agent_id == agent_id).first()
