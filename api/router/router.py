@@ -2244,8 +2244,8 @@ from datetime import datetime
 async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(get_db)):
     
     try:
-        date_format = "%d-%m-%y"
-       
+        date_format = "%y-%m-%d"  # Adjust date format
+        print(1)
         # Update leave details
         for value in source_data["leaveDetails"]:
             if value['leave_type'] == '' or value["from_date"] == 'Invalid date' or value["to_date"] == 'Invalid date':
@@ -2260,27 +2260,35 @@ async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(ge
                 db.add(new_leave)
                 db.commit()
                 db.refresh(new_leave)
+        print(2)
 
         # Update or create shift details for agent
         agent_shift = db.query(AgentShift).filter(AgentShift.agent_id == agent_id).first()
+        print("AGENT_SHIFT: ", agent_shift)
         if agent_shift:
+            print("SHIFT START DATE: ",datetime.strptime(source_data['shift_start_date'], date_format))
+            print("SHIFT END DATE: ",datetime.strptime(source_data['shift_to_date'], date_format))
             db.execute(
                 update(AgentShift)
                 .where(AgentShift.agent_id == agent_id)
                 .values(shift_date_from= datetime.strptime(source_data['shift_start_date'], date_format), shift_date_to=datetime.strptime(source_data['shift_to_date'], date_format))
             )
+            print(3)
             db.commit()
         else:
-            new_shift = AgentShift(agent_id=agent_id, shift_date_from=source_data['shift_start_date'], shift_date_to=source_data['shift_to_date'])
+            print(4)
+            new_shift = AgentShift(agent_id=agent_id, shift_date_from=datetime.strptime(source_data['shift_start_date'], date_format), shift_date_to=datetime.strptime(source_data['shift_to_date'], date_format))  # Parse dates here
             db.add(new_shift)
             db.commit()
 
         # Update shift details for agent
+        print(5)
         db.execute(
             update(Agent)
             .where(Agent.id == agent_id)
             .values(shift_from=source_data['shift_from'], shift_to=source_data['shift_to'])
         )
+        print(6)
         db.commit()
         return ResponseModel(message="Successfully updated")
     except Exception as e:

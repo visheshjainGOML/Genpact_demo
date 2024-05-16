@@ -3328,3 +3328,27 @@
 2024-05-14 11:01:24,332 - INFO - Request received: GET http://localhost:8000/openapi.json
 2024-05-14 11:01:24,422 - INFO - Response code: 200
 2024-05-14 11:01:24,422 - INFO - Response code: 200
+2024-05-14 11:23:21,070 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/62
+2024-05-14 11:23:21,070 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/62
+2024-05-14 11:23:23,497 - INFO - Response code: 200
+2024-05-14 11:23:23,497 - INFO - Response code: 200
+2024-05-16 23:01:53,093 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-16 23:01:53,093 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-16 23:01:53,098 - INFO - Response code: 200
+2024-05-16 23:01:53,098 - INFO - Response code: 200
+2024-05-16 23:01:53,505 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-16 23:01:53,505 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-16 23:01:53,800 - INFO - Response code: 200
+2024-05-16 23:01:53,800 - INFO - Response code: 200
+2024-05-16 23:02:36,666 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/67
+2024-05-16 23:02:36,666 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/67
+2024-05-16 23:02:38,098 - INFO - Response code: 400
+2024-05-16 23:02:38,098 - INFO - Response code: 400
+2024-05-16 23:05:16,524 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/67
+2024-05-16 23:05:16,524 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/67
+2024-05-16 23:05:18,157 - INFO - Response code: 400
+2024-05-16 23:05:18,157 - INFO - Response code: 400
+2024-05-16 23:09:44,315 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/67
+2024-05-16 23:09:44,315 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/67
+2024-05-16 23:09:45,597 - INFO - Response code: 400
+2024-05-16 23:09:45,597 - INFO - Response code: 400
