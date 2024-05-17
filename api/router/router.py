@@ -3210,3 +3210,7 @@ def question_answer_create(case_id: str, db: Session = Depends(get_db)):
             return False
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Unable to check case_id: {e}")
+    
+@app.get('/get/templates', status_code=201)
+async def get_templates(db: Session=Depends(get_db)):
+        return ResponseModel(message=success_message, payload={"products": [await row2dict(product) for product in db.query(Template).all()]})
