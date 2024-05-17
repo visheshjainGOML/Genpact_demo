@@ -2244,7 +2244,7 @@ from datetime import datetime
 async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(get_db)):
     
     try:
-        date_format = "%y-%m-%d"  # Adjust date format
+        date_format = "%d-%m-%y"  # Adjust date format
         print(1)
         # Update leave details
         for value in source_data["leaveDetails"]:
@@ -2266,6 +2266,8 @@ async def create_shift(agent_id:int, source_data: dict, db: Session = Depends(ge
         agent_shift = db.query(AgentShift).filter(AgentShift.agent_id == agent_id).first()
         print("AGENT_SHIFT: ", agent_shift)
         if agent_shift:
+            print("ORIGINAL START: ", source_data['shift_start_date'])
+            print("ORIGINAL end: ", source_data['shift_to_date'])
             print("SHIFT START DATE: ",datetime.strptime(source_data['shift_start_date'], date_format))
             print("SHIFT END DATE: ",datetime.strptime(source_data['shift_to_date'], date_format))
             db.execute(

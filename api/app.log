@@ -3374,3 +3374,23 @@
 2024-05-17 11:25:21,542 - INFO - Request received: GET http://localhost:8000/get/templates
 2024-05-17 11:25:22,509 - INFO - Response code: 201
 2024-05-17 11:25:22,509 - INFO - Response code: 201
+2024-05-17 19:30:46,940 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-17 19:30:46,940 - INFO - Request received: GET http://localhost:8000/docs
+2024-05-17 19:30:46,945 - INFO - Response code: 200
+2024-05-17 19:30:46,945 - INFO - Response code: 200
+2024-05-17 19:30:47,389 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-17 19:30:47,389 - INFO - Request received: GET http://localhost:8000/openapi.json
+2024-05-17 19:30:47,535 - INFO - Response code: 200
+2024-05-17 19:30:47,535 - INFO - Response code: 200
+2024-05-17 19:31:27,184 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/66
+2024-05-17 19:31:27,184 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/66
+2024-05-17 19:31:29,823 - INFO - Response code: 200
+2024-05-17 19:31:29,823 - INFO - Response code: 200
+2024-05-17 19:33:44,437 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/66
+2024-05-17 19:33:44,437 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/66
+2024-05-17 19:33:47,345 - INFO - Response code: 200
+2024-05-17 19:33:47,345 - INFO - Response code: 200
+2024-05-17 19:37:52,698 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/66
+2024-05-17 19:37:52,698 - INFO - Request received: POST http://localhost:8000/agents/update/leave-shift/66
+2024-05-17 19:37:54,166 - INFO - Response code: 400
+2024-05-17 19:37:54,166 - INFO - Response code: 400
